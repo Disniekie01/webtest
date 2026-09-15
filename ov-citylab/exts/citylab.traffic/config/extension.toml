@@ -1,0 +1,13 @@
+[package]
+title = "City Lab SUMO Traffic"
+description = "Sync SUMO vehicles/pedestrians into the City Lab USD stage inside Isaac Kit."
+version = "0.1.0"
+authors = ["City Lab"]
+category = "Simulation"
+keywords = ["sumo", "traffic", "citylab"]
+
+[dependencies]
+"omni.kit.environment.core" = {}
+
+[[python.module]]
+name = "citylab.traffic"

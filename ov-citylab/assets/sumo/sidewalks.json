@@ -1,0 +1,312 @@
+{
+  "source": "/media/disniekie/Working3/NEWCARLA/ov-citylab/assets/city/city_generator_large.usdc",
+  "subset": "CityGenside_walks",
+  "usd_to_sumo_offset": 80.0,
+  "ribbons": [
+    {
+      "dir": "NS",
+      "line_sumo": 0.0,
+      "side": "R",
+      "center_sumo": 4.0019989013671875,
+      "width_m": 4.0,
+      "offset_m": 4.0019989013671875
+    },
+    {
+      "dir": "NS",
+      "line_sumo": 40.0,
+      "side": "L",
+      "center_sumo": 35.99800109863281,
+      "width_m": 4.0,
+      "offset_m": -4.0019989013671875
+    },
+    {
+      "dir": "NS",
+      "line_sumo": 40.0,
+      "side": "R",
+      "center_sumo": 44.50199890136719,
+      "width_m": 5.0,
+      "offset_m": 4.5019989013671875
+    },
+    {
+      "dir": "NS",
+      "line_sumo": 80.0,
+      "side": "L",
+      "center_sumo": 75.49799919128418,
+      "width_m": 5.0,
+      "offset_m": -4.50200080871582
+    },
+    {
+      "dir": "NS",
+      "line_sumo": 80.0,
+      "side": "R",
+      "center_sumo": 84.50200080871582,
+      "width_m": 5.0,
+      "offset_m": 4.50200080871582
+    },
+    {
+      "dir": "NS",
+      "line_sumo": 120.0,
+      "side": "L",
+      "center_sumo": 115.99800109863281,
+      "width_m": 4.0,
+      "offset_m": -4.0019989013671875
+    },
+    {
+      "dir": "NS",
+      "line_sumo": 120.0,
+      "side": "R",
+      "center_sumo": 124.50199890136719,
+      "width_m": 5.0,
+      "offset_m": 4.5019989013671875
+    },
+    {
+      "dir": "NS",
+      "line_sumo": 160.0,
+      "side": "L",
+      "center_sumo": 155.4980010986328,
+      "width_m": 5.0,
+      "offset_m": -4.5019989013671875
+    },
+    {
+      "dir": "EW",
+      "line_sumo": 0.0,
+      "side": "T",
+      "center_sumo": 4.5019989013671875,
+      "width_m": 5.0,
+      "offset_m": 4.5019989013671875
+    },
+    {
+      "dir": "EW",
+      "line_sumo": 40.0,
+      "side": "B",
+      "center_sumo": 35.49800109863281,
+      "width_m": 5.0,
+      "offset_m": -4.5019989013671875
+    },
+    {
+      "dir": "EW",
+      "line_sumo": 40.0,
+      "side": "T",
+      "center_sumo": 44.50199890136719,
+      "width_m": 5.0,
+      "offset_m": 4.5019989013671875
+    },
+    {
+      "dir": "EW",
+      "line_sumo": 80.0,
+      "side": "B",
+      "center_sumo": 75.49799919128418,
+      "width_m": 5.0,
+      "offset_m": -4.50200080871582
+    },
+    {
+      "dir": "EW",
+      "line_sumo": 80.0,
+      "side": "T",
+      "center_sumo": 84.50200080871582,
+      "width_m": 5.0,
+      "offset_m": 4.50200080871582
+    },
+    {
+      "dir": "EW",
+      "line_sumo": 120.0,
+      "side": "B",
+      "center_sumo": 115.49800109863281,
+      "width_m": 5.0,
+      "offset_m": -4.5019989013671875
+    },
+    {
+      "dir": "EW",
+      "line_sumo": 120.0,
+      "side": "T",
+      "center_sumo": 124.50199890136719,
+      "width_m": 5.0,
+      "offset_m": 4.5019989013671875
+    },
+    {
+      "dir": "EW",
+      "line_sumo": 160.0,
+      "side": "B",
+      "center_sumo": 155.4980010986328,
+      "width_m": 5.0,
+      "offset_m": -4.5019989013671875
+    }
+  ],
+  "crossings": [
+    {
+      "id": "A0",
+      "x_sumo": 0.0,
+      "y_sumo": 0.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    },
+    {
+      "id": "A1",
+      "x_sumo": 0.0,
+      "y_sumo": 40.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    },
+    {
+      "id": "A2",
+      "x_sumo": 0.0,
+      "y_sumo": 80.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    },
+    {
+      "id": "A3",
+      "x_sumo": 0.0,
+      "y_sumo": 120.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    },
+    {
+      "id": "A4",
+      "x_sumo": 0.0,
+      "y_sumo": 160.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    },
+    {
+      "id": "B0",
+      "x_sumo": 40.0,
+      "y_sumo": 0.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    },
+    {
+      "id": "B1",
+      "x_sumo": 40.0,
+      "y_sumo": 40.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    },
+    {
+      "id": "B2",
+      "x_sumo": 40.0,
+      "y_sumo": 80.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    },
+    {
+      "id": "B3",
+      "x_sumo": 40.0,
+      "y_sumo": 120.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    },
+    {
+      "id": "B4",
+      "x_sumo": 40.0,
+      "y_sumo": 160.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    },
+    {
+      "id": "C0",
+      "x_sumo": 80.0,
+      "y_sumo": 0.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    },
+    {
+      "id": "C1",
+      "x_sumo": 80.0,
+      "y_sumo": 40.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    },
+    {
+      "id": "C2",
+      "x_sumo": 80.0,
+      "y_sumo": 80.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    },
+    {
+      "id": "C3",
+      "x_sumo": 80.0,
+      "y_sumo": 120.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    },
+    {
+      "id": "C4",
+      "x_sumo": 80.0,
+      "y_sumo": 160.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    },
+    {
+      "id": "D0",
+      "x_sumo": 120.0,
+      "y_sumo": 0.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    },
+    {
+      "id": "D1",
+      "x_sumo": 120.0,
+      "y_sumo": 40.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    },
+    {
+      "id": "D2",
+      "x_sumo": 120.0,
+      "y_sumo": 80.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    },
+    {
+      "id": "D3",
+      "x_sumo": 120.0,
+      "y_sumo": 120.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    },
+    {
+      "id": "D4",
+      "x_sumo": 120.0,
+      "y_sumo": 160.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    },
+    {
+      "id": "E0",
+      "x_sumo": 160.0,
+      "y_sumo": 0.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    },
+    {
+      "id": "E1",
+      "x_sumo": 160.0,
+      "y_sumo": 40.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    },
+    {
+      "id": "E2",
+      "x_sumo": 160.0,
+      "y_sumo": 80.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    },
+    {
+      "id": "E3",
+      "x_sumo": 160.0,
+      "y_sumo": 120.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    },
+    {
+      "id": "E4",
+      "x_sumo": 160.0,
+      "y_sumo": 160.0,
+      "half_size_m": 5.0,
+      "note": "inferred junction box; CityGen has no GeomSubset for crossings"
+    }
+  ]
+}

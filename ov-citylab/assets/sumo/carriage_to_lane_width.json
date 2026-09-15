@@ -1,0 +1,162 @@
+{
+  "EW|0.0|0.0|40.0": {
+    "carriage_m": null,
+    "lane_width_m": 3.5
+  },
+  "EW|0.0|120.0|160.0": {
+    "carriage_m": null,
+    "lane_width_m": 3.5
+  },
+  "EW|0.0|40.0|80.0": {
+    "carriage_m": null,
+    "lane_width_m": 3.5
+  },
+  "EW|0.0|80.0|120.0": {
+    "carriage_m": null,
+    "lane_width_m": 3.5
+  },
+  "EW|120.0|0.0|40.0": {
+    "carriage_m": 5.904003143310547,
+    "lane_width_m": 3.0
+  },
+  "EW|120.0|120.0|160.0": {
+    "carriage_m": 7.903999328613281,
+    "lane_width_m": 3.75
+  },
+  "EW|120.0|40.0|80.0": {
+    "carriage_m": 7.904003143310547,
+    "lane_width_m": 3.75
+  },
+  "EW|120.0|80.0|120.0": {
+    "carriage_m": 3.9040069580078125,
+    "lane_width_m": 2.0
+  },
+  "EW|160.0|0.0|40.0": {
+    "carriage_m": null,
+    "lane_width_m": 3.5
+  },
+  "EW|160.0|120.0|160.0": {
+    "carriage_m": null,
+    "lane_width_m": 3.5
+  },
+  "EW|160.0|40.0|80.0": {
+    "carriage_m": null,
+    "lane_width_m": 3.5
+  },
+  "EW|160.0|80.0|120.0": {
+    "carriage_m": null,
+    "lane_width_m": 3.5
+  },
+  "EW|40.0|0.0|40.0": {
+    "carriage_m": 3.9040069580078125,
+    "lane_width_m": 2.0
+  },
+  "EW|40.0|120.0|160.0": {
+    "carriage_m": 5.904003143310547,
+    "lane_width_m": 3.0
+  },
+  "EW|40.0|40.0|80.0": {
+    "carriage_m": 7.903999328613281,
+    "lane_width_m": 3.75
+  },
+  "EW|40.0|80.0|120.0": {
+    "carriage_m": 5.904003143310547,
+    "lane_width_m": 3.0
+  },
+  "EW|80.0|0.0|40.0": {
+    "carriage_m": 5.904005408287048,
+    "lane_width_m": 3.0
+  },
+  "EW|80.0|120.0|160.0": {
+    "carriage_m": 7.904001712799072,
+    "lane_width_m": 3.75
+  },
+  "EW|80.0|40.0|80.0": {
+    "carriage_m": 7.904001712799072,
+    "lane_width_m": 3.75
+  },
+  "EW|80.0|80.0|120.0": {
+    "carriage_m": 3.9040091037750244,
+    "lane_width_m": 2.0
+  },
+  "NS|0.0|0.0|40.0": {
+    "carriage_m": null,
+    "lane_width_m": 3.5
+  },
+  "NS|0.0|120.0|160.0": {
+    "carriage_m": null,
+    "lane_width_m": 3.5
+  },
+  "NS|0.0|40.0|80.0": {
+    "carriage_m": null,
+    "lane_width_m": 3.5
+  },
+  "NS|0.0|80.0|120.0": {
+    "carriage_m": null,
+    "lane_width_m": 3.5
+  },
+  "NS|120.0|0.0|40.0": {
+    "carriage_m": 5.904003143310547,
+    "lane_width_m": 3.0
+  },
+  "NS|120.0|120.0|160.0": {
+    "carriage_m": 5.904003143310547,
+    "lane_width_m": 3.0
+  },
+  "NS|120.0|40.0|80.0": {
+    "carriage_m": 3.9040069580078125,
+    "lane_width_m": 2.0
+  },
+  "NS|120.0|80.0|120.0": {
+    "carriage_m": 5.904003143310547,
+    "lane_width_m": 3.0
+  },
+  "NS|160.0|0.0|40.0": {
+    "carriage_m": null,
+    "lane_width_m": 3.5
+  },
+  "NS|160.0|120.0|160.0": {
+    "carriage_m": null,
+    "lane_width_m": 3.5
+  },
+  "NS|160.0|40.0|80.0": {
+    "carriage_m": null,
+    "lane_width_m": 3.5
+  },
+  "NS|160.0|80.0|120.0": {
+    "carriage_m": null,
+    "lane_width_m": 3.5
+  },
+  "NS|40.0|0.0|40.0": {
+    "carriage_m": 7.904003143310547,
+    "lane_width_m": 3.75
+  },
+  "NS|40.0|120.0|160.0": {
+    "carriage_m": 5.9040069580078125,
+    "lane_width_m": 3.0
+  },
+  "NS|40.0|40.0|80.0": {
+    "carriage_m": 3.9040069580078125,
+    "lane_width_m": 2.0
+  },
+  "NS|40.0|80.0|120.0": {
+    "carriage_m": 3.9040069580078125,
+    "lane_width_m": 2.0
+  },
+  "NS|80.0|0.0|40.0": {
+    "carriage_m": 5.904005408287048,
+    "lane_width_m": 3.0
+  },
+  "NS|80.0|120.0|160.0": {
+    "carriage_m": 5.904009222984314,
+    "lane_width_m": 3.0
+  },
+  "NS|80.0|40.0|80.0": {
+    "carriage_m": 5.904009222984314,
+    "lane_width_m": 3.0
+  },
+  "NS|80.0|80.0|120.0": {
+    "carriage_m": 3.9040091037750244,
+    "lane_width_m": 2.0
+  }
+}

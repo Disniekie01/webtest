@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes>
+  <!-- Slow city cars (~18 km/h) -->
+  <vType id="car" vClass="passenger" color="1,0.45,0.1"
+         length="4.5" width="1.8" height="1.5"
+         maxSpeed="5.0" speedFactor="0.85" sigma="0.25"
+         accel="1.2" decel="3.5" emergencyDecel="7.0"
+         minGap="2.5" guiShape="passenger" latAlignment="center"
+         jmIgnoreKeepClearTime="2" impatience="0.1"/>
+
+  <flow id="ns_b" type="car" begin="0" end="3600" period="12"
+        from="B0B1" to="B3B4" departLane="best" departSpeed="3"/>
+  <flow id="sn_c" type="car" begin="0" end="3600" period="14"
+        from="C4C3" to="C1C0" departLane="best" departSpeed="3"/>
+  <flow id="ew_1" type="car" begin="0" end="3600" period="12"
+        from="A1B1" to="D1E1" departLane="best" departSpeed="3"/>
+  <flow id="we_2" type="car" begin="0" end="3600" period="14"
+        from="E2D2" to="B2A2" departLane="best" departSpeed="3"/>
+  <flow id="diag" type="car" begin="0" end="3600" period="20"
+        from="A0B0" to="D3E3" departLane="best" departSpeed="3"/>
+</routes>

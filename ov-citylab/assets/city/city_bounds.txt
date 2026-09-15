@@ -1,0 +1,5 @@
+dims_xy=160.000,160.000
+span_m=160.000
+source=city_layout_preview.blend
+traffic_baked=0
+realize=0

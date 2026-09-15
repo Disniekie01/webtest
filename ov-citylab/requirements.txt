@@ -1,0 +1,16 @@
+# City Lab — Omniverse libraries + SUMO traffic
+#
+# Stack (GTC 2026 Omniverse libraries):
+#   ovrtx   — RTX cameras / sensors
+#   ovstage — OpenUSD runtime stage
+#   ovphysx — optional; currently pinned to older ovstage (see README)
+#   SUMO    — roads / traffic / pedestrians (TraCI)
+
+ovrtx==0.5.0.377615
+ovstage==0.2.0.377349
+pillow>=10
+numpy>=1.26
+eclipse-sumo==1.27.1
+fastapi>=0.115
+uvicorn[standard]>=0.30
+websockets>=12

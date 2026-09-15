@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<additional xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/additional_file.xsd">
+  <poly id="BLDG_0_0" type="building" color="0.7,0.7,0.7" fill="1" layer="-1" shape="6.00,7.00 34.00,7.00 34.00,33.00 6.00,33.00"/>
+  <poly id="BLDG_0_1" type="building" color="0.7,0.7,0.7" fill="1" layer="-1" shape="6.00,47.00 34.00,47.00 34.00,73.00 6.00,73.00"/>
+  <poly id="BLDG_0_2" type="building" color="0.7,0.7,0.7" fill="1" layer="-1" shape="6.00,87.00 34.00,87.00 34.00,113.00 6.00,113.00"/>
+  <poly id="BLDG_0_3" type="building" color="0.7,0.7,0.7" fill="1" layer="-1" shape="6.00,127.00 34.00,127.00 34.00,153.00 6.00,153.00"/>
+  <poly id="BLDG_1_0" type="building" color="0.7,0.7,0.7" fill="1" layer="-1" shape="47.00,7.00 73.00,7.00 73.00,33.00 47.00,33.00"/>
+  <poly id="BLDG_1_1" type="building" color="0.7,0.7,0.7" fill="1" layer="-1" shape="47.00,47.00 73.00,47.00 73.00,73.00 47.00,73.00"/>
+  <poly id="BLDG_1_2" type="building" color="0.7,0.7,0.7" fill="1" layer="-1" shape="47.00,87.00 73.00,87.00 73.00,113.00 47.00,113.00"/>
+  <poly id="BLDG_1_3" type="building" color="0.7,0.7,0.7" fill="1" layer="-1" shape="47.00,127.00 73.00,127.00 73.00,153.00 47.00,153.00"/>
+  <poly id="BLDG_2_0" type="building" color="0.7,0.7,0.7" fill="1" layer="-1" shape="87.00,7.00 114.00,7.00 114.00,33.00 87.00,33.00"/>
+  <poly id="BLDG_2_1" type="building" color="0.7,0.7,0.7" fill="1" layer="-1" shape="87.00,47.00 114.00,47.00 114.00,73.00 87.00,73.00"/>
+  <poly id="BLDG_2_2" type="building" color="0.7,0.7,0.7" fill="1" layer="-1" shape="87.00,87.00 114.00,87.00 114.00,113.00 87.00,113.00"/>
+  <poly id="BLDG_2_3" type="building" color="0.7,0.7,0.7" fill="1" layer="-1" shape="87.00,127.00 114.00,127.00 114.00,153.00 87.00,153.00"/>
+  <poly id="BLDG_3_0" type="building" color="0.7,0.7,0.7" fill="1" layer="-1" shape="127.00,7.00 153.00,7.00 153.00,33.00 127.00,33.00"/>
+  <poly id="BLDG_3_1" type="building" color="0.7,0.7,0.7" fill="1" layer="-1" shape="127.00,47.00 153.00,47.00 153.00,73.00 127.00,73.00"/>
+  <poly id="BLDG_3_2" type="building" color="0.7,0.7,0.7" fill="1" layer="-1" shape="127.00,87.00 153.00,87.00 153.00,113.00 127.00,113.00"/>
+  <poly id="BLDG_3_3" type="building" color="0.7,0.7,0.7" fill="1" layer="-1" shape="127.00,127.00 153.00,127.00 153.00,153.00 127.00,153.00"/>
+</additional>

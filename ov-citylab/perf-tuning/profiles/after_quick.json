@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "0.4.1",
+  "mode": "quick",
+  "label": "profile-stage:after",
+  "probed_at": "2026-09-15T19:49:56.666221+00:00",
+  "stage": "/media/disniekie/Working3/NEWCARLA/ov-citylab/perf-tuning/city_generator_large.optimized.usdc",
+  "metrics": {
+    "cold_open_ms": 38.06,
+    "warm_open_ms": 21.29,
+    "warm_open_samples_ms": [
+      20.89,
+      21.81,
+      21.57,
+      20.25,
+      21.29
+    ],
+    "traverse_ms": 0.42,
+    "traverse_prim_count": 2060,
+    "mesh_count": 422,
+    "point_instancer_count": 81,
+    "geom_subset_count": 776
+  }
+}

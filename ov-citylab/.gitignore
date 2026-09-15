@@ -1,0 +1,38 @@
+# --- Environments / dependencies -------------------------------------------
+.venv/
+venv/
+node_modules/
+__pycache__/
+*.pyc
+perf-tuning/runtime/
+tools/webrtc-client/
+isaac6/web-viewer/node_modules/
+isaac6/web-viewer/.vite/
+
+# --- Backups / generated snapshots -----------------------------------------
+*.bak
+*.bak.*
+*.orig
+_output/
+perf-tuning/*.usdc
+perf-tuning/textures
+logs/
+*.log
+
+# --- Heavy binary source art ------------------------------------------------
+# assets/city/textures/ is tracked on purpose: city_generator_large.usdc
+# resolves its maps through the relative ./textures/ paths, so a clone
+# without it renders untextured.
+assets/city/*.blend
+assets/city/*.blend1
+assets/people/
+assets/vehicles/generic_pack/
+*.usdz
+*.zip
+*.tar.xz
+*.fbx
+
+# --- Runtime scratch --------------------------------------------------------
+isaac6/.stream_host
+isaac6/web-viewer/public/stream-config.json
+isaac6/web-viewer/public/stream-host.txt

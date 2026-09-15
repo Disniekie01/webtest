@@ -1,0 +1,56 @@
+{
+  "source": "/World/City/City_Generator_2_0_Object/Plane",
+  "checked_at": "2026-09-15",
+  "blender_settings": {
+    "STREET_WIDTH_m": 8.0,
+    "lanes": 2,
+    "SIDEWALK_SCALE": 4.0
+  },
+  "subsets_found": {
+    "CityGen_Streets": {
+      "faces": 16,
+      "interpretation": "Large ground chunks (parcel-scale), not asphalt ribbons"
+    },
+    "CityGenside_walks": {
+      "faces": 4192,
+      "interpretation": "Real sidewalk mesh strips along streets"
+    },
+    "CityGen_Curb": {
+      "faces": 13464,
+      "interpretation": "Curb geometry between sidewalk and carriageway"
+    },
+    "CityGen_lanes_white": {
+      "faces": 4395,
+      "interpretation": "Lane paint / markings on asphalt"
+    },
+    "CityGen_lanes_secondary_color": {
+      "faces": 880,
+      "strip_width_m": 0.29,
+      "interpretation": "Secondary lane paint"
+    }
+  },
+  "corridor_bands_m": {
+    "note": "Band width across a street corridor (both sides). Inner streets wider because band catches left walk + road + right walk.",
+    "sidewalk_CityGenside_walks": {
+      "edge_streets_approx": [4.0, 5.0],
+      "inner_streets_approx": [13.0, 14.0]
+    },
+    "curb_CityGen_Curb": {
+      "edge_streets_approx": [4.0, 5.0],
+      "inner_streets_approx": [13.0, 14.0]
+    }
+  },
+  "mapped_cross_section": {
+    "carriageway_from_blender_m": 8.0,
+    "lanes_visual": 2,
+    "implied_lane_width_m": 4.0,
+    "sidewalks": "present in mesh as CityGenside_walks + CityGen_Curb",
+    "why_some_lanes_look_smaller": "Sidewalks/curbs/paint eat visual asphalt; road class is still uniform 8 m"
+  },
+  "sumo_recommendation": {
+    "lane_width_m": 3.5,
+    "lanes_per_direction": 1,
+    "sidewalks_in_sumo": false,
+    "reason": "Keep cars on CityGen carriageway. SUMO sidewalks previously pushed lanes onto curbs. Use mesh sidewalks for visuals; optional ped model later."
+  }
+}

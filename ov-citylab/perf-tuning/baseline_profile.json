@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "0.4.1",
+  "mode": "quick",
+  "label": "profile-stage:baseline",
+  "probed_at": "2026-09-15T19:49:08.010012+00:00",
+  "stage": "/media/disniekie/Working3/NEWCARLA/ov-citylab/assets/city/city_generator_large.usdc",
+  "metrics": {
+    "cold_open_ms": 48.98,
+    "warmup_open_ms": 36.81,
+    "warm_open_ms": 33.49,
+    "warm_open_samples_ms": [
+      33.37,
+      39.03,
+      32.96,
+      33.49,
+      33.91
+    ],
+    "warm_open_spread_pct": 18.11,
+    "traverse_ms": 1.32,
+    "traverse_prim_count": 8178,
+    "attr_resolve_ms_capped": 94.11,
+    "attr_resolve_count_capped": 50000,
+    "xform_cache_ms": 14.07,
+    "xformable_count": 5820,
+    "material_bind_ms_capped": 26.37,
+    "material_bind_count_capped": 5879
+  },
+  "notes": [
+    "Quick mode: no FPS/VRAM (Kit\u2192omniperf adjunct not enabled).",
+    "Attribute and material bind timings are capped for large stages."
+  ]
+}

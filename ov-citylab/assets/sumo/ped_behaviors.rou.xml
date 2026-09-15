@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Pedestrians on baked sidewalk graph (SW_*) with crossings (CR_*). -->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+
+  <vTypeDistribution id="ped_pack">
+    <vType id="elderly" vClass="pedestrian"
+           desiredMaxSpeed="0.85" speedFactor="0.85"
+           width="0.55" length="0.35" height="1.60"
+           minGap="0.35" color="0.55,0.70,0.95"
+           guiShape="pedestrian" probability="0.20"/>
+    <vType id="adult" vClass="pedestrian"
+           desiredMaxSpeed="1.35" speedFactor="1.0"
+           width="0.50" length="0.30" height="1.75"
+           minGap="0.25" color="0.15,0.90,1.00"
+           guiShape="pedestrian" probability="0.50"/>
+    <vType id="rushed" vClass="pedestrian"
+           desiredMaxSpeed="1.90" speedFactor="1.25"
+           width="0.45" length="0.25" height="1.80"
+           minGap="0.18" color="1.00,0.40,0.15"
+           guiShape="pedestrian" probability="0.20"/>
+    <vType id="tourist" vClass="pedestrian"
+           desiredMaxSpeed="1.05" speedFactor="0.90"
+           width="0.55" length="0.40" height="1.70"
+           minGap="0.40" color="0.95,0.85,0.20"
+           guiShape="pedestrian" probability="0.10"/>
+  </vTypeDistribution>
+
+  <!-- Sorted by begin — natural mix: along-block walks + street crosses both ways -->
+  <personFlow id="ped_cross_ns_b1" type="ped_pack" departPos="random" begin="0" end="3600" period="10">
+    <walk from="SW_NS_1_0_1_L" to="SW_NS_1_0_1_R"/>
+  </personFlow>
+  <personFlow id="ped_cross_ns_b1r" type="ped_pack" departPos="random" begin="0.2" end="3600" period="11">
+    <walk from="SW_NS_1_0_1_R" to="SW_NS_1_0_1_L"/>
+  </personFlow>
+  <personFlow id="ped_ns_b" type="ped_pack" departPos="random" begin="0.5" end="3600" period="13">
+    <walk from="SW_NS_1_0_1_R" to="SW_NS_1_3_4_R"/>
+  </personFlow>
+  <personFlow id="ped_ns_br" type="ped_pack" departPos="random" begin="0.7" end="3600" period="15">
+    <walk from="SW_NS_1_3_4_R" to="SW_NS_1_0_1_R"/>
+  </personFlow>
+  <personFlow id="ped_cross_ns_c2" type="ped_pack" departPos="random" begin="1" end="3600" period="11">
+    <walk from="SW_NS_2_1_2_R" to="SW_NS_2_1_2_L"/>
+  </personFlow>
+  <personFlow id="ped_ew_1" type="ped_pack" departPos="random" begin="1.5" end="3600" period="14">
+    <walk from="SW_EW_1_0_1_T" to="SW_EW_1_3_4_T"/>
+  </personFlow>
+  <personFlow id="ped_ew_1r" type="ped_pack" departPos="random" begin="1.7" end="3600" period="16">
+    <walk from="SW_EW_1_3_4_T" to="SW_EW_1_0_1_T"/>
+  </personFlow>
+  <personFlow id="ped_cross_ew_1" type="ped_pack" departPos="random" begin="2" end="3600" period="10">
+    <walk from="SW_EW_1_1_2_B" to="SW_EW_1_1_2_T"/>
+  </personFlow>
+  <personFlow id="ped_cross_ew_1r" type="ped_pack" departPos="random" begin="2.2" end="3600" period="11">
+    <walk from="SW_EW_1_1_2_T" to="SW_EW_1_1_2_B"/>
+  </personFlow>
+  <personFlow id="ped_sn_c" type="ped_pack" departPos="random" begin="2.5" end="3600" period="15">
+    <walk from="SW_NS_2_3_4_L" to="SW_NS_2_0_1_L"/>
+  </personFlow>
+  <personFlow id="ped_cross_ew_2" type="ped_pack" departPos="random" begin="3" end="3600" period="11">
+    <walk from="SW_EW_2_2_3_T" to="SW_EW_2_2_3_B"/>
+  </personFlow>
+  <personFlow id="ped_we_2" type="ped_pack" departPos="random" begin="3.5" end="3600" period="15">
+    <walk from="SW_EW_2_3_4_B" to="SW_EW_2_0_1_B"/>
+  </personFlow>
+  <personFlow id="ped_diag" type="ped_pack" departPos="random" begin="4" end="3600" period="14">
+    <walk from="SW_NS_0_0_1_R" to="SW_EW_3_3_4_T"/>
+  </personFlow>
+  <personFlow id="ped_diag_r" type="ped_pack" departPos="random" begin="4.5" end="3600" period="16">
+    <walk from="SW_EW_3_3_4_T" to="SW_NS_0_0_1_R"/>
+  </personFlow>
+</routes>

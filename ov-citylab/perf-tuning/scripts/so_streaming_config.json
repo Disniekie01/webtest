@@ -1,0 +1,21 @@
+[
+  {
+    "operation": "meshCleanup",
+    "mergeVertices": true,
+    "removeDegenerateFaces": true,
+    "removeIsolatedVertices": true,
+    "removeDuplicateFaces": true
+  },
+  {
+    "operation": "optimizePrimvars",
+    "mode": 1,
+    "simplify": true
+  },
+  {
+    "operation": "optimizeMaterials",
+    "optimizeMaterialsMode": 0
+  },
+  {
+    "operation": "computeExtents"
+  }
+]

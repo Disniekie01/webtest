@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Real-time viewing preset: 50 ms delay matches the 0.05 s step length. -->
+<viewsettings>
+  <scheme name="real world"/>
+  <delay value="50"/>
+  <viewport x="44" y="40" zoom="700"/>
+</viewsettings>

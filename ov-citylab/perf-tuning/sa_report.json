@@ -1,0 +1,294 @@
+{
+  "schemaVersion": "0.4.1",
+  "generated_at": "2026-09-15T19:49:08.208470+00:00",
+  "workflow": "omniverse-usd-performance-tuning",
+  "stage": {
+    "identifier": "/media/disniekie/Working3/NEWCARLA/ov-citylab/assets/city/city_generator_large.usdc",
+    "rootLayer": "/media/disniekie/Working3/NEWCARLA/ov-citylab/assets/city/city_generator_large.usdc",
+    "defaultPrim": "/World",
+    "upAxis": "Y",
+    "metersPerUnit": 1.0,
+    "scale_hint": "meters"
+  },
+  "asset_physical_context": {
+    "metersPerUnit": 1.0,
+    "upAxis": "Y",
+    "scale_hint": "meters",
+    "mesh_count": 2880
+  },
+  "summary_counts": {
+    "prim_count": 8178,
+    "mesh_count": 2880,
+    "material_count": 56,
+    "prototype_count": 57,
+    "instance_count": 7490,
+    "reference_count": 0,
+    "payload_count": 0
+  },
+  "composition": {
+    "layers": 2,
+    "references": 0,
+    "payloads": 0,
+    "counting_method": "prims_with_authored_arcs",
+    "sublayers": [
+      "anon:0xf3886c0:city_generator_large-session.usda",
+      "/media/disniekie/Working3/NEWCARLA/ov-citylab/assets/city/city_generator_large.usdc"
+    ],
+    "pointInstancers": 57,
+    "geomSubsets": 2027,
+    "type_counts_top": [
+      [
+        "Xform",
+        2882
+      ],
+      [
+        "Mesh",
+        2880
+      ],
+      [
+        "GeomSubset",
+        2027
+      ],
+      [
+        "Shader",
+        216
+      ],
+      [
+        "Scope",
+        59
+      ],
+      [
+        "PointInstancer",
+        57
+      ],
+      [
+        "Material",
+        56
+      ],
+      [
+        "DomeLight",
+        1
+      ]
+    ]
+  },
+  "instancing": {
+    "instances": 7490,
+    "prototypes": 57,
+    "candidates": 2591,
+    "ratio": 0.7223,
+    "point_instancer_count": 57,
+    "point_instancer_instances": 7490,
+    "native_usd_instances": 0,
+    "instanceable_prims": 0,
+    "notes": [
+      "Buildings already converted to UsdGeom.PointInstancer (57 PIs / ~7490 instances).",
+      "Remaining candidates are street props / clutter with repeated name bases."
+    ]
+  },
+  "hierarchy_dedupe": {
+    "recommended": true,
+    "reason": "2591 remaining repeated prop/clutter copies outside PointInstancers; building kit already instanced.",
+    "top_candidates": [
+      {
+        "path_pattern": "/World/City/City_Generator_2_0_Object/fire_escape_001_*",
+        "subtree_prims": 2,
+        "copies": 1408,
+        "estimated_prim_savings": 2814
+      },
+      {
+        "path_pattern": "/World/City/City_Generator_2_0_Object/Grate001_1K_JPG_Color_*",
+        "subtree_prims": 2,
+        "copies": 115,
+        "estimated_prim_savings": 228
+      },
+      {
+        "path_pattern": "/World/City/City_Generator_2_0_Object/fire_escape_000_*",
+        "subtree_prims": 2,
+        "copies": 108,
+        "estimated_prim_savings": 214
+      },
+      {
+        "path_pattern": "/World/City/City_Generator_2_0_Object/fire_escape_002_*",
+        "subtree_prims": 2,
+        "copies": 108,
+        "estimated_prim_savings": 214
+      },
+      {
+        "path_pattern": "/World/City/City_Generator_2_0_Object/cardboard_box_01_*",
+        "subtree_prims": 2,
+        "copies": 49,
+        "estimated_prim_savings": 96
+      },
+      {
+        "path_pattern": "/World/City/City_Generator_2_0_Object/fire_hydrant_*",
+        "subtree_prims": 2,
+        "copies": 49,
+        "estimated_prim_savings": 96
+      },
+      {
+        "path_pattern": "/World/City/City_Generator_2_0_Object/Street_Lamp_Model_000_*",
+        "subtree_prims": 2,
+        "copies": 48,
+        "estimated_prim_savings": 94
+      },
+      {
+        "path_pattern": "/World/City/City_Generator_2_0_Object/metal_trash_can_*",
+        "subtree_prims": 2,
+        "copies": 48,
+        "estimated_prim_savings": 94
+      },
+      {
+        "path_pattern": "/World/City/City_Generator_2_0_Object/metal_trash_can_rust_*",
+        "subtree_prims": 2,
+        "copies": 48,
+        "estimated_prim_savings": 94
+      },
+      {
+        "path_pattern": "/World/City/City_Generator_2_0_Object/metal_trash_can_rust_handle_right_*",
+        "subtree_prims": 2,
+        "copies": 48,
+        "estimated_prim_savings": 94
+      },
+      {
+        "path_pattern": "/World/City/City_Generator_2_0_Object/street_seating_*",
+        "subtree_prims": 2,
+        "copies": 48,
+        "estimated_prim_savings": 94
+      },
+      {
+        "path_pattern": "/World/City/City_Generator_2_0_Object/utility_box_01_box_low_*",
+        "subtree_prims": 2,
+        "copies": 48,
+        "estimated_prim_savings": 94
+      },
+      {
+        "path_pattern": "/World/City/City_Generator_2_0_Object/utility_box_02_*",
+        "subtree_prims": 2,
+        "copies": 48,
+        "estimated_prim_savings": 94
+      },
+      {
+        "path_pattern": "/World/City/City_Generator_2_0_Object/WetFloorSign_01_*",
+        "subtree_prims": 2,
+        "copies": 48,
+        "estimated_prim_savings": 94
+      },
+      {
+        "path_pattern": "/World/City/City_Generator_2_0_Object/Street_Lamp_Model_002_*",
+        "subtree_prims": 2,
+        "copies": 40,
+        "estimated_prim_savings": 78
+      }
+    ]
+  },
+  "materials": {
+    "unique_bound_paths": 55,
+    "top_bindings": [
+      [
+        "/World/City/_materials/CityGenblack_",
+        1781
+      ],
+      [
+        "/World/City/_materials/CityGenbasic_rough_metal_dark_",
+        428
+      ],
+      [
+        "/World/City/_materials/CityGentextured_metal",
+        339
+      ],
+      [
+        "/World/City/_materials/CityGenbasic_rough_metal_bright",
+        267
+      ],
+      [
+        "/World/City/_materials/CityGenGlass",
+        232
+      ],
+      [
+        "/World/City/_materials/CityGenLamp_Emission",
+        154
+      ],
+      [
+        "/World/City/_materials/CityGenGrate001_1K_JPG_Color",
+        115
+      ],
+      [
+        "/World/City/_materials/CityGenAC",
+        108
+      ],
+      [
+        "/World/City/_materials/CityGenmetal_trash_can_rust",
+        96
+      ],
+      [
+        "/World/City/_materials/CityGenmodular_street_seating_supports",
+        96
+      ],
+      [
+        "/World/City/_materials/CityGenbasic_metal",
+        74
+      ],
+      [
+        "/World/City/_materials/CityGenstreet_signs",
+        66
+      ]
+    ],
+    "notes": [
+      "High GeomSubset binding fan-out (glass/brick/interior) remains a draw-setup cost even with PointInstancers."
+    ]
+  },
+  "validation_scope": {
+    "per_asset": [
+      {
+        "path": "/media/disniekie/Working3/NEWCARLA/ov-citylab/assets/city/city_generator_large.usdc",
+        "concepts": [
+          "perf_high_vertex_count",
+          "primvar_indexability",
+          "mesh_normals",
+          "extents"
+        ]
+      }
+    ],
+    "cross_component_pairs": [],
+    "skip": [
+      "No omniverse:// remote payloads.",
+      "Skip Kit FPS profile until user enables Kit\u2192omniperf adjunct."
+    ]
+  },
+  "phase_recommendation": {
+    "next": "continue_to_hierarchy_dedupe_then_validators",
+    "intent_assumed": "Isaac/webtest visual city streaming; preserve look; prefer load/FPS over per-part editability.",
+    "suggested_ops_priority": [
+      "PointInstancer props (trash/boxes/seating/lamps) similar to buildings",
+      "Usd Optimize: meshCleanup / optimizePrimvars on prototypes",
+      "Reduce GeomSubset fan-out or simplify glass materials for streaming",
+      "Optional: decimateMeshes only with mm tolerance if triangle budget needed"
+    ],
+    "do_not": [
+      "Overwrite source city_generator_large.usdc without explicit approval",
+      "Broad merge of dissimilar materials into one mesh"
+    ]
+  },
+  "findings": [
+    {
+      "id": "buildings_already_instanced",
+      "severity": "info",
+      "summary": "57 PointInstancers with 7490 instances"
+    },
+    {
+      "id": "geomsubset_fanout",
+      "severity": "high",
+      "summary": "2027 GeomSubsets; top binds glass/brick/interior still heavy"
+    },
+    {
+      "id": "prop_copies_remain",
+      "severity": "medium",
+      "summary": "2591 repeated prop-like top-level copies still uninstanced"
+    },
+    {
+      "id": "monolithic_crate",
+      "severity": "medium",
+      "summary": "Single large .usdc root (no payloads/references); consider packaging prototypes as separate assets later"
+    }
+  ]
+}

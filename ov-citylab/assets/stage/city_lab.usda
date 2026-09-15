@@ -1,0 +1,349 @@
+#usda 1.0
+(
+    customLayerData = {
+        dictionary cameraSettings = {
+            dictionary Front = {
+                double3 position = (0, 0, 5)
+                double radius = 5
+            }
+            dictionary Perspective = {
+                double3 position = (39.19078213185828, 1.3150409557172005, 1.3684685500499643)
+                double3 target = (39.649390243809435, 1.8627164286450857, -1.1741710085176993)
+            }
+            dictionary Right = {
+                double3 position = (-5, 0, 0)
+                double radius = 5
+            }
+            dictionary Top = {
+                double3 position = (0, 5, 0)
+                double radius = 5
+            }
+            string boundCamera = "/World/Camera"
+        }
+        dictionary omni_layer = {
+            string authoring_layer = "./city_lab.usda"
+        }
+        dictionary renderSettings = {
+            double "rtx:directLighting:sampledLighting:maxRayUnexposedIntensity" = 901.2654418945312
+            int "rtx:externalFrameCounter" = 135
+            double "rtx:fog:fogColorIntensity" = 0.5
+            int "rtx:indirectDiffuse:fetchSampleCount" = 1
+            double "rtx:indirectDiffuse:maxRayUnexposedIntensity" = 901.2654418945312
+            double "rtx:pathtracing:fireflyFilter:maxPerEmissiveUnexposedIntensity" = 450.6327209472656
+            double "rtx:pathtracing:fireflyFilter:maxUnexposedIntensityPerSample" = 450.6327209472656
+            double "rtx:pathtracing:fireflyFilter:maxUnexposedIntensityPerSampleDiffuse" = 450.6327209472656
+            float3 "rtx:post:colorgrad:blackpoint" = (0.1, 0.1, 0.1)
+            bool "rtx:post:colorgrad:enabled" = 1
+            float3 "rtx:post:colorgrad:gamma" = (0.80668586, 0.8063833, 0.84555984)
+            float3 "rtx:post:colorgrad:whitepoint" = (0.98, 0.9799902, 0.9799902)
+            int "rtx:post:lensFlares:blades" = 10
+            double "rtx:post:lensFlares:cutoffFuzziness" = 0.9999999776482582
+            float3 "rtx:post:lensFlares:cutoffPoint" = (4000, 3000, 1500)
+            bool "rtx:post:lensFlares:enabled" = 0
+            double "rtx:post:lensFlares:fNumber" = -68
+            double "rtx:post:lensFlares:flareScale" = 0.3
+            double "rtx:post:tonemap:fNumber" = 13.419999700039625
+            double "rtx:post:tonemap:irayReinhard:burnHighlights" = 0.08999999798834324
+            bool "rtx:post:tonemap:irayReinhard:burnHighlightsPerComponent" = 0
+            double "rtx:post:tonemap:irayReinhard:crushBlacks" = 0
+            int "rtx:post:tonemap:op" = 7
+            float3 "rtx:post:tonemap:whitepoint" = (0.35419863, 0.5078519, 0.5096525)
+            double "rtx:raytracing:inscattering:atmosphereHeight" = 17544
+            double "rtx:raytracing:inscattering:maxRTSampleUnexposedIntensity" = 28840.494140625
+            double "rtx:raytracing:invisLightRoughnessThreshold" = 0.009999999776482582
+            int "rtx:reflections:maxReflectionBounces" = 2
+            double "rtx:reflections:maxRoughness" = 0.5
+            double "rtx:reflections:sampledLighting:maxRayUnexposedIntensity" = 2703.79638671875
+            int "rtx:reflections:sampledLighting:samplesPerPixel" = 1
+            double "rtx:translucency:maxRayUnexposedIntensity" = 2703.79638671875
+            bool "rtx:translucency:reflectAtAllBounce" = 0
+            double "rtx:translucency:reflectionThroughputThreshold" = 0.1
+            int "rtx:translucency:maxRefractionBounces" = 1
+        }
+    }
+    defaultPrim = "World"
+    metersPerUnit = 1
+    upAxis = "Y"
+)
+
+def Xform "World"
+{
+    def "City" (
+        prepend payload = @../city/city_generator_large.usdc@
+    )
+    {
+        double3 xformOp:translate = (0, 0, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+
+        over "City"
+        {
+            over "City_Generator_2_0_Object"
+            {
+                over "Street_Railing_003_101747371" (
+                    active = false
+                )
+                {
+                }
+
+                over "Street_Railing_003_1072290394" (
+                    active = false
+                )
+                {
+                }
+
+                over "Street_Railing_003_1161885480" (
+                    active = false
+                )
+                {
+                }
+
+                over "Street_Railing_003_1239543253" (
+                    active = false
+                )
+                {
+                }
+
+                over "Street_Railing_003_1561833292" (
+                    active = false
+                )
+                {
+                }
+
+                over "Street_Railing_003_1758377390" (
+                    active = false
+                )
+                {
+                }
+
+                over "Street_Railing_003_1881950082" (
+                    active = false
+                )
+                {
+                }
+
+                over "Street_Railing_003_275760684" (
+                    active = false
+                )
+                {
+                }
+
+                over "Street_Railing_003_293648004" (
+                    active = false
+                )
+                {
+                }
+
+                over "Street_Railing_003_406888288" (
+                    active = false
+                )
+                {
+                }
+
+                over "Street_Railing_003_57292319" (
+                    active = false
+                )
+                {
+                }
+
+                over "Street_Railing_003_688765836" (
+                    active = false
+                )
+                {
+                }
+
+                over "Street_Railing_003_807334629" (
+                    active = false
+                )
+                {
+                }
+
+                over "Street_Railing_003_876796822" (
+                    active = false
+                )
+                {
+                }
+            }
+
+            over "env_light" (
+                active = false
+            )
+            {
+                float inputs:intensity = 0
+                token visibility = "invisible"
+                bool visibleInPrimaryRay = 0
+            }
+        }
+    }
+
+    def Xform "Traffic"
+    {
+        def Xform "Vehicles"
+        {
+        }
+
+        def Xform "Pedestrians"
+        {
+        }
+    }
+
+    def Camera "Camera"
+    {
+        float2 clippingRange = (0.5, 2000)
+        float focalLength = 16
+        float horizontalAperture = 20.955
+        custom uniform vector3d omni:kit:centerOfInterest = (0, 0, -237.99567291688354)
+        token projection = "perspective"
+        float verticalAperture = 15.2908
+        float3 xformOp:rotateXYZ = (175.32118, 80.41128, 180)
+        float3 xformOp:scale = (1, 1, 1)
+        double3 xformOp:translate = (62.3916366921405, 3.9491588839970864, -3.534535327985308)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ", "xformOp:scale"]
+    }
+
+    def "Studio" (
+        prepend payload = @../env/Grey_Studio.usda@
+    )
+    {
+    }
+
+    def DistantLight "DistantLight" (
+        prepend apiSchemas = ["ShapingAPI"]
+    )
+    {
+        float inputs:angle = 1
+        float inputs:intensity = 0
+        float inputs:shaping:cone:angle = 180
+        float inputs:shaping:cone:softness
+        float inputs:shaping:focus
+        color3f inputs:shaping:focusTint
+        asset inputs:shaping:ies:file
+        token visibility = "invisible"
+        quatd xformOp:orient = (0.7640688666101689, -0.6126002363631285, 0.17391067457983755, 0.10331889832976779)
+        double3 xformOp:scale = (1, 1, 1)
+        double3 xformOp:translate = (0, 0, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+    }
+}
+
+def "Render" (
+    hide_in_stage_window = true
+    no_delete = true
+)
+{
+    def "OmniverseKit"
+    {
+        def "HydraTextures" (
+            hide_in_stage_window = true
+            no_delete = true
+        )
+        {
+            def RenderProduct "omni_kit_widget_viewport_ViewportTexture_0" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </World/Camera>
+                token omni:rtx:background:source:texture:textureMode = "repeatMirrored"
+                token omni:rtx:background:source:type = "domeLight"
+                bool omni:rtx:dlss:frameGeneration = 0
+                float omni:rtx:fog:colorIntensity = 0.5
+                bool omni:rtx:fog:enabled
+                float omni:rtx:lights:refractionVisibleRoughnessThreshold = 0.01
+                bool omni:rtx:material:db:nonVisualMaterialCSV:enabled = 0
+                bool omni:rtx:material:db:syncLoads = 1
+                int omni:rtx:post:bloom:aperture:blades = 10
+                float3 omni:rtx:post:bloom:cutoff = (4000, 3000, 1500)
+                float omni:rtx:post:bloom:cutoffFuzziness = 1
+                bool omni:rtx:post:bloom:enabled = 0
+                float omni:rtx:post:bloom:fStop = 8
+                float omni:rtx:post:bloom:scale = 0.05
+                token omni:rtx:post:dlss:execMode = "performance"
+                color3f omni:rtx:post:grade:blackPoint = (0, 0, 0)
+                bool omni:rtx:post:grade:enabled = 1
+                color3f omni:rtx:post:grade:gamma = (1, 1, 1)
+                color3f omni:rtx:post:grade:whitePoint = (1, 1, 1)
+                bool omni:rtx:post:registeredCompositing:invertColorCorrection = 1
+                bool omni:rtx:post:registeredCompositing:invertToneMap = 1
+                float omni:rtx:post:tonemap:irayReinhard:burnHighlights = 0.089999996
+                bool omni:rtx:post:tonemap:irayReinhard:burnHighlightsPerComponent = 0
+                float omni:rtx:post:tonemap:irayReinhard:crushBlacks = 0
+                token omni:rtx:post:tonemap:operator = "iray"
+                color3f omni:rtx:post:tonemap:whitepoint = (0.35419863, 0.5078519, 0.5096525)
+                float omni:rtx:pt:fireflyFilter:maxPerEmissiveUnexposedIntensity = 450.63272
+                float omni:rtx:pt:fireflyFilter:maxUnexposedIntensityPerSample = 450.63272
+                float omni:rtx:pt:fireflyFilter:maxUnexposedIntensityPerSampleDiffuse = 450.63272
+                bool omni:rtx:pt:lightcache:cached:dontResolveConflicts = 1
+                int omni:rtx:pt:maxSamplesPerLaunch = 2073600
+                int omni:rtx:pt:mgpu:maxPixelsPerRegionExponent = 12
+                color3f omni:rtx:rt:ambientLight:color = (0.1, 0.1, 0.1)
+                bool omni:rtx:rt:demoire = 0
+                float omni:rtx:rt:directLighting:maxRayUnexposedIntensity = 901.26544
+                bool omni:rtx:rt:globalVolumetricEffects:enabled
+                float omni:rtx:rt:indirectdiffuse:maxRayUnexposedIntensity = 901.26544
+                int omni:rtx:rt:indirectdiffuse:samples = 4
+                float omni:rtx:rt:inscattering:atmosphereHeight = 17544
+                float omni:rtx:rt:inscattering:maxRTSampleUnexposedIntensity = 28840.494
+                bool omni:rtx:rt:lightcache:spatialCache:dontResolveConflicts = 1
+                int omni:rtx:rt:reflections:maxBounces = 7
+                float omni:rtx:rt:reflections:maxRayUnexposedIntensity = 2703.7964
+                float omni:rtx:rt:reflections:roughnessCacheThreshold = 1
+                int omni:rtx:rt:reflections:samples = 8
+                float omni:rtx:rt:refractions:maxRayUnexposedIntensity = 2703.7964
+                bool omni:rtx:rt:refractions:reflectionInRefraction = 1
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                bool omni:rtx:scene:hydra:mdlMaterialWarmup = 1
+                bool omni:rtx:scene:useViewLightingMode
+                float omni:rtx:translucency:reflectionThroughputThreshold = 0
+                uint omni:rtx:viewTile:limit = 4294967295
+                rel orderedVars = </Render/Vars/LdrColor>
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (1920, 1080)
+            }
+        }
+    }
+
+    def RenderSettings "OmniverseGlobalRenderSettings" (
+        prepend apiSchemas = ["OmniRtxSettingsGlobalRtAdvancedAPI_1", "OmniRtxSettingsGlobalPtAdvancedAPI_1"]
+        no_delete = true
+    )
+    {
+        rel products = </Render/OmniverseKit/HydraTextures/omni_kit_widget_viewport_ViewportTexture_0>
+    }
+
+    def "Vars"
+    {
+        def RenderVar "LdrColor" (
+            hide_in_stage_window = true
+            no_delete = true
+        )
+        {
+            uniform string sourceName = "LdrColor"
+        }
+    }
+}
+
+def Xform "Environment"
+{
+    def DomeLight "sky" (
+        prepend apiSchemas = ["ShapingAPI"]
+    )
+    {
+        float inputs:intensity = 0
+        float inputs:shaping:cone:angle = 180
+        float inputs:shaping:cone:softness
+        float inputs:shaping:focus
+        color3f inputs:shaping:focusTint
+        asset inputs:shaping:ies:file
+        float inputs:specular = 1
+        asset inputs:texture:file = @https://omniverse-content-production.s3.us-west-2.amazonaws.com/Environments/2023_1/DomeLights/Storm/approaching_storm.hdr@
+        token inputs:texture:format = "latlong"
+        token visibility = "invisible"
+        bool visibleInPrimaryRay = 0
+        quatd xformOp:orient = (-0.7071067811865475, 0.7071067811865476, 0, 0)
+        double3 xformOp:scale = (1, 1, 1)
+        double3 xformOp:translate = (0, 0, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+    }
+}
+
