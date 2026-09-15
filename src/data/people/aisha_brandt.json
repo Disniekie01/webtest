@@ -1,0 +1,254 @@
+{
+  "id": "aisha_brandt",
+  "catalog": {
+    "id": "aisha_brandt",
+    "name": "Aisha Brandt",
+    "comfort_level": "advocate",
+    "comfort_score": 0.9,
+    "story": "people/aisha_brandt/story.yaml",
+    "journey": "people/aisha_brandt/journey.yaml",
+    "status": "draft_playable",
+    "tags": [
+      "observation",
+      "research"
+    ]
+  },
+  "person": {
+    "id": "aisha_brandt",
+    "name": "Aisha Brandt",
+    "age": 24,
+    "role": "student_researcher",
+    "home_area": "campus_edge",
+    "appearance": {
+      "blueprint": "walker.pedestrian.0032",
+      "gender": "female",
+      "age_group": "adult",
+      "blueprint_prefers": [
+        "walker.pedestrian.0032",
+        "walker.pedestrian.0023",
+        "walker.pedestrian.0015"
+      ]
+    },
+    "comfort": {
+      "level": "advocate",
+      "score": 0.9,
+      "notes": "Studies human–robot interaction. Seeks out robot encounters; watches how others react. High comfort, high curiosity — her stress comes from watching people treat robots (or each other) badly, not from the bots.",
+      "triggers": [
+        "aggressive_human_shove",
+        "robot_ignored_in_emergency_path",
+        "design_that_excludes_elders"
+      ],
+      "preferences": [
+        "transparent_behavior_logs",
+        "public_demo_routes",
+        "inclusive_design_for_elders",
+        "soft_audible_intent"
+      ]
+    },
+    "mobility": {
+      "modes": [
+        "walk",
+        "bike",
+        "transit"
+      ],
+      "pace": "moderate",
+      "uses": "plaza_observation"
+    },
+    "voice": {
+      "tone": "curious",
+      "catchphrase": "Whose comfort are we designing for first?"
+    }
+  },
+  "story": {
+    "id": "aisha_plaza_watch",
+    "person_id": "aisha_brandt",
+    "title": "Watching the plaza learn",
+    "summary": "Aisha follows a delivery bot through the plaza and notices who yields — her comfort is high; her story is about everyone else's.",
+    "beats": [
+      {
+        "id": "setup",
+        "text": "Aisha sits on the plaza steps with a notebook. A new sidewalk bot route went live this morning; she wants to see the first rush hour before her seminar.\n"
+      },
+      {
+        "id": "approach",
+        "text": "She stands when the bot enters from the east edge, matching its pace at a polite distance. Already she sees an elder flinch and a courier cut close.\n"
+      },
+      {
+        "id": "encounter",
+        "text": "The bot threads a food line, pauses for a stroller, then commits to a crosswalk just as a bike courier brakes. Two strangers argue — \"those things don't belong here\" — while a teenager films it.\n"
+      },
+      {
+        "id": "reaction",
+        "text": "Aisha feels at ease beside the machine. She notes distances, yields, and faces: the elder who flinches, the parent who shrugs, the courier who swears. Comfort, she writes, is unevenly distributed — and the bot's soft chirp before a turn is the only courtesy some people hear.\n"
+      },
+      {
+        "id": "outcome",
+        "text": "She walks home beside the bot for a block, smiling when it chirps again. Her story ends with a design question for the city, not a verdict on robots: whose comfort are we optimizing, and who pays when we get it wrong?\n"
+      }
+    ],
+    "themes": [
+      "observation",
+      "uneven_comfort",
+      "inclusive_design"
+    ],
+    "sim": {
+      "map": "Small_City_LVL",
+      "focus": "plaza_observation",
+      "comfort_arc": [
+        0.9,
+        0.9,
+        0.9,
+        0.88,
+        0.92
+      ],
+      "journey": "people/aisha_brandt/journey.yaml"
+    }
+  },
+  "journey": {
+    "id": "aisha_plaza_watch_journey",
+    "person_id": "aisha_brandt",
+    "story_id": "aisha_plaza_watch",
+    "title": "Watching the plaza learn — walkable journey",
+    "map": "Small_City_LVL",
+    "status": "draft_playable",
+    "person": {
+      "display_name": "Aisha Brandt",
+      "role": "walker",
+      "gender": "female",
+      "age_group": "adult",
+      "blueprint": "walker.pedestrian.0032",
+      "blueprint_prefers": [
+        "walker.pedestrian.0032",
+        "walker.pedestrian.0023",
+        "walker.pedestrian.0015"
+      ],
+      "walk_speed_mps": 1.3,
+      "comfort_start": 0.9
+    },
+    "follow": {
+      "enabled": true,
+      "cinematic": true,
+      "smooth": 0.11,
+      "lookahead_m": 3.5,
+      "distance_m": 5,
+      "height_m": 1.8,
+      "pitch_deg": -9,
+      "shoulder_m": 1.3
+    },
+    "stops": [
+      {
+        "id": "steps_watch",
+        "beat": "setup",
+        "label": "Notebook on the plaza steps",
+        "comfort": 0.9,
+        "hold_s": 2.5,
+        "location": {
+          "x": -135,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180
+      },
+      {
+        "id": "match_pace",
+        "beat": "approach",
+        "label": "Matches the new bot route at a polite distance",
+        "comfort": 0.9,
+        "hold_s": 1,
+        "location": {
+          "x": -155,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180,
+        "spawn_robot": {
+          "id": "demo_route_bot",
+          "kind": "vehicle",
+          "location": {
+            "x": -158,
+            "y": 526,
+            "z": 0.6
+          },
+          "yaw": -180
+        }
+      },
+      {
+        "id": "food_line",
+        "beat": "encounter",
+        "label": "Bot threads the food line",
+        "comfort": 0.9,
+        "hold_s": 1.5,
+        "location": {
+          "x": -172,
+          "y": 522.8,
+          "z": 0.6
+        },
+        "yaw": -180,
+        "move_robot_to": {
+          "location": {
+            "x": -175,
+            "y": 525.5,
+            "z": 0.6
+          },
+          "yaw": -160
+        }
+      },
+      {
+        "id": "crosswalk_commit",
+        "beat": "encounter",
+        "label": "Bot commits to crosswalk — courier brakes",
+        "comfort": 0.88,
+        "hold_s": 2,
+        "location": {
+          "x": -185,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180,
+        "move_robot_to": {
+          "location": {
+            "x": -188,
+            "y": 524,
+            "z": 0.6
+          },
+          "yaw": -140
+        }
+      },
+      {
+        "id": "note_faces",
+        "beat": "reaction",
+        "label": "Notes who flinches, shrugs, swears",
+        "comfort": 0.88,
+        "hold_s": 3,
+        "location": {
+          "x": -190,
+          "y": 522.5,
+          "z": 0.6
+        },
+        "yaw": -170
+      },
+      {
+        "id": "walk_beside",
+        "beat": "outcome",
+        "label": "Walks home beside the bot — soft chirp",
+        "comfort": 0.92,
+        "hold_s": 2,
+        "location": {
+          "x": -205,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180,
+        "move_robot_to": {
+          "location": {
+            "x": -208,
+            "y": 525,
+            "z": 0.6
+          },
+          "yaw": -180
+        }
+      }
+    ],
+    "notes": "Advocate walker; stays near the bot without fear. Soft chirp is narrative (no audio hook yet).\n"
+  }
+}

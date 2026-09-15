@@ -1,0 +1,237 @@
+{
+  "id": "kenji_mori",
+  "catalog": {
+    "id": "kenji_mori",
+    "name": "Kenji Mori",
+    "comfort_level": "comfortable",
+    "comfort_score": 0.7,
+    "story": "people/kenji_mori/story.yaml",
+    "journey": "people/kenji_mori/journey.yaml",
+    "status": "draft_playable",
+    "tags": [
+      "failure_modes"
+    ]
+  },
+  "person": {
+    "id": "kenji_mori",
+    "name": "Kenji Mori",
+    "age": 45,
+    "role": "office_worker",
+    "home_area": "transit_hub_east",
+    "appearance": {
+      "blueprint": "walker.pedestrian.0001",
+      "gender": "male",
+      "age_group": "adult",
+      "blueprint_prefers": [
+        "walker.pedestrian.0001",
+        "walker.pedestrian.0028",
+        "walker.pedestrian.0011"
+      ]
+    },
+    "comfort": {
+      "level": "comfortable",
+      "score": 0.7,
+      "notes": "Used to robotaxis and lobby delivery lockers. Shares sidewalks easily when robots signal intent; annoyed only by opaque failures. Comfort stays high even when patience dips.",
+      "triggers": [
+        "robot_stuck_blocking",
+        "failed_handoff_no_message",
+        "silent_error_state"
+      ],
+      "preferences": [
+        "clear_intent_lights",
+        "recovery_behavior_visible",
+        "locker_eta_accuracy",
+        "pull_aside_on_fault"
+      ]
+    },
+    "mobility": {
+      "modes": [
+        "walk",
+        "robotaxi",
+        "transit"
+      ],
+      "pace": "moderate",
+      "uses": "sidewalk_and_lobby"
+    },
+    "voice": {
+      "tone": "dry",
+      "catchphrase": "Fine with robots — not with furniture that used to be a robot."
+    }
+  },
+  "story": {
+    "id": "kenji_locker_detour",
+    "person_id": "kenji_mori",
+    "title": "The stuck locker run",
+    "summary": "Kenji is comfortable sharing the sidewalk until a failed delivery bot blocks his usual door — comfort stays high, patience does not.",
+    "beats": [
+      {
+        "id": "setup",
+        "text": "After work Kenji walks from the transit hub toward his building, weaving past two delivery bots without breaking stride. He has an app ping: package in the lobby locker, ETA two minutes ago.\n"
+      },
+      {
+        "id": "approach",
+        "text": "The last block is easy. He nods at a robotaxi dropping someone off, steps around a cleaner bot, and already thinks about dinner.\n"
+      },
+      {
+        "id": "encounter",
+        "text": "At the entrance a bot sits dead-center on the ramp, status light amber, no motion. Another pedestrian squeezes past; Kenji cannot with his rolling briefcase. There is no on-screen error — just a machine pretending to be a planter.\n"
+      },
+      {
+        "id": "reaction",
+        "text": "He waits ten seconds, then circles through the garage ramp. Mild irritation — the system usually works — but no spike of fear. He photographs the stuck unit and files an in-app report while walking.\n"
+      },
+      {
+        "id": "outcome",
+        "text": "Package retrieved. Kenji still prefers robots to missing deliveries; he just wants stuck units to pull aside or call for help before they become furniture. His comfort score barely moved; his trust in recovery behavior did.\n"
+      }
+    ],
+    "themes": [
+      "failure_modes",
+      "high_comfort_low_patience",
+      "infrastructure_reliability"
+    ],
+    "sim": {
+      "map": "Small_City_LVL",
+      "focus": "entrance_blockage",
+      "comfort_arc": [
+        0.75,
+        0.72,
+        0.7,
+        0.65,
+        0.72
+      ],
+      "journey": "people/kenji_mori/journey.yaml"
+    }
+  },
+  "journey": {
+    "id": "kenji_locker_detour_journey",
+    "person_id": "kenji_mori",
+    "story_id": "kenji_locker_detour",
+    "title": "The stuck locker run — walkable journey",
+    "map": "Small_City_LVL",
+    "status": "draft_playable",
+    "person": {
+      "display_name": "Kenji Mori",
+      "role": "walker",
+      "gender": "male",
+      "age_group": "adult",
+      "blueprint": "walker.pedestrian.0001",
+      "blueprint_prefers": [
+        "walker.pedestrian.0001",
+        "walker.pedestrian.0028",
+        "walker.pedestrian.0011"
+      ],
+      "walk_speed_mps": 1.45,
+      "comfort_start": 0.75
+    },
+    "follow": {
+      "enabled": true,
+      "cinematic": true,
+      "smooth": 0.12,
+      "lookahead_m": 4,
+      "distance_m": 5.2,
+      "height_m": 1.85,
+      "pitch_deg": -8,
+      "shoulder_m": 1.2
+    },
+    "stops": [
+      {
+        "id": "hub_exit",
+        "beat": "setup",
+        "label": "Leaves transit hub toward home",
+        "comfort": 0.75,
+        "hold_s": 1,
+        "location": {
+          "x": -145,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180
+      },
+      {
+        "id": "easy_weave",
+        "beat": "approach",
+        "label": "Weaves past working bots without slowing",
+        "comfort": 0.72,
+        "hold_s": 1,
+        "location": {
+          "x": -165,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180,
+        "spawn_robot": {
+          "id": "stuck_entrance_bot",
+          "kind": "vehicle",
+          "location": {
+            "x": -198.5,
+            "y": 524.5,
+            "z": 0.6
+          },
+          "yaw": 10
+        }
+      },
+      {
+        "id": "amber_ramp",
+        "beat": "encounter",
+        "label": "Amber bot dead-center on the ramp",
+        "comfort": 0.7,
+        "hold_s": 2,
+        "location": {
+          "x": -190,
+          "y": 522.8,
+          "z": 0.6
+        },
+        "yaw": -180
+      },
+      {
+        "id": "wait_ten",
+        "beat": "reaction",
+        "label": "Waits ten seconds — nothing",
+        "comfort": 0.65,
+        "hold_s": 3,
+        "location": {
+          "x": -196,
+          "y": 523,
+          "z": 0.6
+        },
+        "yaw": -170
+      },
+      {
+        "id": "garage_detour",
+        "beat": "reaction",
+        "label": "Circles via garage ramp",
+        "comfort": 0.65,
+        "hold_s": 1.5,
+        "location": {
+          "x": -200,
+          "y": 520.5,
+          "z": 0.6
+        },
+        "yaw": -90,
+        "move_robot_to": {
+          "location": {
+            "x": -198.5,
+            "y": 524.5,
+            "z": 0.6
+          },
+          "yaw": 10
+        }
+      },
+      {
+        "id": "locker_ok",
+        "beat": "outcome",
+        "label": "Package retrieved — files a report",
+        "comfort": 0.72,
+        "hold_s": 2,
+        "location": {
+          "x": -208,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180
+      }
+    ],
+    "notes": "Comfortable walker; robot stays stuck as \"furniture\" for the beat. Detour stays on sidewalk-nav samples.\n"
+  }
+}

@@ -1,0 +1,64 @@
+.camera-panel {
+  width: 336px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cv-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
+.alarm {
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border: 1px solid var(--glass-edge);
+}
+
+.alarm-0 {
+  color: var(--cyan-assist);
+}
+.alarm-1 {
+  color: var(--teal-bright);
+}
+.alarm-2 {
+  color: var(--amber-stress);
+  border-color: var(--amber-stress);
+}
+.alarm-3 {
+  color: var(--crit);
+  border-color: var(--crit);
+  animation: pulseCrit 1s ease-in-out infinite alternate;
+}
+
+@keyframes pulseCrit {
+  from {
+    box-shadow: 0 0 0 transparent;
+  }
+  to {
+    box-shadow: 0 0 12px rgba(196, 92, 74, 0.45);
+  }
+}
+
+.cv-feed,
+.cv-plan {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: #0e1618;
+  border: 1px solid rgba(120, 190, 188, 0.15);
+}
+
+.cv-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  font-size: 0.72rem;
+}

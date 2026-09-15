@@ -1,0 +1,217 @@
+.kit-bg {
+  position: absolute;
+  inset: 0;
+  background: #0c121a;
+  overflow: hidden;
+}
+
+.kit-bg__iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  pointer-events: auto;
+  background: #000;
+  z-index: 0;
+  /* Keep fully visible while connecting — opacity:0 throttles WebRTC media. */
+  opacity: 1;
+}
+
+.kit-bg__frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.kit-bg__boot {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 50% 42%, #172131, #080b11 65%);
+  z-index: 3;
+  pointer-events: auto;
+}
+
+.kit-bg__card {
+  max-width: 28rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.kit-bg__spin {
+  width: 2.1rem;
+  height: 2.1rem;
+  margin: 0 auto 0.9rem;
+  border: 3px solid #273449;
+  border-top-color: #76b900;
+  border-radius: 50%;
+  animation: kit-spin 1s linear infinite;
+}
+
+@keyframes kit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.kit-bg__title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #edf3ff;
+}
+
+.kit-bg__detail {
+  margin-top: 0.5rem;
+  color: #9ba9bd;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.kit-bg__meta {
+  margin-top: 0.75rem;
+  color: #76b900;
+  font-size: 0.72rem;
+}
+
+.kit-bg__progress {
+  margin-top: 1rem;
+  text-align: left;
+}
+
+.kit-bg__progress-track {
+  height: 0.35rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.kit-bg__progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #5a8f00, #76b900 55%, #c6f27a);
+  transition: width 0.45s ease;
+}
+
+.kit-bg__progress-pct {
+  margin-top: 0.35rem;
+  color: #9ba9bd;
+  font-size: 0.72rem;
+}
+
+.kit-bg__steps {
+  list-style: none;
+  margin: 0.9rem 0 0;
+  padding: 0;
+  text-align: left;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.kit-bg__steps li {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #6b7a8f;
+  font-size: 0.75rem;
+}
+
+.kit-bg__steps li.is-done {
+  color: #c6f27a;
+}
+
+.kit-bg__step-mark {
+  width: 0.9rem;
+  text-align: center;
+  font-size: 0.7rem;
+  opacity: 0.85;
+}
+
+.kit-bg__boot--overlay {
+  background: rgba(7, 10, 15, 0.72);
+  backdrop-filter: blur(2px);
+}
+
+.kit-bg__retry {
+  margin-top: 0;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid rgba(118, 185, 0, 0.45);
+  border-radius: 0.4rem;
+  background: rgba(118, 185, 0, 0.12);
+  color: #c6f27a;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.kit-bg__retry:hover {
+  background: rgba(118, 185, 0, 0.22);
+}
+
+.kit-bg__actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.kit-bg__retry--ghost {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #9ba9bd;
+}
+
+.kit-bg__hint {
+  margin-top: 1rem;
+  color: #6b7a8f;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  max-width: 26rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.kit-bg--webrtc-host .kit-bg__boot {
+  background: radial-gradient(circle at 50% 42%, #121a24, #070a0f 70%);
+}
+
+.kit-bg__hud {
+  position: absolute;
+  left: 0.75rem;
+  top: 0.75rem;
+  z-index: 2;
+  padding: 0.4rem 0.55rem;
+  border-radius: 0.35rem;
+  background: rgba(8, 12, 18, 0.55);
+  color: #9ba9bd;
+  font-size: 0.7rem;
+}
+
+.kit-bg__release {
+  position: absolute;
+  right: 0.75rem;
+  top: 0.75rem;
+  z-index: 4;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid rgba(118, 185, 0, 0.45);
+  border-radius: 0.35rem;
+  background: rgba(8, 12, 18, 0.72);
+  color: #c6f27a;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.kit-bg__release:hover {
+  background: rgba(118, 185, 0, 0.18);
+}
+
+.kit-bg__release:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}

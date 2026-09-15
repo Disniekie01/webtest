@@ -1,0 +1,223 @@
+{
+  "id": "marta_silva",
+  "catalog": {
+    "id": "marta_silva",
+    "name": "Marta Silva",
+    "comfort_level": "neutral",
+    "comfort_score": 0.4,
+    "story": "people/marta_silva/story.yaml",
+    "journey": "people/marta_silva/journey.yaml",
+    "status": "draft_playable",
+    "tags": [
+      "tourist"
+    ]
+  },
+  "person": {
+    "id": "marta_silva",
+    "name": "Marta Silva",
+    "age": 33,
+    "role": "tourist",
+    "home_area": "hotel_plaza",
+    "appearance": {
+      "blueprint": "walker.pedestrian.0023",
+      "gender": "female",
+      "age_group": "adult",
+      "blueprint_prefers": [
+        "walker.pedestrian.0023",
+        "walker.pedestrian.0024",
+        "walker.pedestrian.0032"
+      ]
+    },
+    "comfort": {
+      "level": "neutral",
+      "score": 0.4,
+      "notes": "Visiting for a conference. Has robotaxis at home but not sidewalk delivery bots. Curious until one cuts her photo walk; then she reads every machine as a surprise.",
+      "triggers": [
+        "unexpected_sidewalk_bot",
+        "no_signage_in_tourist_zone",
+        "bot_enters_photo_frame_close"
+      ],
+      "preferences": [
+        "tourist_map_bot_routes",
+        "visible_lane_markings",
+        "gentle_yield_to_pedestrians"
+      ]
+    },
+    "mobility": {
+      "modes": [
+        "walk",
+        "transit",
+        "robotaxi"
+      ],
+      "pace": "moderate",
+      "uses": "plaza_sightseeing"
+    },
+    "voice": {
+      "tone": "open",
+      "catchphrase": "I didn't know the sidewalks had traffic too."
+    }
+  },
+  "story": {
+    "id": "marta_photo_walk",
+    "person_id": "marta_silva",
+    "title": "Photo walk, second traffic",
+    "summary": "Marta explores the plaza with a camera and discovers sidewalk robots mid-frame — curiosity dips into cautious neutrality.",
+    "beats": [
+      {
+        "id": "setup",
+        "text": "Marta leaves the hotel with a half-charged phone and a list of \"local texture\" shots for a conference talk. She expects cars, bikes, crowds — not machines sharing the footpath.\n"
+      },
+      {
+        "id": "approach",
+        "text": "The plaza light is good. She frames a cafe awning, then a fountain. A soft whir enters the shot from the right; she lowers the phone, laughing once — \"oh, cute.\"\n"
+      },
+      {
+        "id": "encounter",
+        "text": "The bot does not stay cute. It cuts across her intended path toward a hotel service door, pausing where tour groups cluster. Marta steps back into a stranger, apologizes twice, and loses the shot.\n"
+      },
+      {
+        "id": "reaction",
+        "text": "She tries to guess the bot's next move from its lights and fails. Without local norms, every pause feels like a trap. She hugs the building line and lets three machines pass before crossing again.\n"
+      },
+      {
+        "id": "outcome",
+        "text": "Back at the hotel she adds a slide: \"Sidewalk AV is infrastructure, not novelty — sign it like traffic.\" Her comfort settles at cautious neutral: she will share the city, but she wants a map of the rules.\n"
+      }
+    ],
+    "themes": [
+      "tourist_literacy",
+      "sidewalk_as_road",
+      "signage"
+    ],
+    "sim": {
+      "map": "Small_City_LVL",
+      "focus": "tourist_plaza",
+      "comfort_arc": [
+        0.48,
+        0.45,
+        0.38,
+        0.35,
+        0.4
+      ],
+      "journey": "people/marta_silva/journey.yaml"
+    }
+  },
+  "journey": {
+    "id": "marta_photo_walk_journey",
+    "person_id": "marta_silva",
+    "story_id": "marta_photo_walk",
+    "title": "Photo walk — walkable journey",
+    "map": "Small_City_LVL",
+    "status": "draft_playable",
+    "person": {
+      "display_name": "Marta Silva",
+      "role": "walker",
+      "gender": "female",
+      "age_group": "adult",
+      "blueprint": "walker.pedestrian.0023",
+      "blueprint_prefers": [
+        "walker.pedestrian.0023",
+        "walker.pedestrian.0024",
+        "walker.pedestrian.0032"
+      ],
+      "walk_speed_mps": 1.25,
+      "comfort_start": 0.48
+    },
+    "follow": {
+      "enabled": true,
+      "cinematic": true,
+      "smooth": 0.11,
+      "lookahead_m": 3.5,
+      "distance_m": 5,
+      "height_m": 1.8,
+      "pitch_deg": -8,
+      "shoulder_m": 1.2
+    },
+    "stops": [
+      {
+        "id": "hotel_out",
+        "beat": "setup",
+        "label": "Leaves the hotel for plaza texture shots",
+        "comfort": 0.48,
+        "hold_s": 1.5,
+        "location": {
+          "x": -138,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180
+      },
+      {
+        "id": "cafe_frame",
+        "beat": "approach",
+        "label": "Frames a cafe — whir enters the shot",
+        "comfort": 0.45,
+        "hold_s": 2,
+        "location": {
+          "x": -158,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180,
+        "spawn_robot": {
+          "id": "tourist_bot",
+          "kind": "vehicle",
+          "location": {
+            "x": -162,
+            "y": 526,
+            "z": 0.6
+          },
+          "yaw": -90
+        }
+      },
+      {
+        "id": "path_cut",
+        "beat": "encounter",
+        "label": "Bot cuts toward the service door",
+        "comfort": 0.38,
+        "hold_s": 2,
+        "location": {
+          "x": -172,
+          "y": 523,
+          "z": 0.6
+        },
+        "yaw": -160,
+        "move_robot_to": {
+          "location": {
+            "x": -175,
+            "y": 524.5,
+            "z": 0.6
+          },
+          "yaw": -120
+        }
+      },
+      {
+        "id": "building_line",
+        "beat": "reaction",
+        "label": "Hugs the building line, lets bots pass",
+        "comfort": 0.35,
+        "hold_s": 2.5,
+        "location": {
+          "x": -180,
+          "y": 521.8,
+          "z": 0.6
+        },
+        "yaw": -180
+      },
+      {
+        "id": "map_the_rules",
+        "beat": "outcome",
+        "label": "Crosses again — already rewriting her slides",
+        "comfort": 0.4,
+        "hold_s": 2,
+        "location": {
+          "x": -195,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180
+      }
+    ],
+    "notes": "Tourist pace with photo holds. Same sidewalk-nav constraints.\n"
+  }
+}

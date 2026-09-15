@@ -1,0 +1,279 @@
+{
+  "id": "elena_voss",
+  "catalog": {
+    "id": "elena_voss",
+    "name": "Elena Voss",
+    "comfort_level": "avoidant",
+    "comfort_score": 0.1,
+    "story": "people/elena_voss/story.yaml",
+    "journey": "people/elena_voss/journey.yaml",
+    "status": "draft_playable",
+    "tags": [
+      "sidewalk",
+      "silent_bot"
+    ]
+  },
+  "person": {
+    "id": "elena_voss",
+    "name": "Elena Voss",
+    "age": 71,
+    "role": "resident",
+    "home_area": "quiet_courtyard",
+    "appearance": {
+      "blueprint": "walker.pedestrian.0023",
+      "gender": "female",
+      "age_group": "adult"
+    },
+    "comfort": {
+      "level": "avoidant",
+      "score": 0.1,
+      "notes": "Lost hearing in one ear years ago; silent sidewalk robots feel like they appear from nowhere. She plans routes to avoid delivery corridors.",
+      "triggers": [
+        "silent_approach",
+        "path_blocked_by_robot",
+        "night_sidewalk_bots"
+      ],
+      "preferences": [
+        "soft_warning_chime",
+        "human_escort_zones",
+        "robot_free_sidewalks"
+      ]
+    },
+    "mobility": {
+      "modes": [
+        "walk",
+        "transit"
+      ],
+      "pace": "slow",
+      "uses": "sidewalk",
+      "avoids": [
+        "delivery_alleys_at_night",
+        "contested_curbs"
+      ]
+    },
+    "voice": {
+      "tone": "careful",
+      "catchphrase": "I need to hear what's coming."
+    },
+    "relationships": [
+      {
+        "aisha_brandt": "studied_as_elder_case"
+      },
+      {
+        "jamal_okonkwo": "shares_alley_opposite_habits"
+      }
+    ]
+  },
+  "story": {
+    "id": "elena_evening_shortcut",
+    "person_id": "elena_voss",
+    "title": "The evening shortcut",
+    "summary": "Elena tries a familiar shortcut home and meets a silent delivery bot that forces her into the street — her comfort collapses to zero.",
+    "beats": [
+      {
+        "id": "setup",
+        "text": "At dusk Elena leaves the courtyard for the pharmacy, cane tapping a rhythm she trusts. The long way around is safer; tonight her knees argue for the alley shortcut behind the plaza.\n"
+      },
+      {
+        "id": "approach",
+        "text": "The alley is quieter than the avenue. She likes that — until quiet means she cannot hear machines either. She keeps to the wall side, counting doorway lights.\n"
+      },
+      {
+        "id": "encounter",
+        "text": "Midway through the alley, a delivery bot waits at a doorway, then rolls forward without a sound. Elena does not hear it until its chassis is almost at her hip.\n"
+      },
+      {
+        "id": "reaction",
+        "text": "She freezes, then steps sideways into the curb lane to give it room. A scooter horn startles her. Heart racing, she presses herself against a wall and waits for the robot to pass — it stops again, blocking the only clear path.\n"
+      },
+      {
+        "id": "outcome",
+        "text": "Elena abandons the shortcut, walks the long way with shaking hands, and tells herself she will not use that alley again until someone promises robots will announce themselves.\n"
+      }
+    ],
+    "themes": [
+      "silent_approach",
+      "accessibility",
+      "route_abandonment"
+    ],
+    "sim": {
+      "map": "Small_City_LVL",
+      "focus": "sidewalk_close_pass",
+      "comfort_arc": [
+        0.15,
+        0.12,
+        0.05,
+        0.02,
+        0.08
+      ],
+      "journey": "people/elena_voss/journey.yaml"
+    }
+  },
+  "journey": {
+    "id": "elena_evening_shortcut_journey",
+    "person_id": "elena_voss",
+    "story_id": "elena_evening_shortcut",
+    "title": "The evening shortcut — walkable journey",
+    "map": "Small_City_LVL",
+    "status": "draft_playable",
+    "person": {
+      "display_name": "Elena Voss",
+      "role": "walker",
+      "gender": "female",
+      "age_group": "adult",
+      "blueprint": "walker.pedestrian.0023",
+      "blueprint_prefers": [
+        "walker.pedestrian.0023",
+        "walker.pedestrian.0024",
+        "walker.pedestrian.0032",
+        "walker.pedestrian.0015"
+      ],
+      "walk_speed_mps": 1.35,
+      "comfort_start": 0.15
+    },
+    "follow": {
+      "enabled": true,
+      "cinematic": true,
+      "smooth": 0.11,
+      "lookahead_m": 3.8,
+      "distance_m": 5,
+      "height_m": 1.85,
+      "pitch_deg": -8,
+      "shoulder_m": 1.2
+    },
+    "stops": [
+      {
+        "id": "courtyard_leave",
+        "beat": "setup",
+        "label": "Leaves the courtyard (sidewalk)",
+        "comfort": 0.15,
+        "hold_s": 2,
+        "location": {
+          "x": -152.9,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180
+      },
+      {
+        "id": "alley_enter",
+        "beat": "setup",
+        "label": "Chooses the alley shortcut",
+        "comfort": 0.12,
+        "hold_s": 1,
+        "location": {
+          "x": -169,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180
+      },
+      {
+        "id": "alley_mid_approach",
+        "beat": "encounter",
+        "label": "Midway — bot waiting ahead on the curb",
+        "comfort": 0.08,
+        "hold_s": 1.5,
+        "location": {
+          "x": -184.9,
+          "y": 522.8,
+          "z": 0.6
+        },
+        "yaw": -180,
+        "spawn_robot": {
+          "id": "silent_delivery_bot",
+          "kind": "vehicle",
+          "location": {
+            "x": -197,
+            "y": 526.5,
+            "z": 0.6
+          },
+          "yaw": -143,
+          "silent": true
+        }
+      },
+      {
+        "id": "close_pass",
+        "beat": "encounter",
+        "label": "Bot rolls — she never heard it",
+        "comfort": 0.05,
+        "hold_s": 2,
+        "location": {
+          "x": -192.8,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -179,
+        "move_robot_to": {
+          "location": {
+            "x": -193.5,
+            "y": 525.5,
+            "z": 0.6
+          },
+          "yaw": -100
+        }
+      },
+      {
+        "id": "step_into_curb",
+        "beat": "reaction",
+        "label": "Steps toward the curb lane",
+        "comfort": 0.02,
+        "hold_s": 2.5,
+        "location": {
+          "x": -197.3,
+          "y": 524.5,
+          "z": 0.6
+        },
+        "yaw": -140
+      },
+      {
+        "id": "pressed_to_wall",
+        "beat": "reaction",
+        "label": "Presses aside — path blocked",
+        "comfort": 0.02,
+        "hold_s": 3,
+        "location": {
+          "x": -198,
+          "y": 521.2,
+          "z": 0.6
+        },
+        "yaw": -74,
+        "move_robot_to": {
+          "location": {
+            "x": -197.5,
+            "y": 523,
+            "z": 0.6
+          },
+          "yaw": -74
+        }
+      },
+      {
+        "id": "abandon_shortcut",
+        "beat": "outcome",
+        "label": "Abandons shortcut — back on sidewalk",
+        "comfort": 0.08,
+        "hold_s": 1,
+        "location": {
+          "x": -192.8,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": 0
+      },
+      {
+        "id": "long_way",
+        "beat": "outcome",
+        "label": "Walking the long way, shaken",
+        "comfort": 0.08,
+        "hold_s": 2,
+        "location": {
+          "x": -161,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": 0
+      }
+    ],
+    "notes": "Adult female walker 0023. Paths use sidewalk-only nav samples + AI pathfinding so she stays on sidewalks and uses crosswalks to cross roads (Recast areas: sidewalk / crosswalk; road polygons excluded by crowd filter).\n"
+  }
+}

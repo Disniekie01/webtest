@@ -1,0 +1,134 @@
+{
+  "version": 2,
+  "map_default": "Small_City_LVL",
+  "arcs": [
+    {
+      "id": "assistive_robotics",
+      "path": "arcs/assistive_robotics.md",
+      "people": [
+        "noor_rahman",
+        "mei_lin",
+        "rosa_delgado"
+      ]
+    }
+  ],
+  "people": [
+    {
+      "id": "elena_voss",
+      "name": "Elena Voss",
+      "comfort_level": "avoidant",
+      "comfort_score": 0.1,
+      "story": "people/elena_voss/story.yaml",
+      "journey": "people/elena_voss/journey.yaml",
+      "status": "draft_playable",
+      "tags": [
+        "sidewalk",
+        "silent_bot"
+      ]
+    },
+    {
+      "id": "rosa_delgado",
+      "name": "Rosa Delgado",
+      "comfort_level": "wary",
+      "comfort_score": 0.25,
+      "story": "people/rosa_delgado/story.yaml",
+      "journey": "people/rosa_delgado/journey.yaml",
+      "status": "draft_playable",
+      "tags": [
+        "caregiver",
+        "accessibility",
+        "assistive_robotics"
+      ]
+    },
+    {
+      "id": "jamal_okonkwo",
+      "name": "Jamal Okonkwo",
+      "comfort_level": "wary",
+      "comfort_score": 0.3,
+      "story": "people/jamal_okonkwo/story.yaml",
+      "journey": "people/jamal_okonkwo/journey.yaml",
+      "status": "draft_playable",
+      "tags": [
+        "curb",
+        "gig_work"
+      ]
+    },
+    {
+      "id": "marta_silva",
+      "name": "Marta Silva",
+      "comfort_level": "neutral",
+      "comfort_score": 0.4,
+      "story": "people/marta_silva/story.yaml",
+      "journey": "people/marta_silva/journey.yaml",
+      "status": "draft_playable",
+      "tags": [
+        "tourist"
+      ]
+    },
+    {
+      "id": "sofia_reyes",
+      "name": "Sofia Reyes",
+      "comfort_level": "neutral",
+      "comfort_score": 0.5,
+      "story": "people/sofia_reyes/story.yaml",
+      "journey": "people/sofia_reyes/journey.yaml",
+      "status": "draft_playable",
+      "tags": [
+        "parent",
+        "plaza"
+      ]
+    },
+    {
+      "id": "kenji_mori",
+      "name": "Kenji Mori",
+      "comfort_level": "comfortable",
+      "comfort_score": 0.7,
+      "story": "people/kenji_mori/story.yaml",
+      "journey": "people/kenji_mori/journey.yaml",
+      "status": "draft_playable",
+      "tags": [
+        "failure_modes"
+      ]
+    },
+    {
+      "id": "noor_rahman",
+      "name": "Noor Rahman",
+      "comfort_level": "comfortable",
+      "comfort_score": 0.72,
+      "story": "people/noor_rahman/story.yaml",
+      "journey": "people/noor_rahman/journey.yaml",
+      "status": "draft_playable",
+      "tags": [
+        "assistive_robotics",
+        "wheelchair",
+        "robotaxi"
+      ]
+    },
+    {
+      "id": "mei_lin",
+      "name": "Mei Lin",
+      "comfort_level": "comfortable",
+      "comfort_score": 0.78,
+      "story": "people/mei_lin/story.yaml",
+      "journey": "people/mei_lin/journey.yaml",
+      "status": "draft_playable",
+      "tags": [
+        "assistive_robotics",
+        "companion_robot"
+      ]
+    },
+    {
+      "id": "aisha_brandt",
+      "name": "Aisha Brandt",
+      "comfort_level": "advocate",
+      "comfort_score": 0.9,
+      "story": "people/aisha_brandt/story.yaml",
+      "journey": "people/aisha_brandt/journey.yaml",
+      "status": "draft_playable",
+      "tags": [
+        "observation",
+        "research"
+      ]
+    }
+  ]
+}

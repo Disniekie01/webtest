@@ -1,0 +1,60 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# Large vendor / kit archives (keep out of git)
+*.zip
+*.usdz
+*.7z
+*.rar
+Downtown City MegaKit*/
+The City Generator*/
+FBX*/
+public/models/downtown/
+public/models/kaykit/
+tools/blender-4.2.9-linux-x64/
+tools/blender-4.2.9-linux-x64.tar.xz
+tools/blender-*-linux-x64/
+tools/blender-*-linux-x64.tar.xz
+tools/procgen_maps_addon.zip
+public/models/procgen/*.blend
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*.json
+
+# Blender / addon vendor trees
+tools/bene-proggen-maps/
+tools/**/blender_assets*
+*.blend
+*.blend1
+*.tar.xz
+*.wasm
+!public/draco/*.wasm
+__pycache__/
+*.pyc
+tools/city-generator-vfxmed/

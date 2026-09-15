@@ -1,0 +1,33 @@
+.app-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0c121a;
+}
+
+.app-viewport {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.app-chrome {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Only interactive chrome receives clicks — Kit video + stream HUD stay reachable underneath */
+.app-chrome button,
+.app-chrome a,
+.app-chrome input,
+.app-chrome textarea,
+.app-chrome select,
+.app-chrome .lab-top,
+.app-chrome .lab-left,
+.app-chrome .lab-right,
+.app-chrome .lab-bottom {
+  pointer-events: auto;
+}

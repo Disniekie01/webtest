@@ -1,0 +1,237 @@
+{
+  "id": "sofia_reyes",
+  "catalog": {
+    "id": "sofia_reyes",
+    "name": "Sofia Reyes",
+    "comfort_level": "neutral",
+    "comfort_score": 0.5,
+    "story": "people/sofia_reyes/story.yaml",
+    "journey": "people/sofia_reyes/journey.yaml",
+    "status": "draft_playable",
+    "tags": [
+      "parent",
+      "plaza"
+    ]
+  },
+  "person": {
+    "id": "sofia_reyes",
+    "name": "Sofia Reyes",
+    "age": 38,
+    "role": "parent",
+    "home_area": "school_corridor",
+    "appearance": {
+      "blueprint": "walker.pedestrian.0024",
+      "gender": "female",
+      "age_group": "adult"
+    },
+    "comfort": {
+      "level": "neutral",
+      "score": 0.5,
+      "notes": "Neither excited nor afraid. Notices robots mainly when they complicate walking with a stroller or a child who wants to touch everything. Her comfort is stable until the clock and the crowd stack up.",
+      "triggers": [
+        "child_reaches_for_robot",
+        "stroller_path_blocked",
+        "dense_plaza_crowd",
+        "robot_lingers_at_crosswalk"
+      ],
+      "preferences": [
+        "clear_passing_side",
+        "no_linger_at_crosswalks",
+        "soft_boundaries_kids_zones",
+        "school_peak_human_lane"
+      ]
+    },
+    "mobility": {
+      "modes": [
+        "walk",
+        "transit"
+      ],
+      "pace": "moderate",
+      "uses": "plaza_and_sidewalk",
+      "companions": [
+        "child_luca",
+        "stroller"
+      ]
+    },
+    "voice": {
+      "tone": "practical",
+      "catchphrase": "We just need a lane that stays human-sized."
+    }
+  },
+  "story": {
+    "id": "sofia_school_run",
+    "person_id": "sofia_reyes",
+    "title": "School run, three agents",
+    "summary": "Sofia walks her child to school through a plaza where a delivery bot, pedestrians, and a curious five-year-old all share one narrow strip.",
+    "beats": [
+      {
+        "id": "setup",
+        "text": "Sofia buckles the stroller strap and takes Luca's hand. The plaza path to school is shorter than the avenue; today it is also busier. She has eight minutes and a coffee she will not get to drink.\n"
+      },
+      {
+        "id": "approach",
+        "text": "They join the morning flow: parents, bags, a courier cutting through. Luca points at every wheel that is not a car. Sofia steers for the wider edge of the plaza strip.\n"
+      },
+      {
+        "id": "encounter",
+        "text": "A delivery bot pauses at a bench cluster. Luca pulls toward it — \"it has eyes!\" — while a surge of pedestrians squeezes the remaining sidewalk. Sofia's stroller wheel clips the bot's bumper with a soft plastic knock.\n"
+      },
+      {
+        "id": "reaction",
+        "text": "She apologizes out of habit, steers Luca back, and waits for a gap. The bot does nothing hostile; it also does nothing helpful. Sofia feels neither fear nor fondness — only the math of minutes, width, and a child who treats the machine like a puppy.\n"
+      },
+      {
+        "id": "outcome",
+        "text": "They arrive at school on time. Sofia files the moment as \"fine, if crowded.\" She would not ban the robots; she would like them to leave a clear human lane during school peaks, and to keep moving when kids stop to stare.\n"
+      }
+    ],
+    "themes": [
+      "mixed_plaza_traffic",
+      "caregiving_load",
+      "design_for_children"
+    ],
+    "sim": {
+      "map": "Small_City_LVL",
+      "focus": "plaza_mixed_traffic",
+      "comfort_arc": [
+        0.52,
+        0.5,
+        0.45,
+        0.42,
+        0.5
+      ],
+      "journey": "people/sofia_reyes/journey.yaml"
+    }
+  },
+  "journey": {
+    "id": "sofia_school_run_journey",
+    "person_id": "sofia_reyes",
+    "story_id": "sofia_school_run",
+    "title": "School run — walkable journey",
+    "map": "Small_City_LVL",
+    "status": "draft_playable",
+    "person": {
+      "display_name": "Sofia Reyes",
+      "role": "walker",
+      "gender": "female",
+      "age_group": "adult",
+      "blueprint": "walker.pedestrian.0024",
+      "blueprint_prefers": [
+        "walker.pedestrian.0024",
+        "walker.pedestrian.0023",
+        "walker.pedestrian.0032"
+      ],
+      "walk_speed_mps": 1.15,
+      "comfort_start": 0.52
+    },
+    "follow": {
+      "enabled": true,
+      "cinematic": true,
+      "smooth": 0.1,
+      "lookahead_m": 3.2,
+      "distance_m": 4.8,
+      "height_m": 1.75,
+      "pitch_deg": -7,
+      "shoulder_m": 1.1
+    },
+    "stops": [
+      {
+        "id": "buckle_up",
+        "beat": "setup",
+        "label": "Leaves home block with Luca",
+        "comfort": 0.52,
+        "hold_s": 2,
+        "location": {
+          "x": -130,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180
+      },
+      {
+        "id": "plaza_join",
+        "beat": "approach",
+        "label": "Joins the morning plaza flow",
+        "comfort": 0.5,
+        "hold_s": 1.5,
+        "location": {
+          "x": -150,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180
+      },
+      {
+        "id": "bot_at_benches",
+        "beat": "encounter",
+        "label": "Bot paused at benches — Luca pulls",
+        "comfort": 0.45,
+        "hold_s": 2.5,
+        "location": {
+          "x": -170,
+          "y": 522.8,
+          "z": 0.6
+        },
+        "yaw": -180,
+        "spawn_robot": {
+          "id": "plaza_bot",
+          "kind": "vehicle",
+          "location": {
+            "x": -176,
+            "y": 526,
+            "z": 0.6
+          },
+          "yaw": -90
+        }
+      },
+      {
+        "id": "stroller_clip",
+        "beat": "reaction",
+        "label": "Stroller clips the bumper",
+        "comfort": 0.42,
+        "hold_s": 3,
+        "location": {
+          "x": -174.5,
+          "y": 523.2,
+          "z": 0.6
+        },
+        "yaw": -150,
+        "move_robot_to": {
+          "location": {
+            "x": -175,
+            "y": 525,
+            "z": 0.6
+          },
+          "yaw": -80
+        }
+      },
+      {
+        "id": "wait_for_gap",
+        "beat": "reaction",
+        "label": "Waits for a human-sized gap",
+        "comfort": 0.42,
+        "hold_s": 2.5,
+        "location": {
+          "x": -178,
+          "y": 522.5,
+          "z": 0.6
+        },
+        "yaw": -180
+      },
+      {
+        "id": "school_gate",
+        "beat": "outcome",
+        "label": "Arrives on time — \"fine, if crowded\"",
+        "comfort": 0.5,
+        "hold_s": 2,
+        "location": {
+          "x": -195,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180
+      }
+    ],
+    "notes": "Adult female walker, slower pace for stroller narrative. Child/stroller are story-only (no second actor yet).\n"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "webtest",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "sync-stories": "node scripts/sync-stories.mjs"
+  },
+  "dependencies": {
+    "@nvidia/omniverse-webrtc-streaming-library": "^5.18.2",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.7.0",
+    "@react-three/postprocessing": "^3.1.1",
+    "js-yaml": "^4.1.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "three": "^0.182.0",
+    "zustand": "^5.0.11"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@types/three": "^0.182.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "oxlint": "^1.81.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0"
+  }
+}

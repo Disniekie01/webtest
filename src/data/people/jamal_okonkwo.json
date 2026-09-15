@@ -1,0 +1,235 @@
+{
+  "id": "jamal_okonkwo",
+  "catalog": {
+    "id": "jamal_okonkwo",
+    "name": "Jamal Okonkwo",
+    "comfort_level": "wary",
+    "comfort_score": 0.3,
+    "story": "people/jamal_okonkwo/story.yaml",
+    "journey": "people/jamal_okonkwo/journey.yaml",
+    "status": "draft_playable",
+    "tags": [
+      "curb",
+      "gig_work"
+    ]
+  },
+  "person": {
+    "id": "jamal_okonkwo",
+    "name": "Jamal Okonkwo",
+    "age": 29,
+    "role": "bike_courier",
+    "home_area": "midtown_depot",
+    "appearance": {
+      "blueprint": "walker.pedestrian.0028",
+      "gender": "male",
+      "age_group": "adult",
+      "notes": "Played on foot in CARLA for now (bike locomotion later). Adult male mesh."
+    },
+    "comfort": {
+      "level": "wary",
+      "score": 0.3,
+      "notes": "Shares curb space with robots for work. Trusts them on predictable routes; distrusts sudden stops and opaque priority rules. Time pressure makes him more brittle than his score suggests.",
+      "triggers": [
+        "sudden_stop",
+        "contested_curb",
+        "robot_cuts_bike_lane",
+        "dual_robot_corner"
+      ],
+      "preferences": [
+        "predictable_yield",
+        "visible_status_lights",
+        "dedicated_bot_lane",
+        "human_pickup_windows"
+      ]
+    },
+    "mobility": {
+      "modes": [
+        "bike",
+        "walk"
+      ],
+      "pace": "hurried",
+      "uses": "curb_and_bike_lane"
+    },
+    "voice": {
+      "tone": "clipped",
+      "catchphrase": "Just tell me who has the curb."
+    }
+  },
+  "story": {
+    "id": "jamal_curb_contest",
+    "person_id": "jamal_okonkwo",
+    "title": "Contest at the curb",
+    "summary": "Jamal races a lunch drop when a sidewalk bot and a robotaxi both claim the same curb — wariness turns into a near-miss calculation.",
+    "beats": [
+      {
+        "id": "setup",
+        "text": "Jamal clips into the pedals with two bags left and a timer that does not care about sidewalk etiquette. The restaurant curb is his usual grab-and-go; he has already lost three minutes to a road closure.\n"
+      },
+      {
+        "id": "approach",
+        "text": "He cuts the alley shortcut the same way Elena avoids it — faster, not safer. Ahead he sees amber lights: a sidewalk bot holding the strip and a robotaxi rolling in for a passenger pickup.\n"
+      },
+      {
+        "id": "encounter",
+        "text": "The loading strip is full. The bot blinks a status he cannot decode; the taxi door starts to open. Jamal has nowhere legal to stop without blocking either machine or the bike lane behind him.\n"
+      },
+      {
+        "id": "reaction",
+        "text": "He brakes hard, chooses a half-meter gap, and commits. The bot lurches forward a foot. Jamal swerves, plants a foot on the pavement, and nearly clips a passenger's suitcase. His wariness spikes into anger — not at the machines themselves, but at the missing rulebook.\n"
+      },
+      {
+        "id": "outcome",
+        "text": "He completes the pickup late and files a voice note to dispatch: skip dual-robot corners at lunch. Comfort settles back toward wary, not avoidant — he still needs the city to work with robots; he just refuses to be the collision-avoidance system for both of them.\n"
+      }
+    ],
+    "themes": [
+      "curb_rights",
+      "gig_worker_pressure",
+      "opaque_robot_signals"
+    ],
+    "sim": {
+      "map": "Small_City_LVL",
+      "focus": "curb_conflict",
+      "comfort_arc": [
+        0.35,
+        0.3,
+        0.25,
+        0.18,
+        0.28
+      ],
+      "journey": "people/jamal_okonkwo/journey.yaml"
+    }
+  },
+  "journey": {
+    "id": "jamal_curb_contest_journey",
+    "person_id": "jamal_okonkwo",
+    "story_id": "jamal_curb_contest",
+    "title": "Contest at the curb — walkable journey",
+    "map": "Small_City_LVL",
+    "status": "draft_playable",
+    "person": {
+      "display_name": "Jamal Okonkwo",
+      "role": "walker",
+      "gender": "male",
+      "age_group": "adult",
+      "blueprint": "walker.pedestrian.0028",
+      "blueprint_prefers": [
+        "walker.pedestrian.0028",
+        "walker.pedestrian.0001",
+        "walker.pedestrian.0011"
+      ],
+      "walk_speed_mps": 1.85,
+      "comfort_start": 0.35
+    },
+    "follow": {
+      "enabled": true,
+      "cinematic": true,
+      "smooth": 0.14,
+      "lookahead_m": 4.5,
+      "distance_m": 5.5,
+      "height_m": 1.9,
+      "pitch_deg": -10,
+      "shoulder_m": 1.4
+    },
+    "stops": [
+      {
+        "id": "depot_push",
+        "beat": "setup",
+        "label": "Leaves the mid-block with the clock running",
+        "comfort": 0.35,
+        "hold_s": 1,
+        "location": {
+          "x": -140,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180
+      },
+      {
+        "id": "alley_cut",
+        "beat": "approach",
+        "label": "Cuts the alley for speed",
+        "comfort": 0.3,
+        "hold_s": 0.5,
+        "location": {
+          "x": -165,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180
+      },
+      {
+        "id": "dual_lights",
+        "beat": "encounter",
+        "label": "Sees bot + taxi claiming the curb",
+        "comfort": 0.25,
+        "hold_s": 1.5,
+        "location": {
+          "x": -186,
+          "y": 522.8,
+          "z": 0.6
+        },
+        "yaw": -180,
+        "spawn_robot": {
+          "id": "curb_bot",
+          "kind": "vehicle",
+          "location": {
+            "x": -198,
+            "y": 526.2,
+            "z": 0.6
+          },
+          "yaw": -90,
+          "silent": false
+        }
+      },
+      {
+        "id": "gap_commit",
+        "beat": "reaction",
+        "label": "Commits to a half-meter gap",
+        "comfort": 0.18,
+        "hold_s": 2,
+        "location": {
+          "x": -194.5,
+          "y": 523.5,
+          "z": 0.6
+        },
+        "yaw": -160,
+        "move_robot_to": {
+          "location": {
+            "x": -195.5,
+            "y": 524.8,
+            "z": 0.6
+          },
+          "yaw": -100
+        }
+      },
+      {
+        "id": "foot_down",
+        "beat": "reaction",
+        "label": "Plants a foot — near miss",
+        "comfort": 0.18,
+        "hold_s": 2,
+        "location": {
+          "x": -197,
+          "y": 522,
+          "z": 0.6
+        },
+        "yaw": -90
+      },
+      {
+        "id": "late_pickup",
+        "beat": "outcome",
+        "label": "Completes pickup late, notes dispatch",
+        "comfort": 0.28,
+        "hold_s": 2,
+        "location": {
+          "x": -205,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180
+      }
+    ],
+    "notes": "Hurried adult male walker. Same sidewalk-nav rules as Elena. Robot stand-in = contested curb bot; robotaxi is narrative-only for now.\n"
+  }
+}

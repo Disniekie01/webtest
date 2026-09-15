@@ -1,0 +1,295 @@
+{
+  "id": "mei_lin",
+  "catalog": {
+    "id": "mei_lin",
+    "name": "Mei Lin",
+    "comfort_level": "comfortable",
+    "comfort_score": 0.78,
+    "story": "people/mei_lin/story.yaml",
+    "journey": "people/mei_lin/journey.yaml",
+    "status": "draft_playable",
+    "tags": [
+      "assistive_robotics",
+      "companion_robot"
+    ]
+  },
+  "person": {
+    "id": "mei_lin",
+    "name": "Mei Lin",
+    "age": 68,
+    "role": "resident",
+    "home_area": "market_row",
+    "appearance": {
+      "blueprint": "walker.pedestrian.0015",
+      "gender": "female",
+      "age_group": "adult",
+      "blueprint_prefers": [
+        "walker.pedestrian.0015",
+        "walker.pedestrian.0023",
+        "walker.pedestrian.0024"
+      ]
+    },
+    "comfort": {
+      "level": "comfortable",
+      "score": 0.78,
+      "notes": "High comfort with her paired city assist-cart robot (carries bags, announces turns, yields at ramps). Lower patience for delivery bots that do not know they share space with an assistive pair.",
+      "triggers": [
+        "delivery_bot_cuts_assist_pair",
+        "assist_bot_battery_fail_in_crowd",
+        "humans_shove_assist_cart"
+      ],
+      "preferences": [
+        "paired_assist_robot",
+        "audible_turn_chime",
+        "ramp_yield_to_assist_pair",
+        "clinic_and_market_assist_routes"
+      ]
+    },
+    "mobility": {
+      "modes": [
+        "walk",
+        "assist_robot",
+        "transit"
+      ],
+      "pace": "slow",
+      "uses": "sidewalk_with_assist_companion",
+      "assistive": {
+        "robot_id": "city_assist_cart",
+        "role": "carry_and_guide",
+        "paired": true
+      }
+    },
+    "voice": {
+      "tone": "warm",
+      "catchphrase": "Mine knows to wait. The others should learn."
+    },
+    "tags": [
+      "assistive_robotics",
+      "companion_robot",
+      "elder",
+      "carry_assist"
+    ]
+  },
+  "story": {
+    "id": "mei_assist_market",
+    "person_id": "mei_lin",
+    "title": "The cart that carries more than groceries",
+    "summary": "Mei walks to market with her paired assist-cart robot; when a delivery bot cuts between them, the assist robot holds, yields the ramp, and reunites — showing robots that assist people, not only deliver packages.",
+    "beats": [
+      {
+        "id": "setup",
+        "text": "Mei taps her wristband. The city assist-cart rolls from the lobby locker, soft chime, empty basket. Today: fruit, rice, and the heavy water pack she will not lift twice.\n"
+      },
+      {
+        "id": "approach",
+        "text": "On the sidewalk the cart stays a half-step ahead and to her left — the side she hears better. It announces \"turning\" before the corner with a tone Elena would have needed in the alley.\n"
+      },
+      {
+        "id": "encounter",
+        "text": "A delivery bot cuts between them for a doorway drop. Mei freezes. The assist-cart stops immediately, widens its gap, and holds the ramp clear until she catches up — then chirps once: still paired.\n"
+      },
+      {
+        "id": "reaction",
+        "text": "She pats the cart handle out of habit. Comfort stays high with her machine; the delivery bot earns a look. Assistance, she thinks, is not speed — it is not abandoning the person when another robot wants the curb.\n"
+      },
+      {
+        "id": "outcome",
+        "text": "At the market the cart follows her aisle path and waits at the checkout. Mei tells the clerk the city finally built a robot for her body, not just for packages. She waves Noor's taxi story on her phone: different machines, same rule — adapt to the human.\n"
+      }
+    ],
+    "themes": [
+      "assistive_robotics",
+      "companion_robot",
+      "elder_support",
+      "paired_agency"
+    ],
+    "sim": {
+      "map": "Small_City_LVL",
+      "focus": "assistive_companion",
+      "comfort_arc": [
+        0.78,
+        0.78,
+        0.74,
+        0.76,
+        0.8
+      ],
+      "journey": "people/mei_lin/journey.yaml",
+      "robots": [
+        {
+          "id": "city_assist_cart",
+          "kind": "assistive",
+          "behavior": "paired_carry_guide_yield"
+        },
+        {
+          "id": "door_delivery_bot",
+          "kind": "delivery",
+          "behavior": "cuts_pair_then_leaves"
+        }
+      ]
+    }
+  },
+  "journey": {
+    "id": "mei_assist_market_journey",
+    "person_id": "mei_lin",
+    "story_id": "mei_assist_market",
+    "title": "The cart that carries more than groceries — walkable journey",
+    "map": "Small_City_LVL",
+    "status": "draft_playable",
+    "arc": "assistive_robotics",
+    "person": {
+      "display_name": "Mei Lin",
+      "role": "walker",
+      "gender": "female",
+      "age_group": "adult",
+      "blueprint": "walker.pedestrian.0015",
+      "blueprint_prefers": [
+        "walker.pedestrian.0015",
+        "walker.pedestrian.0023",
+        "walker.pedestrian.0024"
+      ],
+      "walk_speed_mps": 1.05,
+      "comfort_start": 0.78
+    },
+    "follow": {
+      "enabled": true,
+      "cinematic": true,
+      "smooth": 0.1,
+      "lookahead_m": 3.2,
+      "distance_m": 4.8,
+      "height_m": 1.75,
+      "pitch_deg": -7,
+      "shoulder_m": 1.2
+    },
+    "stops": [
+      {
+        "id": "lobby_pair",
+        "beat": "setup",
+        "label": "Assist-cart pairs from lobby locker",
+        "comfort": 0.78,
+        "hold_s": 2,
+        "location": {
+          "x": -138,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180,
+        "spawn_robot": {
+          "id": "city_assist_cart",
+          "kind": "assistive",
+          "location": {
+            "x": -141,
+            "y": 525.5,
+            "z": 0.6
+          },
+          "yaw": -180
+        }
+      },
+      {
+        "id": "half_step_ahead",
+        "beat": "approach",
+        "label": "Cart stays half-step ahead — announces turn",
+        "comfort": 0.78,
+        "hold_s": 1.5,
+        "location": {
+          "x": -155,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180,
+        "move_robot_to": {
+          "location": {
+            "x": -158,
+            "y": 525.2,
+            "z": 0.6
+          },
+          "yaw": -180
+        }
+      },
+      {
+        "id": "delivery_cuts",
+        "beat": "encounter",
+        "label": "Delivery bot cuts the pair",
+        "comfort": 0.74,
+        "hold_s": 2,
+        "location": {
+          "x": -170,
+          "y": 522.8,
+          "z": 0.6
+        },
+        "yaw": -180,
+        "move_robot_to": {
+          "location": {
+            "x": -168,
+            "y": 524,
+            "z": 0.6
+          },
+          "yaw": -90
+        }
+      },
+      {
+        "id": "cart_holds",
+        "beat": "reaction",
+        "label": "Assist-cart holds and clears the ramp",
+        "comfort": 0.76,
+        "hold_s": 2.5,
+        "location": {
+          "x": -174,
+          "y": 522.5,
+          "z": 0.6
+        },
+        "yaw": -180,
+        "move_robot_to": {
+          "location": {
+            "x": -176,
+            "y": 525.5,
+            "z": 0.6
+          },
+          "yaw": -180
+        }
+      },
+      {
+        "id": "reunited",
+        "beat": "reaction",
+        "label": "Pair reunites — still paired chime",
+        "comfort": 0.78,
+        "hold_s": 1.5,
+        "location": {
+          "x": -180,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180,
+        "move_robot_to": {
+          "location": {
+            "x": -182,
+            "y": 525,
+            "z": 0.6
+          },
+          "yaw": -180
+        }
+      },
+      {
+        "id": "market_door",
+        "beat": "outcome",
+        "label": "Market door — cart waits at checkout path",
+        "comfort": 0.8,
+        "hold_s": 2,
+        "location": {
+          "x": -195,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180,
+        "move_robot_to": {
+          "location": {
+            "x": -196.5,
+            "y": 525,
+            "z": 0.6
+          },
+          "yaw": -180
+        }
+      }
+    ],
+    "notes": "Assist-cart = small vehicle stand-in that leads/yields via move_robot_to. Delivery cut is narrative (single robot actor = the assist cart).\n"
+  }
+}

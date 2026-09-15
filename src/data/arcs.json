@@ -1,0 +1,12 @@
+[
+  {
+    "id": "assistive_robotics",
+    "path": "arcs/assistive_robotics.md",
+    "people": [
+      "noor_rahman",
+      "mei_lin",
+      "rosa_delgado"
+    ],
+    "markdown": "# Assistive robotics arc\r\n#\r\n# People whose stories center on robots that adapt to human bodies and care\r\n# needs — not only package delivery.\r\n\r\narc: assistive_robotics\r\nmap: Small_City_LVL\r\n\r\nstories:\r\n  - person: noor_rahman\r\n    story: noor_accessible_reroute\r\n    focus: wheelchair + robotaxi that reroutes to an accessible bay\r\n    comfort_score: 0.72\r\n\r\n  - person: mei_lin\r\n    story: mei_assist_market\r\n    focus: paired assist-cart companion (carry + guide + yield)\r\n    comfort_score: 0.78\r\n\r\n  - person: rosa_delgado\r\n    story: rosa_clinic_ramp\r\n    focus: caregiver + elder; ramp clearance (assistive design failure)\r\n    comfort_score: 0.25\r\n    note: Contrast case — when robots do not assist.\r\n\r\ndesign_rules:\r\n  - Accessibility is route data, not an apology after a failed stop.\r\n  - Assistive robots stay paired; delivery robots must not split the pair.\r\n  - Ramps and curb cuts are shared critical infrastructure.\r\n  - Silent machines fail people who cannot hear or move aside quickly.\r\n\r\nplay:\r\n  - people/noor_rahman/journey.yaml\r\n  - people/mei_lin/journey.yaml\r\n  - people/rosa_delgado/journey.yaml\r\n"
+  }
+]

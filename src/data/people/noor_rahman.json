@@ -1,0 +1,283 @@
+{
+  "id": "noor_rahman",
+  "catalog": {
+    "id": "noor_rahman",
+    "name": "Noor Rahman",
+    "comfort_level": "comfortable",
+    "comfort_score": 0.72,
+    "story": "people/noor_rahman/story.yaml",
+    "journey": "people/noor_rahman/journey.yaml",
+    "status": "draft_playable",
+    "tags": [
+      "assistive_robotics",
+      "wheelchair",
+      "robotaxi"
+    ]
+  },
+  "person": {
+    "id": "noor_rahman",
+    "name": "Noor Rahman",
+    "age": 36,
+    "role": "wheelchair_user",
+    "home_area": "accessible_housing_east",
+    "appearance": {
+      "blueprint": "walker.pedestrian.0023",
+      "gender": "female",
+      "age_group": "adult",
+      "blueprint_prefers": [
+        "walker.pedestrian.0023",
+        "walker.pedestrian.0024",
+        "walker.pedestrian.0032"
+      ],
+      "mobility_visual": "wheelchair_standin"
+    },
+    "comfort": {
+      "level": "comfortable",
+      "score": 0.72,
+      "notes": "Fine with robots that treat accessibility as a first-class input — curb cuts, ramp clearance, wheelchair-aware pickup. Frustrated by AVs that \"see\" a person but not a wheelchair, or that dump her at a blocked curb and call it done.",
+      "triggers": [
+        "inaccessible_dropoff",
+        "blocked_curb_cut",
+        "robot_blocks_ramp",
+        "forced_street_roll"
+      ],
+      "preferences": [
+        "wheelchair_profile_in_av",
+        "accessible_bay_reroute",
+        "ramp_priority_clearance",
+        "early_eta_for_assist_bots"
+      ]
+    },
+    "mobility": {
+      "modes": [
+        "wheelchair",
+        "robotaxi",
+        "transit"
+      ],
+      "pace": "moderate",
+      "aid": "wheelchair",
+      "uses": "curb_cuts_and_ramps",
+      "avoids": [
+        "lip_curbs",
+        "stair_only_entrances"
+      ]
+    },
+    "voice": {
+      "tone": "clear",
+      "catchphrase": "If your map ignores my wheels, your taxi is not for me."
+    },
+    "tags": [
+      "assistive_robotics",
+      "accessibility",
+      "wheelchair",
+      "robotaxi"
+    ]
+  },
+  "story": {
+    "id": "noor_accessible_reroute",
+    "person_id": "noor_rahman",
+    "title": "The taxi that changed its mind",
+    "summary": "Noor hails a driverless taxi in her wheelchair; the AV reads her accessibility profile, skips a blocked curb, and reroutes to an accessible bay — comfort rises because the machine adapted.",
+    "beats": [
+      {
+        "id": "setup",
+        "text": "Noor locks her chair brakes at the usual pickup pin and opens the city robotaxi app. Her profile already says wheelchair + rear ramp bay preferred. Construction cones sit where last week's curb cut used to be.\n"
+      },
+      {
+        "id": "approach",
+        "text": "The AV appears on the map as a calm blue chevron. It slows as if to take the blocked pin — then its indicator blinks amber: \"Inaccessible stop — rerouting to Bay B (ramp).\"\n"
+      },
+      {
+        "id": "encounter",
+        "text": "Instead of forcing a street-side roll between cones, the taxi continues past, turns at the light, and queues at the marked accessible bay with a flush curb and a human-width clear zone. A delivery bot starts toward the ramp; the bay's priority light holds it.\n"
+      },
+      {
+        "id": "reaction",
+        "text": "Noor rolls the short path to Bay B. She does not have to argue with a driver who is not there. The door / ramp sequence waits for her to clear the threshold sensors. Her shoulders drop — this is what \"understands\" was supposed to mean.\n"
+      },
+      {
+        "id": "outcome",
+        "text": "She boards on time. Comfort ticks up: not because robots are magic, but because this one treated her wheelchair as data that changes the route, not as an afterthought. She screenshots the reroute banner for Aisha's research thread: design the detour before the apology.\n"
+      }
+    ],
+    "themes": [
+      "assistive_robotics",
+      "wheelchair_accessibility",
+      "robotaxi_reroute",
+      "inclusive_av"
+    ],
+    "sim": {
+      "map": "Small_City_LVL",
+      "focus": "accessible_robotaxi_reroute",
+      "comfort_arc": [
+        0.68,
+        0.7,
+        0.74,
+        0.78,
+        0.8
+      ],
+      "journey": "people/noor_rahman/journey.yaml",
+      "robots": [
+        {
+          "id": "city_robotaxi",
+          "kind": "robotaxi",
+          "behavior": "skip_blocked_curb_reroute_accessible_bay"
+        },
+        {
+          "id": "ramp_hold_bot",
+          "kind": "delivery",
+          "behavior": "yield_to_accessible_bay_priority"
+        }
+      ]
+    }
+  },
+  "journey": {
+    "id": "noor_accessible_reroute_journey",
+    "person_id": "noor_rahman",
+    "story_id": "noor_accessible_reroute",
+    "title": "The taxi that changed its mind — walkable journey",
+    "map": "Small_City_LVL",
+    "status": "draft_playable",
+    "arc": "assistive_robotics",
+    "person": {
+      "display_name": "Noor Rahman",
+      "role": "wheelchair_user",
+      "gender": "female",
+      "age_group": "adult",
+      "blueprint": "walker.pedestrian.0023",
+      "blueprint_prefers": [
+        "walker.pedestrian.0023",
+        "walker.pedestrian.0024",
+        "walker.pedestrian.0032"
+      ],
+      "mobility_aid": "wheelchair",
+      "walk_speed_mps": 0.95,
+      "comfort_start": 0.68
+    },
+    "follow": {
+      "enabled": true,
+      "cinematic": true,
+      "smooth": 0.1,
+      "lookahead_m": 3,
+      "distance_m": 5.2,
+      "height_m": 1.7,
+      "pitch_deg": -6,
+      "shoulder_m": 1.3
+    },
+    "stops": [
+      {
+        "id": "hail_pin",
+        "beat": "setup",
+        "label": "Waits at usual pickup — curb cut blocked",
+        "comfort": 0.68,
+        "hold_s": 2.5,
+        "location": {
+          "x": -148,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180
+      },
+      {
+        "id": "av_approaches",
+        "beat": "approach",
+        "label": "Robotaxi approaches — then flags inaccessible stop",
+        "comfort": 0.7,
+        "hold_s": 2,
+        "location": {
+          "x": -155,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180,
+        "spawn_robot": {
+          "id": "city_robotaxi",
+          "kind": "robotaxi",
+          "location": {
+            "x": -162,
+            "y": 528.5,
+            "z": 0.6
+          },
+          "yaw": -180
+        }
+      },
+      {
+        "id": "skip_blocked_curb",
+        "beat": "encounter",
+        "label": "Taxi skips blocked curb — continues past",
+        "comfort": 0.74,
+        "hold_s": 1.5,
+        "location": {
+          "x": -168,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180,
+        "move_robot_to": {
+          "location": {
+            "x": -178,
+            "y": 528,
+            "z": 0.6
+          },
+          "yaw": -160
+        }
+      },
+      {
+        "id": "bay_b_queue",
+        "beat": "encounter",
+        "label": "Queues at accessible Bay B (ramp)",
+        "comfort": 0.76,
+        "hold_s": 2,
+        "location": {
+          "x": -182,
+          "y": 522.8,
+          "z": 0.6
+        },
+        "yaw": -180,
+        "move_robot_to": {
+          "location": {
+            "x": -190,
+            "y": 526.5,
+            "z": 0.6
+          },
+          "yaw": -90
+        }
+      },
+      {
+        "id": "roll_to_bay",
+        "beat": "reaction",
+        "label": "Rolls to flush curb — ramp waits",
+        "comfort": 0.78,
+        "hold_s": 2.5,
+        "location": {
+          "x": -188.5,
+          "y": 523.5,
+          "z": 0.6
+        },
+        "yaw": -120
+      },
+      {
+        "id": "board",
+        "beat": "outcome",
+        "label": "Boards on time — accessibility as route data",
+        "comfort": 0.8,
+        "hold_s": 3,
+        "location": {
+          "x": -190,
+          "y": 524.8,
+          "z": 0.6
+        },
+        "yaw": -90,
+        "move_robot_to": {
+          "location": {
+            "x": -190,
+            "y": 526.5,
+            "z": 0.6
+          },
+          "yaw": -90
+        }
+      }
+    ],
+    "notes": "Wheelchair story uses adult female walker stand-in (no wheelchair mesh in this CARLA build). Robotaxi = full-size vehicle stand-in; reroute is scripted via move_robot_to stops. Keep person on sidewalk/crossings.\n"
+  }
+}

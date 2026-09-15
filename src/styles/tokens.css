@@ -1,0 +1,64 @@
+:root {
+  /* Cool concrete + deep teal glass + signal amber / assistive cyan */
+  --bg-dusk-top: #1a2430;
+  --bg-dusk-mid: #243442;
+  --bg-dusk-bot: #3d4a3f;
+  --concrete: #8a9299;
+  --concrete-deep: #5c646c;
+  --glass: rgba(18, 42, 48, 0.72);
+  --glass-edge: rgba(120, 190, 188, 0.28);
+  --teal: #2f6f6c;
+  --teal-bright: #5eb8b0;
+  --cyan-assist: #7ec8c0;
+  --amber-stress: #d4a15a;
+  --crit: #c45c4a;
+  --text: #eef2f0;
+  --text-muted: #9aa8a6;
+  --ink: #0e1618;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --panel-radius: 2px;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: var(--bg-dusk-mid);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.panel {
+  background: var(--glass);
+  border: 1px solid var(--glass-edge);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: var(--panel-radius);
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.muted {
+  color: var(--text-muted);
+}

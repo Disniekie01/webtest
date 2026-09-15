@@ -1,0 +1,249 @@
+{
+  "id": "rosa_delgado",
+  "catalog": {
+    "id": "rosa_delgado",
+    "name": "Rosa Delgado",
+    "comfort_level": "wary",
+    "comfort_score": 0.25,
+    "story": "people/rosa_delgado/story.yaml",
+    "journey": "people/rosa_delgado/journey.yaml",
+    "status": "draft_playable",
+    "tags": [
+      "caregiver",
+      "accessibility",
+      "assistive_robotics"
+    ]
+  },
+  "person": {
+    "id": "rosa_delgado",
+    "name": "Rosa Delgado",
+    "age": 54,
+    "role": "caregiver",
+    "home_area": "clinic_west",
+    "appearance": {
+      "blueprint": "walker.pedestrian.0015",
+      "gender": "female",
+      "age_group": "adult",
+      "blueprint_prefers": [
+        "walker.pedestrian.0015",
+        "walker.pedestrian.0023",
+        "walker.pedestrian.0024"
+      ]
+    },
+    "comfort": {
+      "level": "wary",
+      "score": 0.25,
+      "notes": "Walks her mother to clinic appointments. More worried about surprise machines than about robots in principle — a startled elder can fall. Comfort sits between Elena's avoidant score and Jamal's workday wary.",
+      "triggers": [
+        "silent_approach_behind_elder",
+        "bot_blocks_ramp",
+        "sudden_status_beep_near_cane"
+      ],
+      "preferences": [
+        "clinic_approach_quiet_zone",
+        "predictable_ramp_clearance",
+        "soft_early_warning",
+        "staffed_dropoff_bay"
+      ]
+    },
+    "mobility": {
+      "modes": [
+        "walk",
+        "transit"
+      ],
+      "pace": "slow",
+      "uses": "sidewalk_and_ramps",
+      "companions": [
+        "mother_elena_style_elder"
+      ]
+    },
+    "voice": {
+      "tone": "protective",
+      "catchphrase": "If she startles, we both go down."
+    }
+  },
+  "story": {
+    "id": "rosa_clinic_ramp",
+    "person_id": "rosa_delgado",
+    "title": "The clinic ramp",
+    "summary": "Rosa guides her mother toward a clinic appointment when a delivery bot claims the only ramp — wariness becomes a fall-risk calculation.",
+    "beats": [
+      {
+        "id": "setup",
+        "text": "Rosa checks the appointment text again: 9:40, west entrance, bring the blue folder. Her mother holds her arm, cane tapping a careful rhythm on the sidewalk.\n"
+      },
+      {
+        "id": "approach",
+        "text": "The clinic block is quiet until it isn't. A sidewalk bot rolls out of a pharmacy bay and lines up for the same ramp Rosa always uses — the only slope without a lip for the cane.\n"
+      },
+      {
+        "id": "encounter",
+        "text": "The bot stops halfway up, amber light blinking. Rosa's mother freezes mid-step. There is no shoulder room; reversing means facing the curb traffic they just escaped.\n"
+      },
+      {
+        "id": "reaction",
+        "text": "Rosa talks softly, plants herself between machine and mother, and waits. When the bot finally creeps forward, she mirrors its pace — not trusting a sudden clear. Her own heart rate outruns her comfort score.\n"
+      },
+      {
+        "id": "outcome",
+        "text": "They make the appointment three minutes late. Rosa asks the desk for a \"quiet approach window\" and writes the city a complaint that is really a care plan: clear the ramps, or warn early enough that elders never have to choose between a robot and a fall.\n"
+      }
+    ],
+    "themes": [
+      "caregiving",
+      "accessibility_ramps",
+      "fall_risk"
+    ],
+    "sim": {
+      "map": "Small_City_LVL",
+      "focus": "ramp_blockage",
+      "comfort_arc": [
+        0.28,
+        0.25,
+        0.18,
+        0.15,
+        0.22
+      ],
+      "journey": "people/rosa_delgado/journey.yaml"
+    }
+  },
+  "journey": {
+    "id": "rosa_clinic_ramp_journey",
+    "person_id": "rosa_delgado",
+    "story_id": "rosa_clinic_ramp",
+    "title": "The clinic ramp — walkable journey",
+    "map": "Small_City_LVL",
+    "status": "draft_playable",
+    "person": {
+      "display_name": "Rosa Delgado",
+      "role": "walker",
+      "gender": "female",
+      "age_group": "adult",
+      "blueprint": "walker.pedestrian.0015",
+      "blueprint_prefers": [
+        "walker.pedestrian.0015",
+        "walker.pedestrian.0023",
+        "walker.pedestrian.0024"
+      ],
+      "walk_speed_mps": 1.05,
+      "comfort_start": 0.28
+    },
+    "follow": {
+      "enabled": true,
+      "cinematic": true,
+      "smooth": 0.09,
+      "lookahead_m": 2.8,
+      "distance_m": 4.5,
+      "height_m": 1.7,
+      "pitch_deg": -6,
+      "shoulder_m": 1
+    },
+    "stops": [
+      {
+        "id": "arm_in_arm",
+        "beat": "setup",
+        "label": "Leaves the block with her mother",
+        "comfort": 0.28,
+        "hold_s": 2,
+        "location": {
+          "x": -148,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180
+      },
+      {
+        "id": "pharmacy_bay",
+        "beat": "approach",
+        "label": "Bot exits pharmacy bay toward the ramp",
+        "comfort": 0.25,
+        "hold_s": 1.5,
+        "location": {
+          "x": -168,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180,
+        "spawn_robot": {
+          "id": "ramp_bot",
+          "kind": "vehicle",
+          "location": {
+            "x": -192,
+            "y": 525.5,
+            "z": 0.6
+          },
+          "yaw": -120
+        }
+      },
+      {
+        "id": "ramp_claimed",
+        "beat": "encounter",
+        "label": "Bot stops halfway up the only ramp",
+        "comfort": 0.18,
+        "hold_s": 2.5,
+        "location": {
+          "x": -186,
+          "y": 522.8,
+          "z": 0.6
+        },
+        "yaw": -180,
+        "move_robot_to": {
+          "location": {
+            "x": -195,
+            "y": 524.2,
+            "z": 0.6
+          },
+          "yaw": -90
+        }
+      },
+      {
+        "id": "body_shield",
+        "beat": "reaction",
+        "label": "Stands between machine and mother",
+        "comfort": 0.15,
+        "hold_s": 3,
+        "location": {
+          "x": -193,
+          "y": 523,
+          "z": 0.6
+        },
+        "yaw": -160
+      },
+      {
+        "id": "mirrored_pace",
+        "beat": "reaction",
+        "label": "Mirrors the bot up the ramp",
+        "comfort": 0.18,
+        "hold_s": 2,
+        "location": {
+          "x": -198,
+          "y": 523.5,
+          "z": 0.6
+        },
+        "yaw": -180,
+        "move_robot_to": {
+          "location": {
+            "x": -202,
+            "y": 524.5,
+            "z": 0.6
+          },
+          "yaw": -180
+        }
+      },
+      {
+        "id": "desk_late",
+        "beat": "outcome",
+        "label": "Three minutes late — asks for quiet approach",
+        "comfort": 0.22,
+        "hold_s": 2,
+        "location": {
+          "x": -210,
+          "y": 522.7,
+          "z": 0.6
+        },
+        "yaw": -180
+      }
+    ],
+    "notes": "Slow caregiver pace. Companion elder is narrative-only for now.\n"
+  }
+}

@@ -1,0 +1,110 @@
+[
+  {
+    "id": "elena_voss",
+    "name": "Elena Voss",
+    "comfort_score": 0.1,
+    "comfort_level": "avoidant",
+    "tags": [
+      "sidewalk",
+      "silent_bot"
+    ],
+    "status": "draft_playable",
+    "has_journey": true
+  },
+  {
+    "id": "rosa_delgado",
+    "name": "Rosa Delgado",
+    "comfort_score": 0.25,
+    "comfort_level": "wary",
+    "tags": [
+      "caregiver",
+      "accessibility",
+      "assistive_robotics"
+    ],
+    "status": "draft_playable",
+    "has_journey": true
+  },
+  {
+    "id": "jamal_okonkwo",
+    "name": "Jamal Okonkwo",
+    "comfort_score": 0.3,
+    "comfort_level": "wary",
+    "tags": [
+      "curb",
+      "gig_work"
+    ],
+    "status": "draft_playable",
+    "has_journey": true
+  },
+  {
+    "id": "marta_silva",
+    "name": "Marta Silva",
+    "comfort_score": 0.4,
+    "comfort_level": "neutral",
+    "tags": [
+      "tourist"
+    ],
+    "status": "draft_playable",
+    "has_journey": true
+  },
+  {
+    "id": "sofia_reyes",
+    "name": "Sofia Reyes",
+    "comfort_score": 0.5,
+    "comfort_level": "neutral",
+    "tags": [
+      "parent",
+      "plaza"
+    ],
+    "status": "draft_playable",
+    "has_journey": true
+  },
+  {
+    "id": "kenji_mori",
+    "name": "Kenji Mori",
+    "comfort_score": 0.7,
+    "comfort_level": "comfortable",
+    "tags": [
+      "failure_modes"
+    ],
+    "status": "draft_playable",
+    "has_journey": true
+  },
+  {
+    "id": "noor_rahman",
+    "name": "Noor Rahman",
+    "comfort_score": 0.72,
+    "comfort_level": "comfortable",
+    "tags": [
+      "assistive_robotics",
+      "wheelchair",
+      "robotaxi"
+    ],
+    "status": "draft_playable",
+    "has_journey": true
+  },
+  {
+    "id": "mei_lin",
+    "name": "Mei Lin",
+    "comfort_score": 0.78,
+    "comfort_level": "comfortable",
+    "tags": [
+      "assistive_robotics",
+      "companion_robot"
+    ],
+    "status": "draft_playable",
+    "has_journey": true
+  },
+  {
+    "id": "aisha_brandt",
+    "name": "Aisha Brandt",
+    "comfort_score": 0.9,
+    "comfort_level": "advocate",
+    "tags": [
+      "observation",
+      "research"
+    ],
+    "status": "draft_playable",
+    "has_journey": true
+  }
+]

@@ -1,0 +1,81 @@
+.ovrtx-bg {
+  position: absolute;
+  inset: 0;
+  background: #0c121a;
+  overflow: hidden;
+}
+
+.ovrtx-bg__stream {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.ovrtx-bg__boot {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 50% 42%, #172131, #080b11 65%);
+  z-index: 1;
+}
+
+.ovrtx-bg__card {
+  max-width: 28rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.ovrtx-bg__spin {
+  width: 2.1rem;
+  height: 2.1rem;
+  margin: 0 auto 0.9rem;
+  border: 3px solid #273449;
+  border-top-color: #76b900;
+  border-radius: 50%;
+  animation: ovrtx-spin 1s linear infinite;
+}
+
+@keyframes ovrtx-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ovrtx-bg__title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #edf3ff;
+}
+
+.ovrtx-bg__detail {
+  margin-top: 0.5rem;
+  color: #9ba9bd;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.ovrtx-bg__meta {
+  margin-top: 0.75rem;
+  color: #76b900;
+  font-size: 0.72rem;
+}
+
+.ovrtx-bg__hud {
+  position: absolute;
+  left: 0.75rem;
+  top: 0.75rem;
+  z-index: 2;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.45rem;
+  background: rgba(8, 11, 17, 0.72);
+  color: #9ba9bd;
+  font-size: 0.68rem;
+  pointer-events: none;
+}
