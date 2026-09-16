@@ -124,6 +124,19 @@ Do **not** open a second `:8210` tab — one NVST client only. Yardline samples
 JPEG (`/viewport/frame.jpg`), not WebRTC pixels. Prefer `yolov8n` at ~5–10 Hz
 if Isaac and Yardline share one GPU.
 
+### Comfort zones (Phase 1)
+
+Persona comfort scores (defaults + **Comfort opt-in** overrides) are deposited
+onto a 4 m city grid and published to:
+
+| Route | Purpose |
+| --- | --- |
+| `POST/GET /api/comfort-zones` | Vite cache (+ fan-out to Kit) |
+| `GET/POST /viewport/api/comfort-zones` | Kit `:8790` when viewport HTTP is on |
+
+Low comfort → **avoid** / **caution** cells on the CV city map (**Comfort zones**
+chip). Robots will consume this grid in a later orchestrator pass.
+
 ---
 
 ## City look

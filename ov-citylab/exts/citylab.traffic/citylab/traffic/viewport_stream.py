@@ -29,6 +29,13 @@ class ViewportStreamState:
             "vehicles": [],
             "pedestrians": [],
         }
+        self.comfort_zones: dict = {
+            "updatedAt": 0.0,
+            "span_m": 160.0,
+            "cell_m": 4.0,
+            "cells": [],
+            "deposits": [],
+        }
 
     def publish(self, jpeg: bytes, width: int, height: int, vehicles: int, pedestrians: int) -> None:
         with self.lock:
@@ -58,6 +65,15 @@ class ViewportStreamState:
         with self.lock:
             return dict(self.actors)
 
+    def set_comfort_zones(self, payload: dict) -> None:
+        with self.lock:
+            self.comfort_zones = dict(payload)
+            self.comfort_zones["updatedAt"] = time.time()
+
+    def comfort_zones_snapshot(self) -> dict:
+        with self.lock:
+            return dict(self.comfort_zones)
+
     def status(self) -> dict:
         with self.lock:
             return {
@@ -84,45 +100,98 @@ class _Handler(BaseHTTPRequestHandler):
             return
         carb.log_info("[citylab.view] " + (fmt % args))
 
+    def _cors(self) -> None:
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+
+    def do_OPTIONS(self) -> None:  # noqa: N802
+        self.send_response(HTTPStatus.NO_CONTENT)
+        self._cors()
+        self.end_headers()
+
     def do_GET(self) -> None:  # noqa: N802
-        if self.path.startswith("/api/status"):
+        path = self.path.split("?", 1)[0]
+        if path.startswith("/api/status"):
             body = json.dumps(STATE.status()).encode("utf-8")
             self.send_response(HTTPStatus.OK)
             self.send_header("Content-Type", "application/json")
-            self.send_header("Access-Control-Allow-Origin", "*")
+            self._cors()
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
             return
-        if self.path.startswith("/api/actors"):
+        if path.startswith("/api/actors"):
             body = json.dumps(STATE.actors_snapshot()).encode("utf-8")
             self.send_response(HTTPStatus.OK)
             self.send_header("Content-Type", "application/json")
-            self.send_header("Access-Control-Allow-Origin", "*")
+            self._cors()
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+        if path.startswith("/api/comfort-zones"):
+            body = json.dumps(STATE.comfort_zones_snapshot()).encode("utf-8")
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "application/json")
+            self._cors()
             self.send_header("Cache-Control", "no-store")
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
             return
         # Prefer short single-frame GETs — long MJPEG holds threads and wedges :8790
-        if self.path.startswith("/frame.jpg") or self.path.startswith("/stream.mjpg"):
+        if path.startswith("/frame.jpg") or path.startswith("/stream.mjpg"):
             with STATE.lock:
                 frame = STATE.jpeg
             if not frame:
                 self.send_response(HTTPStatus.SERVICE_UNAVAILABLE)
-                self.send_header("Access-Control-Allow-Origin", "*")
+                self._cors()
                 self.end_headers()
                 return
             self.send_response(HTTPStatus.OK)
             self.send_header("Content-Type", "image/jpeg")
             self.send_header("Cache-Control", "no-store")
-            self.send_header("Access-Control-Allow-Origin", "*")
+            self._cors()
             self.send_header("Content-Length", str(len(frame)))
             self.end_headers()
             try:
                 self.wfile.write(frame)
             except (BrokenPipeError, ConnectionResetError, OSError):
                 return
+            return
+        self.send_response(HTTPStatus.NOT_FOUND)
+        self.end_headers()
+
+    def do_POST(self) -> None:  # noqa: N802
+        path = self.path.split("?", 1)[0]
+        if path.startswith("/api/comfort-zones"):
+            length = int(self.headers.get("Content-Length") or 0)
+            raw = self.rfile.read(length) if length > 0 else b"{}"
+            try:
+                payload = json.loads(raw.decode("utf-8"))
+                if not isinstance(payload, dict):
+                    raise ValueError("expected object")
+            except Exception as exc:
+                body = json.dumps({"ok": False, "error": str(exc)}).encode("utf-8")
+                self.send_response(HTTPStatus.BAD_REQUEST)
+                self.send_header("Content-Type", "application/json")
+                self._cors()
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
+            STATE.set_comfort_zones(payload)
+            body = json.dumps({"ok": True, "cells": len(payload.get("cells") or [])}).encode(
+                "utf-8"
+            )
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "application/json")
+            self._cors()
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
             return
         self.send_response(HTTPStatus.NOT_FOUND)
         self.end_headers()

@@ -5,6 +5,12 @@ import type { ConflictSnapshot } from "../../data/types";
 import { useLabStore } from "../../state/store";
 import { drawCityMap, getCityHeatmap } from "../../cv/cityMap";
 import {
+  collectComfortDeposits,
+  getComfortZoneGrid,
+  publishComfortZones,
+  type ComfortZoneSnapshot,
+} from "../../cv/comfortZones";
+import {
   calibrateYardline,
   conflictFromYardline,
   fetchKitActors,
@@ -68,6 +74,8 @@ export function CvModal() {
   const storeConflict = useLabStore((s) => s.conflict);
   const personPos = useLabStore((s) => s.personPos);
   const robotPos = useLabStore((s) => s.robotPos);
+  const selectedId = useLabStore((s) => s.selectedId);
+  const comfortOverrides = useLabStore((s) => s.comfortOverrides);
 
   const feedRef = useRef<HTMLCanvasElement>(null);
   const planRef = useRef<HTMLCanvasElement>(null);
@@ -83,8 +91,11 @@ export function CvModal() {
   const [incidents, setIncidents] = useState<YardlineIncident[]>([]);
   const [sideTab, setSideTab] = useState<"pairs" | "brief" | "incidents">("pairs");
   const [showHeat, setShowHeat] = useState(true);
+  const [showComfort, setShowComfort] = useState(true);
   const [heatWindow, setHeatWindow] = useState(120);
+  const [zoneSnap, setZoneSnap] = useState<ComfortZoneSnapshot | null>(null);
   const heatRef = useRef(getCityHeatmap());
+  const zoneRef = useRef(getComfortZoneGrid());
 
 
   useEffect(() => {
@@ -131,6 +142,22 @@ export function CvModal() {
     heatRef.current.setWindow(heatWindow);
   }, [heatWindow]);
 
+  // Comfort zones from opt-in / personas → map + Kit API
+  useEffect(() => {
+    if (!show) return;
+    const deposits = collectComfortDeposits({
+      overrides: comfortOverrides,
+      selectedId,
+      personPos,
+      optInOnly: false,
+    });
+    const grid = zoneRef.current;
+    grid.rebuild(deposits);
+    const snap = grid.snapshot(deposits);
+    setZoneSnap(snap);
+    void publishComfortZones(snap);
+  }, [show, comfortOverrides, selectedId, personPos]);
+
   useEffect(() => {
     if (!show) return;
     let alive = true;
@@ -163,7 +190,7 @@ export function CvModal() {
     return () => window.removeEventListener("keydown", onKey);
   }, [show, closeCv, yl?.playing]);
 
-  // Camera draw
+  // Camera draw — Yardline tracks + Kit-projected delivery robots (YOLO misses amber cubes)
   useEffect(() => {
     if (!show) return;
     const feed = feedRef.current;
@@ -224,6 +251,10 @@ export function CvModal() {
         if (aim) drawHeadingArrow(fctx, mapX(aim[0]), mapY(aim[1]), mapX(aim[2]), mapY(aim[3]), color);
       }
 
+      // Kit UV robot overlays disabled (were blank spots). Mesh is visible in the twin JPEG;
+      // map pane still shows amber bot markers from Kit actors.
+      void actors;
+
       if (calibrating && calClicks.length) {
         fctx.fillStyle = "#e0a05a";
         calClicks.forEach(([cx, cy], i) => {
@@ -240,7 +271,7 @@ export function CvModal() {
       img.onload = () => paint(img, frame);
       img.src = src;
     }
-  }, [show, yl, calibrating, calClicks]);
+  }, [show, yl, calibrating, calClicks, actors]);
 
   // City map
   useEffect(() => {
@@ -255,9 +286,22 @@ export function CvModal() {
       conflict: storeConflict,
       heatmap: heatRef.current,
       showHeat,
+      comfortGrid: zoneRef.current,
+      comfortZones: zoneSnap,
+      showComfort,
     });
     setMapConflict(c);
-  }, [show, actors, personPos, robotPos, storeConflict, showHeat, heatWindow]);
+  }, [
+    show,
+    actors,
+    personPos,
+    robotPos,
+    storeConflict,
+    showHeat,
+    heatWindow,
+    showComfort,
+    zoneSnap,
+  ]);
 
   const onFeedClick = async (e: MouseEvent<HTMLCanvasElement>) => {
     if (!calibrating || !yl?.lastFrame) return;
@@ -292,12 +336,30 @@ export function CvModal() {
 
   const frame = yl?.lastFrame ?? null;
   const liveConflict = frame ? conflictFromYardline(frame) : null;
-  const conflict = liveConflict ?? mapConflict ?? storeConflict;
+  const conflict = (() => {
+    if (liveConflict && mapConflict) {
+      const alarm = Math.max(liveConflict.alarm, mapConflict.alarm) as 0 | 1 | 2 | 3;
+      return {
+        tracks: [...liveConflict.tracks, ...mapConflict.tracks],
+        pairs: [
+          ...liveConflict.pairs,
+          ...mapConflict.pairs.filter(
+            (p) =>
+              p.track_a.startsWith("bot:") ||
+              p.track_b.startsWith("bot:") ||
+              p.class_a === "robot" ||
+              p.class_b === "robot",
+          ),
+        ],
+        alarm,
+        alarm_name: LEVEL_NAME[alarm],
+      };
+    }
+    return liveConflict ?? mapConflict ?? storeConflict;
+  })();
   const alarm = conflict?.alarm ?? 0;
   const risk = frame?.risk;
-  const pairs = liveConflict?.pairs?.length
-    ? liveConflict.pairs
-    : mapConflict?.pairs ?? [];
+  const pairs = conflict?.pairs ?? [];
   const client = getYardlineClient();
 
   const ui = (
@@ -332,7 +394,20 @@ export function CvModal() {
                   ? `${pairs[0].distance_m.toFixed(2)}m`
                   : "—"}
             </span>
-            <span>P {frame?.n_workers ?? actors?.pedestrians.length ?? 0}</span>
+            <span>
+              P{" "}
+              {actors
+                ? actors.pedestrians.filter((p) => p.cls !== "robot").length
+                : (frame?.n_workers ?? 0)}
+            </span>
+            <span>
+              R{" "}
+              {actors
+                ? actors.pedestrians.filter(
+                    (p) => p.cls === "robot" || p.type === "delivery_robot",
+                  ).length
+                : 0}
+            </span>
             <span>V {frame?.n_vehicles ?? actors?.vehicles.length ?? 0}</span>
             <span>{frame?.latency_ms != null ? `${Math.round(frame.latency_ms)} ms` : "—"}</span>
             <span>{yl?.calibrated ? "Plane" : "No plane"}</span>
@@ -403,6 +478,14 @@ export function CvModal() {
           >
             Heatmap
           </button>
+          <button
+            type="button"
+            className={`chip-toggle ${showComfort ? "on" : ""}`}
+            onClick={() => setShowComfort((v) => !v)}
+            title="Comfort zones from opt-in / personas"
+          >
+            Comfort zones
+          </button>
           <select
             className="cv-heat-window mono"
             value={heatWindow}
@@ -450,7 +533,11 @@ export function CvModal() {
             </div>
             <div className="cv-stage-pane">
               <div className="cv-stage-label mono muted">
-                City map · Kit / SUMO · {showHeat ? `heat ${heatWindow}s` : "heat off"}
+                City map · Kit / SUMO
+                {showHeat ? ` · heat ${heatWindow}s` : ""}
+                {showComfort
+                  ? ` · comfort ${zoneSnap?.cells.length ?? 0} cells`
+                  : ""}
               </div>
               <div className="cv-canvas-frame">
                 <canvas ref={planRef} width={1280} height={720} className="cv-plan-lg" />

@@ -2,7 +2,7 @@
 <configuration>
   <input>
     <net-file value="city_grid.net.xml"/>
-    <route-files value="traffic.rou.xml,ped_behaviors.rou.xml"/>
+    <route-files value="traffic.rou.xml,ped_behaviors.rou.xml,robots.rou.xml"/>
     <additional-files value="buildings.poly.xml,crossings.poly.xml"/>
   </input>
   <time>

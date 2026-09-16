@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Curb delivery robots — sidewalk person vType (JuPedSim-friendly). -->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+
+  <vType id="delivery_robot" vClass="pedestrian"
+         desiredMaxSpeed="1.1" speedFactor="1.0"
+         width="0.70" length="0.70" height="0.55"
+         minGap="0.80" color="1.00,0.62,0.20"
+         guiShape="pedestrian"/>
+
+  <!-- Sorted by begin — depot → dropoff loops on baked sidewalk edges -->
+  <personFlow id="bot_ns_b" type="delivery_robot" begin="5" number="2" period="90" departPos="random_free">
+    <walk from="SW_NS_1_0_1_R" to="SW_NS_1_3_4_R"/>
+  </personFlow>
+  <personFlow id="bot_ew_1" type="delivery_robot" begin="12" number="2" period="100" departPos="random_free">
+    <walk from="SW_EW_1_0_1_T" to="SW_EW_1_3_4_T"/>
+  </personFlow>
+  <personFlow id="bot_ns_br" type="delivery_robot" begin="20" number="2" period="95" departPos="random_free">
+    <walk from="SW_NS_1_3_4_R" to="SW_NS_1_0_1_R"/>
+  </personFlow>
+  <personFlow id="bot_diag" type="delivery_robot" begin="30" number="2" period="110" departPos="random_free">
+    <walk from="SW_NS_0_0_1_R" to="SW_EW_3_3_4_T"/>
+  </personFlow>
+</routes>

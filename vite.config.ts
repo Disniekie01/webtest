@@ -46,9 +46,85 @@ function kitBootReady(boot: Record<string, unknown> | null): boolean {
 }
 
 function webrtcLauncherPlugin(): Plugin {
+  /** Dev fallback when Kit :8790 is down — UI still aggregates comfort zones. */
+  let comfortZonesCache: Record<string, unknown> = {
+    updatedAt: 0,
+    span_m: 160,
+    cell_m: 4,
+    cells: [],
+    deposits: [],
+  };
+
   return {
     name: "citylab-webrtc-launcher",
     configureServer(server) {
+      server.middlewares.use("/api/comfort-zones", async (req, res, next) => {
+        if (req.method === "OPTIONS") {
+          res.statusCode = 204;
+          res.setHeader("Access-Control-Allow-Origin", "*");
+          res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+          res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+          res.end();
+          return;
+        }
+        res.setHeader("Content-Type", "application/json");
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Cache-Control", "no-store");
+        if (req.method === "GET") {
+          // Prefer Kit copy when available
+          try {
+            const r = await fetch("http://127.0.0.1:8790/api/comfort-zones", {
+              signal: AbortSignal.timeout(400),
+            });
+            if (r.ok) {
+              const j = (await r.json()) as Record<string, unknown>;
+              comfortZonesCache = j;
+              res.end(JSON.stringify(j));
+              return;
+            }
+          } catch {
+            /* use cache */
+          }
+          res.end(JSON.stringify(comfortZonesCache));
+          return;
+        }
+        if (req.method === "POST") {
+          const chunks: Buffer[] = [];
+          req.on("data", (c) => chunks.push(Buffer.from(c)));
+          req.on("end", async () => {
+            try {
+              const raw = Buffer.concat(chunks).toString("utf8") || "{}";
+              const payload = JSON.parse(raw) as Record<string, unknown>;
+              comfortZonesCache = { ...payload, updatedAt: Date.now() / 1000 };
+              // Fan-out to Kit when viewport HTTP is up
+              try {
+                await fetch("http://127.0.0.1:8790/api/comfort-zones", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(comfortZonesCache),
+                  signal: AbortSignal.timeout(800),
+                });
+              } catch {
+                /* kit offline — cache only */
+              }
+              res.statusCode = 200;
+              res.end(
+                JSON.stringify({
+                  ok: true,
+                  cells: Array.isArray(comfortZonesCache.cells)
+                    ? (comfortZonesCache.cells as unknown[]).length
+                    : 0,
+                }),
+              );
+            } catch (e) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ ok: false, error: String(e) }));
+            }
+          });
+          return;
+        }
+        next();
+      });
       server.middlewares.use("/api/stream-status", async (_req, res) => {
         // Isaac default 49100; keep 49102 as legacy probe
         const signal =

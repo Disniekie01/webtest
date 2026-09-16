@@ -51,7 +51,8 @@ export class CityOccupancyHeatmap {
   step(actors: KitActorsPayload | null, now = performance.now() / 1000) {
     if (!actors) return;
     for (const p of actors.pedestrians) {
-      this.events.push({ t: now, x: p.x, z: p.z, w: 1 });
+      const isRobot = p.cls === "robot" || p.type === "delivery_robot";
+      this.events.push({ t: now, x: p.x, z: p.z, w: isRobot ? 0.55 : 1 });
     }
     for (const v of actors.vehicles) {
       this.events.push({ t: now, x: v.x, z: v.z, w: 0.35 });
@@ -122,9 +123,10 @@ export function getCityHeatmap(): CityOccupancyHeatmap {
 export function actorsToTracks(payload: KitActorsPayload): YardTrack[] {
   const tracks: YardTrack[] = [];
   for (const p of payload.pedestrians) {
+    const isRobot = p.cls === "robot" || p.type === "delivery_robot";
     tracks.push({
-      id: `ped:${p.id}`,
-      cls: "person",
+      id: isRobot ? `bot:${p.id}` : `ped:${p.id}`,
+      cls: isRobot ? "robot" : "person",
       x: p.x,
       y: p.z,
       vx: 0,
@@ -159,6 +161,9 @@ export type DrawCityMapOpts = {
   conflict: ConflictSnapshot | null;
   heatmap?: CityOccupancyHeatmap | null;
   showHeat?: boolean;
+  comfortZones?: import("./comfortZones").ComfortZoneSnapshot | null;
+  comfortGrid?: import("./comfortZones").ComfortZoneGrid | null;
+  showComfort?: boolean;
 };
 
 export function drawCityMap(
@@ -208,6 +213,15 @@ export function drawCityMap(
     mockFallback.heatmap.draw(ctx, toPx, scale);
   }
 
+  // Comfort zones (opt-in / persona discs) — hatch over heat
+  if (
+    mockFallback?.showComfort !== false &&
+    mockFallback?.comfortZones &&
+    mockFallback?.comfortGrid
+  ) {
+    mockFallback.comfortGrid.draw(ctx, toPx, scale, mockFallback.comfortZones);
+  }
+
   // Soft center grid
   ctx.strokeStyle = "rgba(242,239,232,0.06)";
   ctx.lineWidth = 1;
@@ -229,12 +243,15 @@ export function drawCityMap(
 
   let conflict: ConflictSnapshot | null = null;
   const peds: { id: string; x: number; z: number; yaw: number }[] = [];
+  const bots: { id: string; x: number; z: number; yaw: number }[] = [];
   const vehs: { id: string; x: number; z: number; yaw: number }[] = [];
 
   if (actors && (actors.pedestrians.length || actors.vehicles.length)) {
     conflict = cityProximityConflict(actors);
     for (const p of actors.pedestrians) {
-      peds.push({ id: p.id, x: p.x, z: p.z, yaw: p.yaw ?? 0 });
+      const isRobot = p.cls === "robot" || p.type === "delivery_robot";
+      if (isRobot) bots.push({ id: p.id, x: p.x, z: p.z, yaw: p.yaw ?? 0 });
+      else peds.push({ id: p.id, x: p.x, z: p.z, yaw: p.yaw ?? 0 });
     }
     for (const v of actors.vehicles) {
       vehs.push({ id: v.id, x: v.x, z: v.z, yaw: v.yaw ?? 0 });
@@ -252,10 +269,11 @@ export function drawCityMap(
     }
   }
 
-  // Proximity links (person↔vehicle within threshold)
+  // Proximity links (person↔vehicle/robot within threshold)
   if (conflict?.pairs?.length) {
     const byTrack = new Map<string, { x: number; z: number }>();
     for (const p of peds) byTrack.set(`ped:${p.id}`, p);
+    for (const b of bots) byTrack.set(`bot:${b.id}`, b);
     for (const v of vehs) byTrack.set(`veh:${v.id}`, v);
     for (const pair of conflict.pairs) {
       if (pair.distance_m > PROXIMITY_M) continue;
@@ -309,6 +327,24 @@ export function drawCityMap(
     ctx.restore();
   }
 
+  // Delivery robots (amber squares on sidewalk)
+  for (const b of bots) {
+    const [px, pz] = toPx(b.x, b.z);
+    const yaw = ((b.yaw ?? 0) * Math.PI) / 180;
+    ctx.save();
+    ctx.translate(px, pz);
+    ctx.rotate(yaw);
+    ctx.fillStyle = "#e0a05a";
+    ctx.fillRect(-4, -4, 8, 8);
+    ctx.strokeStyle = "#f2c27a";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(10, 0);
+    ctx.stroke();
+    ctx.restore();
+  }
+
   // Pedestrians + heading
   for (const p of peds) {
     const [px, pz] = toPx(p.x, p.z);
@@ -345,9 +381,14 @@ export function drawCityMap(
     mockFallback?.showHeat !== false && heat
       ? `  ·  heat ${heat.windowS}s n=${heat.samples}`
       : "";
+  const zoneN = mockFallback?.comfortZones?.cells.length ?? 0;
+  const zoneBit =
+    mockFallback?.showComfort !== false && zoneN > 0 ? `  ·  zones ${zoneN}` : "";
+  const nPed = peds.length;
+  const nBot = bots.length;
   ctx.fillText(
     live
-      ? `CITY 160 m  ·  ${actors!.pedestrians.length} ped  ${actors!.vehicles.length} veh  ·  ${alarmName}${heatBit}`
+      ? `CITY 160 m  ·  ${nPed} ped  ${nBot} bot  ${actors!.vehicles.length} veh  ·  ${alarmName}${heatBit}${zoneBit}`
       : "CITY 160 m  ·  WAITING KIT ACTORS  ·  MOCK FALLBACK",
     10,
     16,

@@ -76,8 +76,18 @@ _PED_COLORS = {
     "adult": Gf.Vec3f(0.15, 0.90, 1.00),
     "rushed": Gf.Vec3f(1.00, 0.40, 0.15),
     "tourist": Gf.Vec3f(0.95, 0.85, 0.20),
+    "delivery_robot": Gf.Vec3f(1.00, 0.62, 0.20),
 }
 _PED_COLOR_DEFAULT = Gf.Vec3f(0.15, 0.90, 1.00)
+_ROBOT_CUBE_SIZE = Gf.Vec3f(0.75, 0.55, 0.70)
+# SmartCity deliveryrobot_001 (Y≈height in mesh). Scale ~0.32 → ~0.9 m curb bot.
+_ROBOT_MESH_SCALE = float(os.environ.get("CITYLAB_ROBOT_MESH_SCALE", "0.32"))
+_ROBOT_ASSET_NAME = os.environ.get("CITYLAB_ROBOT_ASSET", "deliveryrobot_001.usd")
+_ROBOT_PRIM_PATH = os.environ.get("CITYLAB_ROBOT_PRIM", "/deliveryrobot_001")
+_ROBOT_PRIM_REV = "v2"
+# Camera UV overlays were drifting (blank CV boxes). Off until plane is city-aligned.
+_ROBOT_PUBLISH_UV = os.environ.get("CITYLAB_ROBOT_UV", "0") == "1"
+_ROBOT_YAW_OFFSET_DEG = float(os.environ.get("CITYLAB_ROBOT_YAW_OFFSET", "0"))
 # Quaternius outfits — static walk mid-poses only (max stream FPS).
 _PED_MESH_POOL = (
     "male_casual",
@@ -99,6 +109,7 @@ _PED_MESH_DEFAULT = "male_casual"
 # Static walk pose only (no skel, no idle swap) — best stream FPS.
 _PED_PRIM_REV = "v9"
 MAX_PED = int(os.environ.get("CITYLAB_MAX_PED", "24"))
+MAX_ROBOT = int(os.environ.get("CITYLAB_MAX_ROBOT", "6"))
 MAX_VEH = int(os.environ.get("CITYLAB_MAX_VEH", "32"))
 # TraCI sync every N Kit frames (higher = cheaper).
 _TRAFFIC_SYNC_EVERY = int(os.environ.get("CITYLAB_TRAFFIC_SYNC_EVERY", "3"))
@@ -413,6 +424,71 @@ def _ped_lateral_offset_m(traci_mod, pid: str) -> float:
     except Exception:
         pass
     return 0.5 * lane_w + PED_SIDEWALK_INSET_M
+
+
+def _is_delivery_robot(type_id: str) -> bool:
+    base = (type_id or "").split("@")[0]
+    return base == "delivery_robot"
+
+
+def _project_world_to_uv(
+    stage,
+    cam_path: str,
+    x: float,
+    y: float,
+    z: float,
+    width: int,
+    height: int,
+) -> tuple[float, float] | None:
+    """Project a USD world point through /World/Camera → image pixels (origin top-left)."""
+    try:
+        prim = stage.GetPrimAtPath(cam_path)
+        if not prim or not prim.IsValid():
+            return None
+        # Prefer the live xform (Kit reframes the camera) over Gf.Camera cache quirks.
+        world_xf = UsdGeom.Xformable(prim).ComputeLocalToWorldTransform(Usd.TimeCode.Default())
+        p_cam = world_xf.GetInverse().Transform(Gf.Vec3d(float(x), float(y), float(z)))
+        # USD camera looks down local −Z; ahead ⇒ z < 0.
+        if p_cam[2] >= -0.05:
+            return None
+        usd_cam = UsdGeom.Camera(prim)
+        focal = float(usd_cam.GetFocalLengthAttr().Get() or 16.0)
+        hap = float(usd_cam.GetHorizontalApertureAttr().Get() or 20.955)
+        vap = float(usd_cam.GetVerticalApertureAttr().Get() or 0.0)
+        if vap <= 1e-6:
+            vap = hap * (float(height) / max(1.0, float(width)))
+        # Film-back pinhole → NDC-ish, then pixels.
+        nx = (p_cam[0] / -p_cam[2]) * (focal / hap)
+        ny = (p_cam[1] / -p_cam[2]) * (focal / vap)
+        if abs(nx) > 1.6 or abs(ny) > 1.6:
+            return None
+        u = (nx * 0.5 + 0.5) * float(width)
+        v = (0.5 - ny * 0.5) * float(height)
+        if u < -40 or v < -40 or u > width + 40 or v > height + 40:
+            return None
+        return float(u), float(v)
+    except Exception as exc:
+        if not getattr(_project_world_to_uv, "_err_logged", False):
+            carb.log_warn(f"[citylab.traffic] project uv: {exc}")
+            _project_world_to_uv._err_logged = True  # type: ignore[attr-defined]
+        return None
+
+
+def _robot_bbox_from_foot(
+    u: float,
+    v: float,
+    width: int,
+    height: int,
+    *,
+    half_w: float = 18.0,
+    half_h: float = 14.0,
+) -> list[float]:
+    """Axis-aligned box around a projected foot (image px)."""
+    x1 = max(0.0, u - half_w)
+    y1 = max(0.0, v - half_h * 1.6)
+    x2 = min(float(width), u + half_w)
+    y2 = min(float(height), v + half_h * 0.4)
+    return [round(x1, 1), round(y1, 1), round(x2, 1), round(y2, 1)]
 
 
 def _ped_color(type_id: str) -> Gf.Vec3f:
@@ -1427,13 +1503,31 @@ class CityLabTrafficExtension(omni.ext.IExt):
             ribbons = self._sidewalk_ribbons
             all_pids = [str(p) for p in self._traci.person.getIDList()]
             alive = set(all_pids)
-            # Keep a sticky follow set so capping MAX_PED doesn't shuffle/teleport actors.
+
+            def _person_type(pid: str) -> str:
+                try:
+                    return str(self._traci.person.getTypeID(pid))
+                except Exception:
+                    return "adult"
+
+            robot_pids = [p for p in all_pids if _is_delivery_robot(_person_type(p))]
+            human_pids = [p for p in all_pids if p not in set(robot_pids)]
+            # Prefer delivery robots in the sticky follow set (capped separately).
             self._ped_follow_ids = [p for p in self._ped_follow_ids if p in alive]
-            for p in all_pids:
-                if len(self._ped_follow_ids) >= MAX_PED:
+            follow_robots = [p for p in self._ped_follow_ids if p in set(robot_pids)]
+            follow_humans = [p for p in self._ped_follow_ids if p not in set(robot_pids)]
+            for p in robot_pids:
+                if len(follow_robots) >= MAX_ROBOT:
                     break
-                if p not in self._ped_follow_ids:
-                    self._ped_follow_ids.append(p)
+                if p not in follow_robots:
+                    follow_robots.append(p)
+            human_slots = max(0, MAX_PED - len(follow_robots))
+            for p in human_pids:
+                if len(follow_humans) >= human_slots:
+                    break
+                if p not in follow_humans:
+                    follow_humans.append(p)
+            self._ped_follow_ids = follow_robots + follow_humans[:human_slots]
             live_pids: set[str] = set(self._ped_follow_ids)
             for pid in self._ped_follow_ids:
                 sx, sy = self._traci.person.getPosition(pid)
@@ -1485,6 +1579,48 @@ class CityLabTrafficExtension(omni.ext.IExt):
             self._ped = len(pedestrians)
             self._sync_prims(vehicles, pedestrians)
             # USD XZ poses for City Lab 2D map (prefer TraCI over vision).
+            # Also project robots → camera UV so Yardline CV can box them
+            # (YOLO will not see amber curb cubes as "robot").
+            stage = omni.usd.get_context().get_stage()
+            cam_path = "/World/Camera"
+            vw = int(getattr(viewstream.STATE, "width", 0) or VIEW_W)
+            vh = int(getattr(viewstream.STATE, "height", 0) or VIEW_H)
+
+            def _with_uv(aid, ux, uy, uz, yaw, ptype, cls_name: str) -> dict:
+                row = {
+                    "id": str(aid),
+                    "x": round(float(ux), 2),
+                    "z": round(float(uz), 2),
+                    "yaw": round(float(yaw), 1),
+                    "cls": cls_name,
+                    "type": str(ptype),
+                }
+                if stage is not None and cls_name == "robot" and _ROBOT_PUBLISH_UV:
+                    uv = _project_world_to_uv(stage, cam_path, ux, uy, uz, vw, vh)
+                    if uv is not None:
+                        u, v = uv
+                        row["u"] = round(u, 1)
+                        row["v"] = round(v, 1)
+                        row["bbox"] = _robot_bbox_from_foot(u, v, vw, vh)
+                        # Aim a short heading tick in image space from yaw (USD Y-up).
+                        rad = math.radians(float(yaw))
+                        row["aim_uv"] = [
+                            round(u, 1),
+                            round(v, 1),
+                            round(u + math.sin(rad) * 22.0, 1),
+                            round(v - math.cos(rad) * 22.0, 1),
+                        ]
+                        if not getattr(self, "_robot_uv_ok", False):
+                            carb.log_warn(
+                                f"[citylab.traffic] robot UV ok {aid} → ({row['u']},{row['v']}) @{vw}x{vh}"
+                            )
+                            self._robot_uv_ok = True
+                    elif self._frame % 300 == 0:
+                        carb.log_warn(
+                            f"[citylab.traffic] robot UV miss {aid} xyz=({ux:.1f},{uy:.1f},{uz:.1f})"
+                        )
+                return row
+
             viewstream.STATE.publish_actors(
                 [
                     {
@@ -1497,15 +1633,16 @@ class CityLabTrafficExtension(omni.ext.IExt):
                     for vid, ux, _uy, uz, yaw in vehicles
                 ],
                 [
-                    {
-                        "id": str(pid),
-                        "x": round(float(ux), 2),
-                        "z": round(float(uz), 2),
-                        "yaw": round(float(yaw), 1),
-                        "cls": "person",
-                        "type": str(ptype),
-                    }
-                    for pid, ux, _uy, uz, yaw, ptype in pedestrians
+                    _with_uv(
+                        pid,
+                        ux,
+                        uy,
+                        uz,
+                        yaw,
+                        ptype,
+                        "robot" if _is_delivery_robot(str(ptype)) else "person",
+                    )
+                    for pid, ux, uy, uz, yaw, ptype in pedestrians
                 ],
                 span_m=CITY_SPAN_M,
             )
@@ -1814,6 +1951,9 @@ class CityLabTrafficExtension(omni.ext.IExt):
     def _pedestrian_asset_for(self, type_id: str, actor_id: str = "") -> Path:
         return self._root / "assets" / "people" / _ped_mesh_name(type_id, actor_id)
 
+    def _robot_asset_for(self) -> Path:
+        return self._root / "assets" / "robots" / _ROBOT_ASSET_NAME
+
     def _apply_pedestrian_actors(self, stage, parent_path, pedestrians) -> None:
         parent = stage.GetPrimAtPath(parent_path)
         if not parent or not parent.IsValid():
@@ -1824,7 +1964,9 @@ class CityLabTrafficExtension(omni.ext.IExt):
         for item in pedestrians:
             aid, x, y, z, yaw, ptype = item[:6]
             safe = "".join(c if c.isalnum() or c == "_" else "_" for c in str(aid))
-            path = f"{parent_path}/ped_{_PED_PRIM_REV}_{safe}"
+            is_bot = _is_delivery_robot(str(ptype))
+            prefix = f"robot_{_ROBOT_PRIM_REV}" if is_bot else f"ped_{_PED_PRIM_REV}"
+            path = f"{parent_path}/{prefix}_{safe}"
             live.add(path)
             color = _ped_color(str(ptype))
             prim = stage.GetPrimAtPath(path)
@@ -1834,24 +1976,53 @@ class CityLabTrafficExtension(omni.ext.IExt):
                 body_path = f"{path}/Body"
                 if stage.GetPrimAtPath(body_path):
                     stage.RemovePrim(body_path)
-                asset = self._pedestrian_asset_for(str(ptype), str(aid))
-                if asset.is_file():
-                    body = stage.DefinePrim(body_path, "Xform")
-                    body.GetReferences().AddReference(
-                        Sdf.Reference(assetPath=str(asset), primPath="/Person")
-                    )
-                    if self._ped_spawn_logged < 4:
-                        carb.log_warn(
-                            f"[citylab.traffic] spawn ped {safe} ({ptype}) → {asset.name}"
+                if is_bot:
+                    asset = self._robot_asset_for()
+                    if asset.is_file():
+                        body = stage.DefinePrim(body_path, "Xform")
+                        body.GetReferences().AddReference(
+                            Sdf.Reference(
+                                assetPath=str(asset),
+                                primPath=_ROBOT_PRIM_PATH,
+                            )
                         )
-                        self._ped_spawn_logged += 1
+                        xf_body = UsdGeom.Xformable(body)
+                        if abs(_ROBOT_MESH_SCALE - 1.0) > 1e-3:
+                            xf_body.AddScaleOp().Set(
+                                Gf.Vec3f(_ROBOT_MESH_SCALE)
+                            )
+                        if self._ped_spawn_logged < 8:
+                            carb.log_warn(
+                                f"[citylab.traffic] spawn robot {safe} → {asset.name} ×{_ROBOT_MESH_SCALE}"
+                            )
+                            self._ped_spawn_logged += 1
+                    else:
+                        cube = UsdGeom.Cube.Define(stage, body_path)
+                        cube.CreateSizeAttr(1.0)
+                        cube.AddScaleOp().Set(_ROBOT_CUBE_SIZE)
+                        cube.GetDisplayColorAttr().Set([color])
+                        carb.log_warn(f"[citylab.traffic] missing robot mesh {asset}")
                 else:
-                    cube = UsdGeom.Cube.Define(stage, body_path)
-                    cube.CreateSizeAttr(1.0)
-                    cube.AddScaleOp().Set(size)
-                    cube.GetDisplayColorAttr().Set([color])
-                    carb.log_warn(f"[citylab.traffic] missing ped mesh {asset}")
-            _set_actor_xform(prim, x, y, z, yaw)
+                    asset = self._pedestrian_asset_for(str(ptype), str(aid))
+                    if asset.is_file():
+                        body = stage.DefinePrim(body_path, "Xform")
+                        body.GetReferences().AddReference(
+                            Sdf.Reference(assetPath=str(asset), primPath="/Person")
+                        )
+                        if self._ped_spawn_logged < 4:
+                            carb.log_warn(
+                                f"[citylab.traffic] spawn ped {safe} ({ptype}) → {asset.name}"
+                            )
+                            self._ped_spawn_logged += 1
+                    else:
+                        cube = UsdGeom.Cube.Define(stage, body_path)
+                        cube.CreateSizeAttr(1.0)
+                        cube.AddScaleOp().Set(size)
+                        cube.GetDisplayColorAttr().Set([color])
+                        carb.log_warn(f"[citylab.traffic] missing ped mesh {asset}")
+            bot_yaw = float(yaw) + (_ROBOT_YAW_OFFSET_DEG if is_bot else 0.0)
+            ground_y = 0.02 if is_bot else y
+            _set_actor_xform(prim, x, ground_y, z, bot_yaw)
 
         for child in list(stage.GetPrimAtPath(parent_path).GetChildren()):
             if child.GetPath().pathString not in live:

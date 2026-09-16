@@ -56,8 +56,9 @@ export function OptInPanel() {
         </button>
       </div>
       <p className="muted optin-note">
-        Residents set what they want robots to respect. Preferences change
-        mock replans (e.g. accessible bay reroute).
+        Residents set what they want robots to respect. Scores aggregate into{" "}
+        <strong>comfort zones</strong> on the CV city map (avoid / caution /
+        advisory) for future robot standoff and reroute.
       </p>
 
       <label className="score-label">

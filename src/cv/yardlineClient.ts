@@ -338,6 +338,13 @@ export type KitActor = {
   yaw?: number;
   cls: string;
   type?: string;
+  /** Projected foot on Kit viewport JPEG (px @ viewport resolution). */
+  u?: number;
+  v?: number;
+  /** [x1,y1,x2,y2] in Kit viewport pixels. */
+  bbox?: [number, number, number, number] | number[];
+  /** Heading tick in Kit viewport pixels. */
+  aim_uv?: [number, number, number, number] | number[];
 };
 
 export type KitActorsPayload = {
