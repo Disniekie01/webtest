@@ -14,12 +14,14 @@ import {
   calibrateYardline,
   conflictFromYardline,
   fetchKitActors,
+  fetchOrchestrator,
   fetchYardlineBriefing,
   fetchYardlineIncidents,
   getYardlineClient,
   postYardlineLabel,
   trackAimUv,
   type KitActorsPayload,
+  type OrchestratorPayload,
   type YardlineBriefing,
   type YardlineFrame,
   type YardlineIncident,
@@ -83,6 +85,7 @@ export function CvModal() {
 
   const [yl, setYl] = useState<YardlineStatus | null>(null);
   const [actors, setActors] = useState<KitActorsPayload | null>(null);
+  const [orch, setOrch] = useState<OrchestratorPayload | null>(null);
   const [mapConflict, setMapConflict] = useState<ConflictSnapshot | null>(null);
   const [calibrating, setCalibrating] = useState(false);
   const [calClicks, setCalClicks] = useState<[number, number][]>([]);
@@ -118,17 +121,18 @@ export function CvModal() {
     };
   }, [show]);
 
-  // Kit actor poll for 2D map + heatmap deposit
+  // Kit actor poll for 2D map + heatmap deposit + orchestrator policy
   useEffect(() => {
     if (!show) return;
     let alive = true;
     const tick = async () => {
-      const payload = await fetchKitActors();
+      const [payload, policy] = await Promise.all([fetchKitActors(), fetchOrchestrator()]);
       if (!alive) return;
       if (payload) {
         setActors(payload);
         if (showHeat) heatRef.current.step(payload);
       }
+      if (policy) setOrch(policy);
     };
     tick();
     const id = window.setInterval(tick, 400);
@@ -409,6 +413,14 @@ export function CvModal() {
                 : 0}
             </span>
             <span>V {frame?.n_vehicles ?? actors?.vehicles.length ?? 0}</span>
+            <span>
+              Policy{" "}
+              {orch?.enabled === false
+                ? "off"
+                : orch?.actions?.length
+                  ? [...new Set(orch.actions.map((a) => a.action))].join("/")
+                  : "—"}
+            </span>
             <span>{frame?.latency_ms != null ? `${Math.round(frame.latency_ms)} ms` : "—"}</span>
             <span>{yl?.calibrated ? "Plane" : "No plane"}</span>
             <span>{yl?.piiRedacted !== false ? "PII" : "RAW"}</span>

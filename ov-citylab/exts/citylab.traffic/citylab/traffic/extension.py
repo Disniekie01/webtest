@@ -18,6 +18,7 @@ from pxr import Gf, Sdf, Usd, UsdGeom, UsdLux, UsdShade
 
 from . import stream_control
 from . import viewport_stream as viewstream
+from .orchestrator import Orchestrator
 
 
 # Match Blender 4×4 @ ~160 m + SUMO 5×5 junctions @ 40 m → 160 m (scale≈1)
@@ -574,6 +575,7 @@ class CityLabTrafficExtension(omni.ext.IExt):
         _load_ped_bands(self._root)
         self._ped_sidewalk_state: dict[str, dict] = {}
         self._ped_follow_ids: list[str] = []
+        self._orch = Orchestrator()
         self._update_sub = None
         self._traci = None
         self._running = False
@@ -1569,6 +1571,19 @@ class CityLabTrafficExtension(omni.ext.IExt):
             # Light safety net only — JuPedSim should already keep ~0.5–1 m gaps.
             sep = 0.55 if PED_MODEL == "jupedsim" else 0.85
             pedestrians = _separate_pedestrians_xz(pedestrians, min_dist_m=sep)
+
+            # Phase 3: rule orchestrator — comfort / busy / proximity → robot speed.
+            try:
+                sim_t = float(self._traci.simulation.getTime())
+            except Exception:
+                sim_t = float(self._frame)
+            self._orch.step(
+                self._traci,
+                pedestrians,
+                viewstream.STATE.comfort_zones_snapshot(),
+                sim_t=sim_t,
+            )
+            viewstream.STATE.publish_orchestrator(self._orch.snapshot())
 
             # Drop sticky state for people who left the sim
             for stale in list(self._ped_sidewalk_state.keys()):

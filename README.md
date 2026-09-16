@@ -135,7 +135,27 @@ onto a 4 m city grid and published to:
 | `GET/POST /viewport/api/comfort-zones` | Kit `:8790` when viewport HTTP is on |
 
 Low comfort → **avoid** / **caution** cells on the CV city map (**Comfort zones**
-chip). Robots will consume this grid in a later orchestrator pass.
+chip). Delivery robots consume this grid via the Phase 3 rule orchestrator.
+
+### Delivery robots (Phase 2)
+
+SUMO `robots.rou.xml` walks `delivery_robot` sidewalk agents. Kit spawns
+`assets/robots/deliveryrobot_001.usd` and publishes `cls: "robot"` on
+`/viewport/api/actors`. The CV map draws amber bot markers and person↔bot
+proximity; camera UV overlays stay off until a city-aligned plane exists.
+
+### Rule orchestrator (Phase 3)
+
+Each TraCI tick scores robots with
+`cost = w_c·(1−comfort) + w_b·busy + w_p·proximity`, then
+`person.setSpeed` → **proceed** / **slow** / **hold**.
+
+| Route | Purpose |
+| --- | --- |
+| `GET /viewport/api/orchestrator` | Latest actions + log path |
+
+Logs: `/tmp/citylab_orch_logs/orch_YYYYMMDD.jsonl` inside the Isaac container
+(`CITYLAB_ORCH_LOG_DIR` to override). Toggle with `CITYLAB_ORCH=0`.
 
 ---
 

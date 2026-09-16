@@ -364,6 +364,35 @@ export async function fetchKitActors(): Promise<KitActorsPayload | null> {
   }
 }
 
+export type OrchAction = {
+  robot_id: string;
+  action: string;
+  cost?: number;
+  comfort?: number;
+  busy?: number;
+  prox?: number;
+};
+
+export type OrchestratorPayload = {
+  updatedAt?: number;
+  enabled?: boolean;
+  tick?: number;
+  actions?: OrchAction[];
+  log?: string | null;
+};
+
+export async function fetchOrchestrator(): Promise<OrchestratorPayload | null> {
+  try {
+    const res = await fetch("/viewport/api/orchestrator", {
+      signal: AbortSignal.timeout(800),
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as OrchestratorPayload;
+  } catch {
+    return null;
+  }
+}
+
 export type YardlineBriefing = {
   title?: string;
   body?: string;

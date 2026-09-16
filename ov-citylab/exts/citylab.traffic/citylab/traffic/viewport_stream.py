@@ -36,6 +36,13 @@ class ViewportStreamState:
             "cells": [],
             "deposits": [],
         }
+        self.orchestrator: dict = {
+            "updatedAt": 0.0,
+            "enabled": False,
+            "tick": 0,
+            "actions": [],
+            "log": None,
+        }
 
     def publish(self, jpeg: bytes, width: int, height: int, vehicles: int, pedestrians: int) -> None:
         with self.lock:
@@ -73,6 +80,15 @@ class ViewportStreamState:
     def comfort_zones_snapshot(self) -> dict:
         with self.lock:
             return dict(self.comfort_zones)
+
+    def publish_orchestrator(self, payload: dict) -> None:
+        with self.lock:
+            self.orchestrator = dict(payload)
+            self.orchestrator["updatedAt"] = time.time()
+
+    def orchestrator_snapshot(self) -> dict:
+        with self.lock:
+            return dict(self.orchestrator)
 
     def status(self) -> dict:
         with self.lock:
@@ -133,6 +149,16 @@ class _Handler(BaseHTTPRequestHandler):
             return
         if path.startswith("/api/comfort-zones"):
             body = json.dumps(STATE.comfort_zones_snapshot()).encode("utf-8")
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "application/json")
+            self._cors()
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+        if path.startswith("/api/orchestrator"):
+            body = json.dumps(STATE.orchestrator_snapshot()).encode("utf-8")
             self.send_response(HTTPStatus.OK)
             self.send_header("Content-Type", "application/json")
             self._cors()
