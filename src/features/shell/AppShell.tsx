@@ -1,7 +1,6 @@
 import { StoryRail } from "../stories/StoryRail";
 import { BeatPanel } from "../stories/BeatPanel";
 import { OptInPanel } from "../comfort/OptInPanel";
-import { CameraPanel } from "../cv/CameraPanel";
 import { Transport } from "../play/Transport";
 import { useLabStore } from "../../state/store";
 import "./AppShell.css";
@@ -26,7 +25,6 @@ export function AppShell() {
       <div className="lab-right">
         <BeatPanel />
         {showOptIn && <OptInPanel />}
-        <CameraPanel />
       </div>
 
       <div className="lab-bottom">

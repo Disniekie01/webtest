@@ -23,6 +23,12 @@ class ViewportStreamState:
         self.vehicles = 0
         self.pedestrians = 0
         self.detail = "booting"
+        self.actors: dict = {
+            "updatedAt": 0.0,
+            "span_m": 160.0,
+            "vehicles": [],
+            "pedestrians": [],
+        }
 
     def publish(self, jpeg: bytes, width: int, height: int, vehicles: int, pedestrians: int) -> None:
         with self.lock:
@@ -33,6 +39,24 @@ class ViewportStreamState:
             self.vehicles = vehicles
             self.pedestrians = pedestrians
             self.detail = f"Kit viewport · {vehicles} veh · {pedestrians} ped"
+
+    def publish_actors(
+        self,
+        vehicles: list[dict],
+        pedestrians: list[dict],
+        span_m: float = 160.0,
+    ) -> None:
+        with self.lock:
+            self.actors = {
+                "updatedAt": time.time(),
+                "span_m": float(span_m),
+                "vehicles": vehicles,
+                "pedestrians": pedestrians,
+            }
+
+    def actors_snapshot(self) -> dict:
+        with self.lock:
+            return dict(self.actors)
 
     def status(self) -> dict:
         with self.lock:
@@ -46,6 +70,7 @@ class ViewportStreamState:
                 "width": self.width,
                 "height": self.height,
                 "source": "kit-viewport",
+                "actorsAt": self.actors.get("updatedAt", 0),
             }
 
 
@@ -65,6 +90,16 @@ class _Handler(BaseHTTPRequestHandler):
             self.send_response(HTTPStatus.OK)
             self.send_header("Content-Type", "application/json")
             self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+        if self.path.startswith("/api/actors"):
+            body = json.dumps(STATE.actors_snapshot()).encode("utf-8")
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Cache-Control", "no-store")
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)

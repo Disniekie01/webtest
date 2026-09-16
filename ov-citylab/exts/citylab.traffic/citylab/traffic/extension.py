@@ -31,15 +31,21 @@ VIEW_H = int(os.environ.get("CITYLAB_VIEW_H", "1080"))
 # Heading-based offsets fail for against-traffic walkers — snap to mesh ribbons instead.
 _PED_OFFSET_ENV = os.environ.get("CITYLAB_PED_OFFSET_M")  # optional fixed total (legacy)
 PED_SIDEWALK_INSET_M = float(os.environ.get("CITYLAB_PED_INSET_M", "2.2"))  # unused when JSON present
-# Optional: jupedsim (crowd dynamics). Default striping is set in city.sumocfg.
-PED_MODEL = os.environ.get("CITYLAB_PED_MODEL", "").strip().lower()
+# Optional: jupedsim (crowd dynamics). Default is jupedsim via city.sumocfg / CITYLAB_PED_MODEL.
+PED_MODEL = os.environ.get("CITYLAB_PED_MODEL", "jupedsim").strip().lower()
 _SIDEWALKS_JSON: dict | None = None
 _SIDEWALK_RIBBONS: list[dict] = []
 
-# Flat generic pack exports + parking car (known-visible)
-# Temporary: only the known-good parking car until generic pack is fixed.
+# KayKit City Builder cars (CC0) — the same models the webtest view renders, so
+# the twin and the web mock show the same traffic. Built by
+# tools/export_kaykit_cars.py, checked by tools/verify_cars.py. All five share
+# one atlas material, so the variety costs a single texture.
 _CAR_MESHES = (
-    "parking_car.usdc",
+    "kaykit/car_sedan.usdc",
+    "kaykit/car_stationwagon.usdc",
+    "kaykit/car_hatchback.usdc",
+    "kaykit/car_taxi.usdc",
+    "kaykit/car_police.usdc",
 )
 _CAR_PAINT = (
     Gf.Vec3f(0.82, 0.12, 0.10),
@@ -52,11 +58,17 @@ _CAR_PAINT = (
     Gf.Vec3f(0.55, 0.15, 0.55),
 )
 # Bump path suffix when mesh/yaw convention changes so live actors respawn.
-_CAR_PRIM_REV = "v14"
-# parking_car / people USDs are authored Y-up (height=+Y, forward=+X). No body tilt.
-# SUMO 0°=north (−Z), 90°=east (+X). yaw = 90 - angle; offset flips nose if needed.
+_CAR_PRIM_REV = "v18"
+# Temporary uniform shrink so KayKit bodies fit 2.0–3.0 m SUMO lanes
+# (meshes are ~2.1 m wide). Replace with properly sized assets later.
+_CAR_MESH_SCALE = float(os.environ.get("CITYLAB_CAR_SCALE", "0.85"))
+# Car / people USDs are authored Y-up, grounded at y=0, no body tilt.
+# SUMO 0°=north (−Z), 90°=east (+X). yaw = 90 - angle, so the 180° offset below
+# means the meshes point their nose down −X. verify_cars.py enforces that.
 _CAR_YAW_OFFSET_DEG = float(os.environ.get("CITYLAB_CAR_YAW_OFFSET", "180"))
-_PED_YAW_OFFSET_DEG = float(os.environ.get("CITYLAB_PED_YAW_OFFSET", "180"))
+# Peds: export_quaternius_people.py bakes +90° into vertices before forward=+X
+# export. Cars use 180; peds need 270 (= 90 + 180) so they face their motion.
+_PED_YAW_OFFSET_DEG = float(os.environ.get("CITYLAB_PED_YAW_OFFSET", "270"))
 
 # ped_behaviors.rou.xml type → display color (cube fallback) / mesh file
 _PED_COLORS = {
@@ -141,6 +153,7 @@ def _load_ped_bands(root: Path) -> dict[str, dict]:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
         _PED_BANDS = dict(data.get("bands") or {})
+        # Keep this ≤ ~1.0: larger values push CR walkers past the curb into asphalt.
         _PED_CROSS_HALF_M = float(data.get("cross_half_m") or 1.0)
         carb.log_warn(f"[citylab.traffic] loaded {len(_PED_BANDS)} sidewalk bands")
     except Exception as exc:
@@ -316,7 +329,8 @@ def _ped_lateral_target(
         return 0.5 * (lo + hi) + _PED_RIBBON_SHIFT_M
 
     jitter = (zlib.crc32(pid.encode("utf-8")) % 1001) / 1000.0  # [0, 1]
-    if _PED_KEEP_RIGHT:
+    # Keep-right is for sidewalk streams only — on CR it pushes walkers into the curb/road.
+    if _PED_KEEP_RIGHT and not crossing:
         # Opposing streams take opposite halves, overlapping slightly in the middle.
         mid = 0.5 * (lo + hi)
         slack = 0.15 * (hi - lo)
@@ -324,6 +338,67 @@ def _ped_lateral_target(
     else:
         a, b = lo, hi
     return min(hi, max(lo, a + jitter * (b - a) + _PED_RIBBON_SHIFT_M))
+
+
+def _separate_pedestrians_xz(
+    pedestrians: list, min_dist_m: float = 0.85
+) -> list:
+    """Push overlapping USD ped positions apart so striping jams don't render as one mesh."""
+    if len(pedestrians) < 2:
+        return pedestrians
+    out = [list(p) for p in pedestrians]
+    for _ in range(4):
+        moved = False
+        for i in range(len(out)):
+            for j in range(i + 1, len(out)):
+                dx = float(out[j][1]) - float(out[i][1])
+                dz = float(out[j][3]) - float(out[i][3])
+                d2 = dx * dx + dz * dz
+                if d2 >= min_dist_m * min_dist_m:
+                    continue
+                if d2 < 1e-8:
+                    # Identical pose — fan by stable hash so they don't stick forever.
+                    ang = (zlib.crc32(str(out[j][0]).encode("utf-8")) % 360) * 0.01745329251
+                    dx, dz = math.cos(ang), math.sin(ang)
+                    d2 = 1.0
+                d = d2 ** 0.5
+                push = 0.5 * (min_dist_m - d) / d
+                out[i][1] = float(out[i][1]) - dx * push
+                out[i][3] = float(out[i][3]) - dz * push
+                out[j][1] = float(out[j][1]) + dx * push
+                out[j][3] = float(out[j][3]) + dz * push
+                moved = True
+        if not moved:
+            break
+    return [tuple(p) for p in out]
+
+
+def _sumo_ped_model_args() -> list[str]:
+    """CLI args for the active pedestrian model (reload-safe)."""
+    model = PED_MODEL or "jupedsim"
+    args: list[str] = []
+    if model in ("striping", "jupedsim", "nonInteracting"):
+        args.extend(["--pedestrian.model", model])
+    if model == "jupedsim":
+        args.extend(
+            [
+                "--pedestrian.jupedsim.model",
+                os.environ.get("CITYLAB_JUPED_MODEL", "CollisionFreeSpeedV2"),
+                "--pedestrian.jupedsim.step-length",
+                os.environ.get("CITYLAB_JUPED_STEP", "0.05"),
+                "--pedestrian.jupedsim.exit-tolerance",
+                "1.0",
+                "--pedestrian.jupedsim.strength-neighbor-repulsion",
+                os.environ.get("CITYLAB_JUPED_NBR_STR", "12.0"),
+                "--pedestrian.jupedsim.range-neighbor-repulsion",
+                os.environ.get("CITYLAB_JUPED_NBR_RANGE", "1.4"),
+                "--pedestrian.jupedsim.strength-geometry-repulsion",
+                os.environ.get("CITYLAB_JUPED_GEO_STR", "8.0"),
+                "--pedestrian.jupedsim.range-geometry-repulsion",
+                os.environ.get("CITYLAB_JUPED_GEO_RANGE", "0.6"),
+            ]
+        )
+    return args
 
 
 def _ped_lateral_offset_m(traci_mod, pid: str) -> float:
@@ -861,8 +936,8 @@ class CityLabTrafficExtension(omni.ext.IExt):
                 "--no-step-log",
                 "true",
             ]
-            if PED_MODEL in ("striping", "jupedsim", "nonInteracting"):
-                cmd.extend(["--pedestrian.model", PED_MODEL])
+            model = PED_MODEL or "jupedsim"
+            cmd.extend(_sumo_ped_model_args())
             traci.start(cmd)
             bounds = traci.simulation.getNetBoundary()
             # Use the designed 160 m grid span for centering — TraCI bounds can inflate
@@ -875,7 +950,8 @@ class CityLabTrafficExtension(omni.ext.IExt):
             self._sumo_pending = False
             carb.log_warn(
                 f"[citylab.traffic] SUMO up map={raw_w:.0f}×{raw_h:.0f} m "
-                f"center={self._net_w:.0f}×{self._net_h:.0f} scale={COORD_SCALE:.3f}"
+                f"center={self._net_w:.0f}×{self._net_h:.0f} scale={COORD_SCALE:.3f} "
+                f"ped_model={model}"
             )
             stream_control.set_boot(
                 stage="sumo",
@@ -1334,8 +1410,7 @@ class CityLabTrafficExtension(omni.ext.IExt):
                 and self._traci.simulation.getMinExpectedNumber() == 0
             ):
                 reload = ["-c", str(self._sumo_cfg), "--start", "--no-step-log", "true"]
-                if PED_MODEL in ("striping", "jupedsim", "nonInteracting"):
-                    reload.extend(["--pedestrian.model", PED_MODEL])
+                reload.extend(_sumo_ped_model_args())
                 self._traci.load(reload)
                 return
 
@@ -1370,9 +1445,22 @@ class CityLabTrafficExtension(omni.ext.IExt):
                     lane_id = self._traci.person.getLaneID(pid)
                 except Exception:
                     lane_id = ""
-                if ribbons:
-                    sx, sy = self._smooth_sidewalk_pose(str(pid), sx, sy, lane_id, ribbons)
-                else:
+                try:
+                    speed = float(self._traci.person.getSpeed(pid))
+                except Exception:
+                    speed = 1.0
+                try:
+                    lane_pos = float(self._traci.person.getLanePosition(pid))
+                except Exception:
+                    lane_pos = 0.0
+                if ribbons and PED_MODEL != "jupedsim":
+                    # Striping sits on lane centre-lines — snap onto CityGen sidewalk ribbons.
+                    # JuPedSim already places agents in continuous 2D; snapping would collapse
+                    # their natural spacing back into a blob.
+                    sx, sy = self._smooth_sidewalk_pose(
+                        str(pid), sx, sy, lane_id, ribbons, speed=speed, lane_pos=lane_pos
+                    )
+                elif PED_MODEL != "jupedsim":
                     offset = _ped_lateral_offset_m(self._traci, pid)
                     if offset:
                         sx, sy = _sidewalk_offset_sumo(sx, sy, angle, offset)
@@ -1384,6 +1472,10 @@ class CityLabTrafficExtension(omni.ext.IExt):
                     ptype = "adult"
                 pedestrians.append((pid, ux, 0.05, uz, yaw, ptype))
 
+            # Light safety net only — JuPedSim should already keep ~0.5–1 m gaps.
+            sep = 0.55 if PED_MODEL == "jupedsim" else 0.85
+            pedestrians = _separate_pedestrians_xz(pedestrians, min_dist_m=sep)
+
             # Drop sticky state for people who left the sim
             for stale in list(self._ped_sidewalk_state.keys()):
                 if stale not in live_pids:
@@ -1392,6 +1484,31 @@ class CityLabTrafficExtension(omni.ext.IExt):
             self._veh = len(vehicles)
             self._ped = len(pedestrians)
             self._sync_prims(vehicles, pedestrians)
+            # USD XZ poses for City Lab 2D map (prefer TraCI over vision).
+            viewstream.STATE.publish_actors(
+                [
+                    {
+                        "id": str(vid),
+                        "x": round(float(ux), 2),
+                        "z": round(float(uz), 2),
+                        "yaw": round(float(yaw), 1),
+                        "cls": "vehicle",
+                    }
+                    for vid, ux, _uy, uz, yaw in vehicles
+                ],
+                [
+                    {
+                        "id": str(pid),
+                        "x": round(float(ux), 2),
+                        "z": round(float(uz), 2),
+                        "yaw": round(float(yaw), 1),
+                        "cls": "person",
+                        "type": str(ptype),
+                    }
+                    for pid, ux, _uy, uz, yaw, ptype in pedestrians
+                ],
+                span_m=CITY_SPAN_M,
+            )
         except Exception as exc:
             if self._frame % 60 == 0:
                 carb.log_warn(f"[citylab.traffic] sync: {exc}")
@@ -1439,6 +1556,8 @@ class CityLabTrafficExtension(omni.ext.IExt):
         sy: float,
         lane_id: str,
         ribbons: list[dict],
+        speed: float = 1.0,
+        lane_pos: float = 0.0,
     ) -> tuple[float, float]:
         """Pin walkers to CityGen sidewalk/crosswalk ribbons; lerp so junctions don't jump."""
         state = self._ped_sidewalk_state.get(pid)
@@ -1477,31 +1596,89 @@ class CityLabTrafficExtension(omni.ext.IExt):
                     _step(prev_x, sx, _PED_POS_STEP_M),
                     _step(prev_y, sy, _PED_POS_STEP_M),
                 )
-            target = _ped_lateral_target(
-                pid,
-                ribbon,
-                _PED_BANDS.get(str(ped.get("edge") or "")),
-                bool(ped.get("rev")),
-                str(ped.get("kind")) == "CR",
-            )
-            # SW_*: spread across the sidewalk. CR_*: pin the non-crossing axis so the
-            # crosswalk stays on the sidewalk line while the free axis follows SUMO.
-            if direction == "NS":
-                goal_x, goal_y = target, sy
+            crossing = str(ped.get("kind")) == "CR"
+            center = float(ribbon["center_sumo"])
+            # Crossings: pin hard to ribbon centre (no curb-side spread into asphalt).
+            # Sidewalks: keep band/keep-right spread.
+            if crossing:
+                # Building-side inset so waiters sit on tiles, not the zebra/curb.
+                half_w = 0.5 * float(ribbon.get("width_m") or 4.0)
+                inset = min(0.9, max(0.35, half_w * 0.35))
+                target = center - inset if center < line else center + inset
+            elif (
+                state is not None
+                and state.get("dir") == direction
+                and str(state.get("side")) == side
+            ):
+                target = float(state["vis_x"] if direction == "NS" else state["vis_y"])
             else:
-                goal_x, goal_y = sx, target
+                target = _ped_lateral_target(
+                    pid,
+                    ribbon,
+                    _PED_BANDS.get(str(ped.get("edge") or "")),
+                    bool(ped.get("rev")),
+                    False,
+                )
+
+            along = (
+                (zlib.crc32(f"{pid}|along".encode("utf-8")) % 1001) / 1000.0 - 0.5
+            ) * (0.25 if crossing else 0.45)
+
+            # Jammed / queued on a crossing → hold at the nearer sidewalk corner
+            # instead of stacking mid-zebra where SUMO striping deadlocks.
+            if crossing and speed < 0.45 and lane_id and self._traci is not None:
+                try:
+                    shape = self._traci.lane.getShape(lane_id)
+                    lane_len = float(self._traci.lane.getLength(lane_id)) or 1.0
+                    if shape:
+                        end = shape[0] if lane_pos < 0.5 * lane_len else shape[-1]
+                        sx, sy = float(end[0]), float(end[1])
+                        along = (
+                            (zlib.crc32(f"{pid}|wait".encode("utf-8")) % 1001) / 1000.0 - 0.5
+                        ) * 1.2
+                except Exception:
+                    pass
+
+            if direction == "NS":
+                goal_x, goal_y = target, sy + along
+            else:
+                goal_x, goal_y = sx + along, target
             if state is None:
                 return _store(direction, line, side, goal_x, goal_y)
+            axis_flip = str(state.get("dir")) != direction
+            lat_lim = _PED_POS_STEP_M if axis_flip or crossing else _PED_LATERAL_STEP_M
+            free_lim = _PED_POS_STEP_M
             return _store(
                 direction,
                 line,
                 side,
-                _step(prev_x, goal_x, _PED_LATERAL_STEP_M if direction == "NS" else _PED_POS_STEP_M),
-                _step(prev_y, goal_y, _PED_LATERAL_STEP_M if direction == "EW" else _PED_POS_STEP_M),
+                _step(prev_x, goal_x, lat_lim if direction == "NS" else free_lim),
+                _step(prev_y, goal_y, lat_lim if direction == "EW" else free_lim),
             )
 
-        # True junction / unknown: ease both axes toward SUMO (never freeze one axis).
-        if edge.startswith(":") or _corridor_from_lane(lane_id) is None:
+        # True junction / unknown: keep the last sidewalk lateral pin when we have one,
+        # otherwise people slam into the carriageway centre where SUMO junctions sit.
+        if edge.startswith(":") or (ped is None and _corridor_from_lane(lane_id) is None):
+            if state is not None and state.get("dir") in ("NS", "EW") and state.get("side") not in (None, "?"):
+                direction = str(state["dir"])
+                line = float(state["line"])
+                side = str(state["side"])
+                ribbon = _ribbon_for(ribbons, direction, line, side)
+                prev_x = float(state["vis_x"])
+                prev_y = float(state["vis_y"])
+                if ribbon is not None:
+                    target = float(ribbon["center_sumo"])
+                    if direction == "NS":
+                        goal_x, goal_y = target, sy
+                    else:
+                        goal_x, goal_y = sx, target
+                    return _store(
+                        direction,
+                        line,
+                        side,
+                        _step(prev_x, goal_x, _PED_LATERAL_STEP_M if direction == "NS" else _PED_POS_STEP_M),
+                        _step(prev_y, goal_y, _PED_LATERAL_STEP_M if direction == "EW" else _PED_POS_STEP_M),
+                    )
             if state is None:
                 return _store("?", 0.0, "?", sx, sy)
             prev_x = float(state["vis_x"])
@@ -1552,7 +1729,9 @@ class CityLabTrafficExtension(omni.ext.IExt):
         self._apply_pedestrian_actors(stage, f"{TRAFFIC_ROOT}/Pedestrians", pedestrians)
 
     def _vehicle_asset_for(self, aid: str) -> tuple[Path, Gf.Vec3f]:
-        h = abs(hash(str(aid)))
+        # Spread across all mesh types: Python's hash() is salted per process,
+        # so use a stable checksum so sedan/taxi/police/etc. all show up.
+        h = sum(ord(c) for c in str(aid))
         mesh_name = _CAR_MESHES[h % len(_CAR_MESHES)]
         color = _CAR_PAINT[h % len(_CAR_PAINT)]
         return self._root / "assets" / "vehicles" / mesh_name, color
@@ -1610,6 +1789,10 @@ class CityLabTrafficExtension(omni.ext.IExt):
                     body.GetReferences().AddReference(
                         Sdf.Reference(assetPath=str(asset), primPath="/Car")
                     )
+                    if abs(_CAR_MESH_SCALE - 1.0) > 1e-3:
+                        UsdGeom.Xformable(body).AddScaleOp().Set(
+                            Gf.Vec3f(_CAR_MESH_SCALE)
+                        )
                     self._bind_car_paint(stage, body_path, color)
                     if getattr(self, "_car_spawn_logged", 0) < 6:
                         self._car_spawn_logged = getattr(self, "_car_spawn_logged", 0) + 1
@@ -1617,7 +1800,9 @@ class CityLabTrafficExtension(omni.ext.IExt):
                 else:
                     cube = UsdGeom.Cube.Define(stage, body_path)
                     cube.CreateSizeAttr(1.0)
-                    cube.AddScaleOp().Set(Gf.Vec3f(4.5, 1.5, 2.0))
+                    cube.AddScaleOp().Set(
+                        Gf.Vec3f(4.5 * _CAR_MESH_SCALE, 1.5 * _CAR_MESH_SCALE, 2.0 * _CAR_MESH_SCALE)
+                    )
                     cube.GetDisplayColorAttr().Set([color])
                     carb.log_warn(f"[citylab.traffic] missing car mesh {asset}")
             _set_actor_xform(prim, x, y, z, yaw)

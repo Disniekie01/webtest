@@ -28,6 +28,12 @@
 .app-chrome .lab-top,
 .app-chrome .lab-left,
 .app-chrome .lab-right,
-.app-chrome .lab-bottom {
+.app-chrome .lab-bottom,
+.app-chrome .cv-modal-backdrop {
   pointer-events: auto;
 }
+
+body.cv-modal-open .kit-bg__iframe {
+  pointer-events: none;
+}
+

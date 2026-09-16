@@ -170,7 +170,8 @@ function webrtcLauncherPlugin(): Plugin {
             [
               "--new-window",
               "--autoplay-policy=no-user-gesture-required",
-              "http://127.0.0.1:8210/",
+              // City Lab UI embeds the viewer; never open :8210 alone (steals NVST slot).
+              "http://127.0.0.1:5175/",
             ],
             {
               detached: true,
@@ -180,7 +181,7 @@ function webrtcLauncherPlugin(): Plugin {
           );
           child.unref();
           res.statusCode = 200;
-          res.end(JSON.stringify({ ok: true, detail: "Chrome → http://127.0.0.1:8210/", pid: child.pid }));
+          res.end(JSON.stringify({ ok: true, detail: "Chrome → http://127.0.0.1:5175/", pid: child.pid }));
         } catch (err) {
           res.statusCode = 500;
           res.end(JSON.stringify({ ok: false, error: String(err) }));
@@ -247,6 +248,13 @@ export default defineConfig({
         target: "http://127.0.0.1:8210",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/ov-stream/, "") || "/",
+        ws: true,
+      },
+      // Yardline CV (YOLO / ByteTrack / TTC) — twin frames via /viewport/frame.jpg
+      "/yardline": {
+        target: "http://127.0.0.1:8010",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/yardline/, "") || "/",
         ws: true,
       },
     },

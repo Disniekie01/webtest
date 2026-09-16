@@ -1,6 +1,7 @@
 import { useLabStore } from "./state/store";
 import { Hero } from "./features/shell/Hero";
 import { AppShell } from "./features/shell/AppShell";
+import { CvModal } from "./features/cv/CvModal";
 import { KitStreamBackground } from "./scene/KitStreamBackground";
 import "./App.css";
 
@@ -13,6 +14,8 @@ export default function App() {
         <KitStreamBackground />
       </div>
       <div className="app-chrome">{mode === "hero" ? <Hero /> : <AppShell />}</div>
+      {/* Portal target sibling — not under pointer-events:none chrome */}
+      <CvModal />
     </div>
   );
 }

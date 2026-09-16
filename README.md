@@ -102,12 +102,27 @@ When `ov-citylab/` is present, the dev server adds these endpoints and proxies:
 | `/api/release-stream-slot` | `ov-citylab/scripts/release_stream_slot.sh` | Free the single WebRTC client slot |
 | `/api/open-chrome-stream` | local Chrome | Open the raw viewer |
 | `/ov-stream` | `http://127.0.0.1:8210` | Same-origin embed of the stream |
-| `/viewport`, `/kit-api` | `http://127.0.0.1:8790` | Kit viewport + API |
+| `/viewport`, `/kit-api` | `http://127.0.0.1:8790` | Kit viewport JPEG + `/api/actors` |
 | `/stream-ctl` | `http://127.0.0.1:8791` | Kit stream control |
+| `/yardline` | `http://127.0.0.1:8010` | Yardline CV (HTTP + WS `/ws/stream`) |
 
 Ports in play: **5175** app, **8210** stream viewer, **49100** WebRTC signaling
-(TCP), **47998** media (UDP), **8791** Kit control. Running it needs an NVIDIA
-GPU, Docker with the NVIDIA container runtime, and access to the Isaac Sim image.
+(TCP), **47998** media (UDP), **8790** viewport JPEG / actors, **8791** Kit
+control, **8010** Yardline. Running the twin needs an NVIDIA GPU, Docker with
+the NVIDIA container runtime, and access to the Isaac Sim image.
+
+### Yardline CV on the twin
+
+1. Start Isaac with viewport HTTP (default): `ov-citylab/scripts/run_isaac6_streaming.sh`
+   — sets `CITYLAB_VIEWPORT_HTTP=1`. Confirm `GET http://127.0.0.1:5175/viewport/frame.jpg`.
+2. Start Yardline: `ov-citylab/scripts/run_yardline_twin.sh` (or `uvicorn` on `:8010`).
+3. Open City Lab UI, leave **Yardline CV** on. The panel shows twin detections;
+   **City Map** plots SUMO/Kit ped+vehicle poses with proximity. Use **Calibrate**
+   (4 ground clicks) for metric TTC overlays.
+
+Do **not** open a second `:8210` tab — one NVST client only. Yardline samples
+JPEG (`/viewport/frame.jpg`), not WebRTC pixels. Prefer `yolov8n` at ~5–10 Hz
+if Isaac and Yardline share one GPU.
 
 ---
 

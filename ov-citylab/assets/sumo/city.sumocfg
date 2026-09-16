@@ -14,9 +14,16 @@
     <collision.action value="warn"/>
     <time-to-teleport value="120"/>
     <emergencydecel.warning-threshold value="1.5"/>
-    <pedestrian.model value="striping"/>
-    <pedestrian.striping.dawdling value="0.35"/>
-    <pedestrian.striping.stripe-width value="0.65"/>
+    <!-- JuPedSim: continuous 2D crowd (CollisionFreeSpeedV2) — not striping lanes -->
+    <pedestrian.model value="jupedsim"/>
+    <pedestrian.jupedsim.model value="CollisionFreeSpeedV2"/>
+    <pedestrian.jupedsim.step-length value="0.05"/>
+    <pedestrian.jupedsim.exit-tolerance value="1.0"/>
+    <!-- Stronger personal space so crossings don't form a white blob -->
+    <pedestrian.jupedsim.strength-neighbor-repulsion value="12.0"/>
+    <pedestrian.jupedsim.range-neighbor-repulsion value="1.4"/>
+    <pedestrian.jupedsim.strength-geometry-repulsion value="8.0"/>
+    <pedestrian.jupedsim.range-geometry-repulsion value="0.6"/>
   </processing>
   <report>
     <duration-log.disable value="true"/>

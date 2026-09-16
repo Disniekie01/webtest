@@ -47,6 +47,8 @@ type LabState = {
   setDuration: (d: number) => void;
   tick: (dt: number) => void;
   toggleCv: () => void;
+  openCv: () => void;
+  closeCv: () => void;
   toggleOptIn: () => void;
   setComfortOverride: (id: string, o: ComfortOverride) => void;
   setPlaybackFrame: (frame: {
@@ -100,7 +102,7 @@ export const useLabStore = create<LabState>()(
       playing: false,
       timeS: 0,
       durationS: 1,
-      showCv: true,
+      showCv: false,
       showOptIn: false,
       comfortOverrides: {},
       conflict: null,
@@ -159,6 +161,8 @@ export const useLabStore = create<LabState>()(
         set({ timeS: next });
       },
       toggleCv: () => set((s) => ({ showCv: !s.showCv })),
+      openCv: () => set({ showCv: true }),
+      closeCv: () => set({ showCv: false }),
       toggleOptIn: () => set((s) => ({ showOptIn: !s.showOptIn })),
       setComfortOverride: (id, o) => {
         // Keep a stable object identity only when content changes for subscribers.
@@ -209,7 +213,6 @@ export const useLabStore = create<LabState>()(
       name: "city-lab-comfort",
       partialize: (s) => ({
         comfortOverrides: s.comfortOverrides,
-        showCv: s.showCv,
       }),
     },
   ),

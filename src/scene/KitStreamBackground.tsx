@@ -4,6 +4,8 @@ import "./KitStreamBackground.css";
 /**
  * Single WebRTC client: NVIDIA viewer (:8210) embedded full-bleed under City Lab UI.
  * Do not also open a separate :8210 tab — that steals the NVST slot.
+ * Note: /ov-stream proxy breaks the viewer (absolute /src and /stream-config
+ * paths hit the webtest Vite root instead of the viewer).
  */
 const VIEWER = "http://127.0.0.1:8210/";
 
@@ -120,7 +122,7 @@ export function KitStreamBackground() {
           className="kit-bg__iframe"
           src={`${VIEWER}?embed=1&t=${iframeKey}`}
           title="Isaac Sim WebRTC"
-          allow="autoplay; fullscreen; clipboard-read; clipboard-write"
+          allow="autoplay; fullscreen; clipboard-read; clipboard-write; display-capture"
           referrerPolicy="no-referrer"
         />
       )}

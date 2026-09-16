@@ -21,6 +21,15 @@ export function Hero() {
             type="button"
             className="cta"
             onClick={() => {
+              useLabStore.getState().openCv();
+            }}
+          >
+            CV
+          </button>
+          <button
+            type="button"
+            className="cta"
+            onClick={() => {
               useLabStore.setState({ showOptIn: true });
               enterLab("noor_rahman");
             }}
