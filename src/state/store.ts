@@ -37,6 +37,12 @@ type LabState = {
   currentBeat: string | null;
   currentComfort: number;
   currentLabel: string | null;
+  /** TraCI raw action: proceed | slow | hold */
+  orchAction: string | null;
+  /** Story chip: proceed | detour | yield */
+  orchPolicy: string | null;
+  orchLive: boolean;
+  kitRobotLive: boolean;
 
   enterLab: (personId?: string) => void;
   backHero: () => void;
@@ -51,6 +57,12 @@ type LabState = {
   closeCv: () => void;
   toggleOptIn: () => void;
   setComfortOverride: (id: string, o: ComfortOverride) => void;
+  setOrchPolicy: (p: {
+    action: string | null;
+    label: string | null;
+    live: boolean;
+    kitRobotLive: boolean;
+  }) => void;
   setPlaybackFrame: (frame: {
     personPos: [number, number, number];
     robotPos: [number, number, number] | null;
@@ -112,6 +124,10 @@ export const useLabStore = create<LabState>()(
       currentBeat: null,
       currentComfort: 0.5,
       currentLabel: null,
+      orchAction: null,
+      orchPolicy: null,
+      orchLive: false,
+      kitRobotLive: false,
 
       enterLab: (personId) => {
         const id = personId || peopleIndexJson[0]?.id || null;
@@ -170,6 +186,23 @@ export const useLabStore = create<LabState>()(
         set((s) => ({
           comfortOverrides: { ...s.comfortOverrides, [id]: o },
         }));
+      },
+      setOrchPolicy: (p) => {
+        const cur = get();
+        if (
+          cur.orchAction === p.action &&
+          cur.orchPolicy === p.label &&
+          cur.orchLive === p.live &&
+          cur.kitRobotLive === p.kitRobotLive
+        ) {
+          return;
+        }
+        set({
+          orchAction: p.action,
+          orchPolicy: p.label,
+          orchLive: p.live,
+          kitRobotLive: p.kitRobotLive,
+        });
       },
       setPlaybackFrame: (frame) => {
         const cur = get();

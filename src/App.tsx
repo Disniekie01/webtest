@@ -3,6 +3,7 @@ import { Hero } from "./features/shell/Hero";
 import { AppShell } from "./features/shell/AppShell";
 import { CvModal } from "./features/cv/CvModal";
 import { ComfortZonePublisher } from "./features/comfort/ComfortZonePublisher";
+import { StoryKitBridge } from "./features/stories/StoryKitBridge";
 import { KitStreamBackground } from "./scene/KitStreamBackground";
 import "./App.css";
 
@@ -16,6 +17,7 @@ export default function App() {
       </div>
       <div className="app-chrome">{mode === "hero" ? <Hero /> : <AppShell />}</div>
       <ComfortZonePublisher />
+      <StoryKitBridge />
       <CvModal />
     </div>
   );

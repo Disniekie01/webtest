@@ -7,6 +7,9 @@ export function BeatPanel() {
   const beat = useLabStore((s) => s.currentBeat);
   const comfort = useLabStore((s) => s.currentComfort);
   const label = useLabStore((s) => s.currentLabel);
+  const orchPolicy = useLabStore((s) => s.orchPolicy);
+  const orchLive = useLabStore((s) => s.orchLive);
+  const kitRobotLive = useLabStore((s) => s.kitRobotLive);
   const pack = selectedId ? packs[selectedId] : null;
 
   if (!pack) {
@@ -20,6 +23,15 @@ export function BeatPanel() {
   const story = pack.story;
   const activeBeat =
     story?.beats?.find((b) => b.id === beat) || story?.beats?.[0];
+  const policy = orchPolicy || "—";
+  const policyClass =
+    policy === "yield"
+      ? "yield"
+      : policy === "detour"
+        ? "detour"
+        : policy === "proceed"
+          ? "proceed"
+          : "idle";
 
   return (
     <aside className="beat-panel panel">
@@ -44,6 +56,16 @@ export function BeatPanel() {
           />
         </div>
         <div className="muted mono beat-label">{label || "—"}</div>
+      </div>
+
+      <div className="policy-row">
+        <span className="mono muted">Policy</span>
+        <span className={`policy-chip policy-chip--${policyClass}`}>
+          {orchLive ? policy : "off"}
+        </span>
+        <span className="mono muted policy-source">
+          {kitRobotLive ? "kit robot" : "story path"}
+        </span>
       </div>
 
       {activeBeat && (

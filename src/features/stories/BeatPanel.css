@@ -52,6 +52,43 @@
   font-size: 0.72rem;
 }
 
+.policy-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+}
+
+.policy-chip {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border: 1px solid var(--glass-edge);
+  color: var(--text-muted);
+}
+
+.policy-chip--proceed {
+  color: #8ec3d4;
+  border-color: rgba(142, 195, 212, 0.45);
+}
+
+.policy-chip--detour {
+  color: #e0a05a;
+  border-color: rgba(224, 160, 90, 0.5);
+}
+
+.policy-chip--yield {
+  color: #d45b4a;
+  border-color: rgba(212, 91, 74, 0.55);
+}
+
+.policy-source {
+  margin-left: auto;
+  font-size: 0.65rem;
+}
+
 .beat-block {
   border-left: 2px solid var(--teal-bright);
   padding-left: 12px;

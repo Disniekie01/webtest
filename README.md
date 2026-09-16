@@ -157,6 +157,22 @@ Each TraCI tick scores robots with
 Logs: `/tmp/citylab_orch_logs/orch_YYYYMMDD.jsonl` inside the Isaac container
 (`CITYLAB_ORCH_LOG_DIR` to override). Toggle with `CITYLAB_ORCH=0`.
 
+Scorer mode: `CITYLAB_ORCH_MODE=auto|rules|model` (default **auto** loads
+`assets/orchestrator/policy_v0.json` when present). Retrain:
+
+```bash
+python ov-citylab/tools/train_orchestrator.py --logs /path/to/orch_*.jsonl
+```
+
+Hard clamps always apply: person proximity or avoid-level cells → **hold**.
+
+### Stories ↔ live robots (Phase 4)
+
+`StoryKitBridge` advances story beats without R3F and prefers Kit
+`cls: "robot"` poses when actors are live (journey keyframes as fallback).
+BeatPanel shows a **Policy** chip (`proceed` / `detour` / `yield`) from the
+orchestrator.
+
 ---
 
 ## City look

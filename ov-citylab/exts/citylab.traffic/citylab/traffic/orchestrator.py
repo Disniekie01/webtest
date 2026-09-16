@@ -1,6 +1,7 @@
-"""Rule orchestrator v0 — comfort + busy + proximity → TraCI robot speed.
+"""Rule + learned orchestrator — comfort + busy + proximity → TraCI robot speed.
 
 Writes JSONL action logs (default /tmp — Kit mounts citylab read-only).
+Mode: CITYLAB_ORCH_MODE=rules|model|auto (auto uses model when policy file exists).
 """
 from __future__ import annotations
 
@@ -13,7 +14,10 @@ from typing import Any
 
 import carb
 
+from .policy_model import PolicyModel, rule_action
+
 ORCH_ENABLED = os.environ.get("CITYLAB_ORCH", "1") == "1"
+ORCH_MODE = os.environ.get("CITYLAB_ORCH_MODE", "auto").strip().lower()
 W_COMFORT = float(os.environ.get("CITYLAB_ORCH_W_COMFORT", "1.0"))
 W_BUSY = float(os.environ.get("CITYLAB_ORCH_W_BUSY", "0.65"))
 W_PROX = float(os.environ.get("CITYLAB_ORCH_W_PROX", "1.25"))
@@ -22,9 +26,14 @@ BUSY_RADIUS_M = float(os.environ.get("CITYLAB_ORCH_BUSY_R_M", "8.0"))
 BUSY_FULL_N = float(os.environ.get("CITYLAB_ORCH_BUSY_N", "5.0"))
 SLOW_COST = float(os.environ.get("CITYLAB_ORCH_SLOW_COST", "0.35"))
 HOLD_COST = float(os.environ.get("CITYLAB_ORCH_HOLD_COST", "0.65"))
-ROBOT_CRUISE = float(os.environ.get("CITYLAB_ORCH_CRUISE", "1.1"))
 ROBOT_SLOW = float(os.environ.get("CITYLAB_ORCH_SLOW", "0.35"))
 LOG_DIR = Path(os.environ.get("CITYLAB_ORCH_LOG_DIR", "/tmp/citylab_orch_logs"))
+POLICY_PATH = Path(
+    os.environ.get(
+        "CITYLAB_ORCH_POLICY",
+        "/citylab/assets/orchestrator/policy_v0.json",
+    )
+)
 
 
 def _is_robot(ptype: str) -> bool:
@@ -47,7 +56,6 @@ def _comfort_at(zones: dict[str, Any], x: float, z: float) -> tuple[float, int]:
             best = c
             break
     if best is None:
-        # Nearest deposited cell within 1 hop, else clear.
         for c in cells:
             if abs(int(c.get("ix", 0)) - ix) <= 1 and abs(int(c.get("iz", 0)) - iz) <= 1:
                 best = c
@@ -80,14 +88,6 @@ def _prox_alarm(humans: list[tuple[float, float]], x: float, z: float) -> float:
     return 0.0
 
 
-def _action_for_cost(cost: float, level: int, prox: float) -> str:
-    if prox >= 1.0 or level >= 3 or cost >= HOLD_COST:
-        return "hold"
-    if level >= 2 or cost >= SLOW_COST:
-        return "slow"
-    return "proceed"
-
-
 def _speed_for_action(action: str) -> float:
     if action == "hold":
         return 0.0
@@ -97,18 +97,40 @@ def _speed_for_action(action: str) -> float:
 
 
 class Orchestrator:
-    def __init__(self) -> None:
+    def __init__(self, policy_path: Path | None = None) -> None:
         self.enabled = ORCH_ENABLED
         self._prev: dict[str, str] = {}
         self._last_actions: list[dict[str, Any]] = []
         self._log_path: Path | None = None
         self._tick = 0
+        self._policy: PolicyModel | None = None
+        self._scorer = "rules"
+        path = policy_path or POLICY_PATH
+        want_model = ORCH_MODE in ("model", "auto")
+        if want_model:
+            # Also try repo-relative path when not in Docker.
+            candidates = [
+                path,
+                Path(__file__).resolve().parents[4] / "assets" / "orchestrator" / "policy_v0.json",
+                Path(__file__).resolve().parents[3] / "assets" / "orchestrator" / "policy_v0.json",
+            ]
+            for cand in candidates:
+                model = PolicyModel.load(cand)
+                if model is not None:
+                    self._policy = model
+                    self._scorer = "model"
+                    carb.log_warn(
+                        f"[citylab.orch] policy model {model.version}/{model.kind} ← {cand}"
+                    )
+                    break
+            if self._policy is None and ORCH_MODE == "model":
+                carb.log_warn("[citylab.orch] CITYLAB_ORCH_MODE=model but no policy file — rules")
         if self.enabled:
             try:
                 LOG_DIR.mkdir(parents=True, exist_ok=True)
                 self._log_path = LOG_DIR / f"orch_{time.strftime('%Y%m%d')}.jsonl"
                 carb.log_warn(
-                    f"[citylab.orch] enabled log={self._log_path} "
+                    f"[citylab.orch] enabled scorer={self._scorer} log={self._log_path} "
                     f"w_c={W_COMFORT} w_b={W_BUSY} w_p={W_PROX}"
                 )
             except Exception as exc:
@@ -118,9 +140,32 @@ class Orchestrator:
         return {
             "enabled": self.enabled,
             "tick": self._tick,
+            "scorer": self._scorer,
+            "mode": ORCH_MODE,
             "actions": list(self._last_actions),
             "log": str(self._log_path) if self._log_path else None,
         }
+
+    def _decide(self, comfort: float, busy: float, prox: float, level: int) -> tuple[str, float]:
+        if self._policy is not None and self._scorer == "model":
+            action = self._policy.predict(comfort, busy, prox, level)
+        else:
+            action = rule_action(
+                comfort,
+                busy,
+                prox,
+                level,
+                w_c=W_COMFORT,
+                w_b=W_BUSY,
+                w_p=W_PROX,
+                slow_cost=SLOW_COST,
+                hold_cost=HOLD_COST,
+            )
+        # Absolute safety clamps (even if model misfires).
+        if prox >= 1.0 or level >= 3:
+            action = "hold"
+        cost = W_COMFORT * (1.0 - comfort) + W_BUSY * busy + W_PROX * prox
+        return action, cost
 
     def step(
         self,
@@ -153,9 +198,11 @@ class Orchestrator:
             comfort, level = _comfort_at(zones, x, z)
             busy = _busy01(humans, x, z)
             prox = _prox_alarm(humans, x, z)
-            cost = W_COMFORT * (1.0 - comfort) + W_BUSY * busy + W_PROX * prox
-            action = _action_for_cost(cost, level, prox)
+            action, cost = self._decide(comfort, busy, prox, level)
             speed = _speed_for_action(action)
+            # Clamp: never faster than cruise via positive setSpeed.
+            if speed > 1.1:
+                speed = 1.1
             try:
                 traci_mod.person.setSpeed(pid, speed)
             except Exception as exc:
@@ -175,18 +222,18 @@ class Orchestrator:
                 "cost": round(cost, 3),
                 "action": action,
                 "speed": speed,
+                "scorer": self._scorer,
             }
             actions.append(row)
             if self._prev.get(pid) != action:
                 self._append_log(row)
                 if self._tick <= 5 or action != "proceed":
                     carb.log_warn(
-                        f"[citylab.orch] {pid} → {action} cost={cost:.2f} "
+                        f"[citylab.orch] {pid} → {action} ({self._scorer}) cost={cost:.2f} "
                         f"comfort={comfort:.2f} busy={busy:.2f} prox={prox:.0f}"
                     )
             self._prev[pid] = action
 
-        # Drop stale
         live = {a["robot_id"] for a in actions}
         for stale in list(self._prev.keys()):
             if stale not in live:
