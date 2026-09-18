@@ -1,0 +1,5 @@
+dims_xy=168.104,168.104
+span_m=168.104
+source=city_generator_large.usdc
+faces≈440000
+parity=isaac_usdc_decimated
