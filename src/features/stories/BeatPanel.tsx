@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { comfortColor } from "../../lib/journeyMath";
 import { packs, useLabStore } from "../../state/store";
 import "./BeatPanel.css";
@@ -11,6 +12,19 @@ export function BeatPanel() {
   const orchLive = useLabStore((s) => s.orchLive);
   const kitRobotLive = useLabStore((s) => s.kitRobotLive);
   const pack = selectedId ? packs[selectedId] : null;
+  const [flash, setFlash] = useState(false);
+  const prevPolicy = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!orchPolicy) return;
+    if (prevPolicy.current !== null && prevPolicy.current !== orchPolicy) {
+      setFlash(true);
+      const t = window.setTimeout(() => setFlash(false), 700);
+      prevPolicy.current = orchPolicy;
+      return () => window.clearTimeout(t);
+    }
+    prevPolicy.current = orchPolicy;
+  }, [orchPolicy]);
 
   if (!pack) {
     return (
@@ -23,6 +37,7 @@ export function BeatPanel() {
   const story = pack.story;
   const activeBeat =
     story?.beats?.find((b) => b.id === beat) || story?.beats?.[0];
+  // Show last action even when orch briefly goes quiet (not binary "off").
   const policy = orchPolicy || "—";
   const policyClass =
     policy === "yield"
@@ -60,11 +75,13 @@ export function BeatPanel() {
 
       <div className="policy-row">
         <span className="mono muted">Policy</span>
-        <span className={`policy-chip policy-chip--${policyClass}`}>
-          {orchLive ? policy : "off"}
+        <span
+          className={`policy-chip policy-chip--${policyClass}${flash ? " policy-chip--flash" : ""}`}
+        >
+          {policy}
         </span>
         <span className="mono muted policy-source">
-          {kitRobotLive ? "kit robot" : "story path"}
+          {kitRobotLive ? "kit robot" : orchLive ? "orch" : "story path"}
         </span>
       </div>
 

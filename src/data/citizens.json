@@ -1,0 +1,59 @@
+[
+  {
+    "id": "margaret",
+    "name": "Margaret Chen",
+    "age": 78,
+    "role": "Independent resident",
+    "district": "Harbor Residences",
+    "portrait": "/citizens/margaret.jpg",
+    "tagline": "Values independence. Needs the city to adapt quietly.",
+    "comfortScore": 0.22,
+    "accessibility": ["step-free routes", "extended crossing time", "low-curb priority"],
+    "preferences": ["paired assist when available", "predictable yields", "quiet sidewalks"],
+    "triggers": ["blocked curb cut", "construction on sidewalk", "sudden robot approach"],
+    "journey": [
+      { "t": "07:40", "label": "Leaves apartment", "detail": "Opt-in accessibility profile active" },
+      { "t": "07:55", "label": "Sidewalk closure detected", "detail": "Construction reduces west corridor" },
+      { "t": "08:05", "label": "Route adjusted", "detail": "Crossing prioritized; assist option offered" },
+      { "t": "08:25", "label": "Arrives clinic", "detail": "Independence preserved — city adapted around her" }
+    ]
+  },
+  {
+    "id": "amir",
+    "name": "Amir Hassan",
+    "age": 34,
+    "role": "Daily transit commuter",
+    "district": "North Line corridor",
+    "portrait": "/citizens/amir.jpg",
+    "tagline": "Crosses the city by transit every morning.",
+    "comfortScore": 0.48,
+    "accessibility": [],
+    "preferences": ["early disruption alerts", "clear interchange guidance", "robot-free platforms"],
+    "triggers": ["station crowding", "cascading delays", "blocked pedestrian corridors"],
+    "journey": [
+      { "t": "07:10", "label": "Enters North Hub", "detail": "Baseline commute pattern" },
+      { "t": "07:18", "label": "Line delay detected", "detail": "CV sees crowd formation forming" },
+      { "t": "07:22", "label": "Guidance updates", "detail": "Signage + twin scenarios explore alternatives" },
+      { "t": "07:40", "label": "Seamless transfer", "detail": "Autonomous fleets rerouted from corridors" }
+    ]
+  },
+  {
+    "id": "sofia",
+    "name": "Sofia Reyes",
+    "age": 38,
+    "role": "District professional",
+    "district": "Mixed-use core",
+    "portrait": "/citizens/sofia.jpg",
+    "tagline": "Wants robot convenience — with limited interaction in crowds.",
+    "comfortScore": 0.55,
+    "accessibility": [],
+    "preferences": ["limited robot interaction at lunch", "staggered deliveries", "shifted drone corridors"],
+    "triggers": ["dense plaza crowds", "robot linger at crosswalk", "delivery clustering"],
+    "journey": [
+      { "t": "11:45", "label": "Lunch surge begins", "detail": "Pedestrian density rising in mixed-use core" },
+      { "t": "12:00", "label": "Comfort zones tighten", "detail": "Community prefs create interaction buffers" },
+      { "t": "12:10", "label": "Fleet adapts", "detail": "Routes adjust; deliveries stagger; drones shift" },
+      { "t": "12:35", "label": "Harmonized midday", "detail": "City understands how tech should behave" }
+    ]
+  }
+]

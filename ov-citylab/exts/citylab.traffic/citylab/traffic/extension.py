@@ -310,6 +310,46 @@ _PED_KEEP_RIGHT = os.environ.get("CITYLAB_PED_KEEP_RIGHT", "1").strip() not in (
 _PED_CURB_BIAS_M = float(os.environ.get("CITYLAB_PED_CURB_BIAS_M", "0.7"))
 
 
+def _tls_snapshot(traci_mod) -> list[dict]:
+    """Main-grid traffic lights (A0–E4) as ns/ew lamp colors for the web twin."""
+    out: list[dict] = []
+    if traci_mod is None:
+        return out
+    try:
+        ids = list(traci_mod.trafficlight.getIDList())
+    except Exception:
+        return out
+    main = {f"{col}{row}" for col in "ABCDE" for row in range(5)}
+    for tid in ids:
+        sid = str(tid)
+        if sid not in main:
+            continue
+        try:
+            state = str(traci_mod.trafficlight.getRedYellowGreenState(sid) or "")
+        except Exception:
+            continue
+        if not state:
+            continue
+        mid = max(1, len(state) // 2)
+
+        def _lamp(ch: str) -> str:
+            if ch in ("G", "g"):
+                return "G"
+            if ch in ("Y", "y"):
+                return "Y"
+            return "R"
+
+        out.append(
+            {
+                "id": sid,
+                "ns": _lamp(state[0]),
+                "ew": _lamp(state[mid] if mid < len(state) else state[-1]),
+                "state": state,
+            }
+        )
+    return out
+
+
 def _ped_lateral_target(
     pid: str, ribbon: dict, band: dict | None, reverse: bool, crossing: bool
 ) -> float:
@@ -430,6 +470,63 @@ def _ped_lateral_offset_m(traci_mod, pid: str) -> float:
 def _is_delivery_robot(type_id: str) -> bool:
     base = (type_id or "").split("@")[0]
     return base == "delivery_robot"
+
+
+# Sidewalk out-and-back circuits matching robots.rou.xml (TraCI re-append when stages empty).
+_ROBOT_CIRCUITS: tuple[tuple[str, str], ...] = (
+    ("SW_NS_1_0_1_R", "SW_NS_1_3_4_R"),
+    ("SW_EW_1_0_1_T", "SW_EW_1_3_4_T"),
+    ("SW_NS_1_3_4_R", "SW_NS_1_0_1_R"),
+    ("SW_NS_0_0_1_R", "SW_EW_3_3_4_T"),
+)
+
+
+def _reloop_delivery_robots(traci_mod, robot_pids: list[str]) -> int:
+    """Re-append walk stages so finished bots stay on curb instead of vanishing."""
+    if not robot_pids or traci_mod is None:
+        return 0
+    n = 0
+    for pid in robot_pids:
+        try:
+            remaining = int(traci_mod.person.getRemainingStages(pid))
+        except Exception:
+            continue
+        if remaining > 0:
+            continue
+        a, b = _ROBOT_CIRCUITS[hash(pid) % len(_ROBOT_CIRCUITS)]
+        try:
+            edge = ""
+            try:
+                edge = str(traci_mod.person.getRoadID(pid) or "")
+            except Exception:
+                edge = ""
+            if edge == b:
+                a, b = b, a
+            elif edge and edge != a:
+                for ca, cb in _ROBOT_CIRCUITS:
+                    if edge == ca:
+                        a, b = ca, cb
+                        break
+                    if edge == cb:
+                        a, b = cb, ca
+                        break
+            # Route via network so non-adjacent sidewalk edges still work.
+            legs = []
+            for src, dst in ((a, b), (b, a)):
+                try:
+                    route = traci_mod.simulation.findRoute(src, dst, vType="delivery_robot")
+                    edges = list(getattr(route, "edges", None) or [])
+                except Exception:
+                    edges = []
+                if not edges:
+                    edges = [src, dst]
+                legs.append(edges)
+            for edges in legs:
+                traci_mod.person.appendWalkingStage(pid, edges, arrivalPos=-1)
+            n += 1
+        except Exception as exc:
+            carb.log_warn(f"[citylab.traffic] reloop {pid}: {exc}")
+    return n
 
 
 def _project_world_to_uv(
@@ -1290,6 +1387,56 @@ class CityLabTrafficExtension(omni.ext.IExt):
         except Exception as exc:
             carb.log_warn(f"[citylab.traffic] camera frame: {exc}")
 
+    def _apply_web_camera_pending(self) -> None:
+        """Apply eye/target/fov posted from the web twin (/api/camera)."""
+        pose = viewstream.STATE.take_camera_pending()
+        if not pose:
+            return
+        cam_path = "/World/Camera"
+        try:
+            stage = omni.usd.get_context().get_stage()
+            if stage is None:
+                return
+            cam = stage.GetPrimAtPath(cam_path)
+            if not cam or not cam.IsValid():
+                UsdGeom.Camera.Define(stage, cam_path)
+                cam = stage.GetPrimAtPath(cam_path)
+            eye = Gf.Vec3d(*pose["eye"])
+            target = Gf.Vec3d(*pose["target"])
+            up = Gf.Vec3d(0.0, 1.0, 0.0)
+            # LookAt builds a view matrix; camera world = inverse
+            view = Gf.Matrix4d().SetLookAt(eye, target, up)
+            world = view.GetInverse()
+            xf = UsdGeom.Xformable(cam)
+            xf.ClearXformOpOrder()
+            xf.AddTransformOp().Set(world)
+            try:
+                cam_api = UsdGeom.Camera(cam)
+                # Approx FOV → focal length with 20.955mm horizontal aperture (USD default-ish)
+                fov = max(10.0, min(90.0, float(pose.get("fov") or 40.0)))
+                apert = 20.955
+                focal = apert / (2.0 * math.tan(math.radians(fov) * 0.5))
+                cam_api.GetFocalLengthAttr().Set(float(focal))
+                cam_api.GetHorizontalApertureAttr().Set(float(apert))
+            except Exception:
+                pass
+            try:
+                from omni.kit.viewport.utility import get_active_viewport
+
+                vp = get_active_viewport()
+                if vp is not None:
+                    try:
+                        vp.set_active_camera(cam_path)
+                    except Exception:
+                        vp.camera_path = cam_path
+            except Exception:
+                pass
+            carb.log_warn(
+                f"[citylab.traffic] web camera eye={pose['eye']} target={pose['target']} fov={pose.get('fov')}"
+            )
+        except Exception as exc:
+            carb.log_warn(f"[citylab.traffic] web camera apply: {exc}")
+
     @staticmethod
     def _apply_stream_quality(settings) -> None:
         """1080p viewport + DLSS for livestream encode."""
@@ -1427,6 +1574,7 @@ class CityLabTrafficExtension(omni.ext.IExt):
         if stream_control.consume_release():
             asyncio.ensure_future(self._bounce_livestream_slot())
         self._frame += 1
+        self._apply_web_camera_pending()
         if self._frame == 1:
             stream_control.set_boot(
                 stage="ticking",
@@ -1496,10 +1644,14 @@ class CityLabTrafficExtension(omni.ext.IExt):
             for vid in list(self._traci.vehicle.getIDList())[:MAX_VEH]:
                 sx, sy = self._traci.vehicle.getPosition(vid)
                 angle = self._traci.vehicle.getAngle(vid)
+                try:
+                    speed = float(self._traci.vehicle.getSpeed(vid))
+                except Exception:
+                    speed = 0.0
                 ux, uz = _sumo_to_usd(sx, sy, self._net_w, self._net_h)
                 yaw = -(angle - 90.0) + _CAR_YAW_OFFSET_DEG
                 # Mesh grounded at y=0 (wheel contact); tiny lift avoids z-fight
-                vehicles.append((vid, ux, 0.02, uz, yaw))
+                vehicles.append((vid, ux, 0.02, uz, yaw, speed))
 
             pedestrians = []
             ribbons = self._sidewalk_ribbons
@@ -1514,6 +1666,9 @@ class CityLabTrafficExtension(omni.ext.IExt):
 
             robot_pids = [p for p in all_pids if _is_delivery_robot(_person_type(p))]
             human_pids = [p for p in all_pids if p not in set(robot_pids)]
+            # Keep finished delivery bots alive (personFlow legs can exhaust).
+            if robot_pids and self._frame % 15 == 0:
+                _reloop_delivery_robots(self._traci, robot_pids)
             # Prefer delivery robots in the sticky follow set (capped separately).
             self._ped_follow_ids = [p for p in self._ped_follow_ids if p in alive]
             follow_robots = [p for p in self._ped_follow_ids if p in set(robot_pids)]
@@ -1566,7 +1721,7 @@ class CityLabTrafficExtension(omni.ext.IExt):
                     ptype = self._traci.person.getTypeID(pid)
                 except Exception:
                     ptype = "adult"
-                pedestrians.append((pid, ux, 0.05, uz, yaw, ptype))
+                pedestrians.append((pid, ux, 0.05, uz, yaw, ptype, speed))
 
             # Light safety net only — JuPedSim should already keep ~0.5–1 m gaps.
             sep = 0.55 if PED_MODEL == "jupedsim" else 0.85
@@ -1601,7 +1756,7 @@ class CityLabTrafficExtension(omni.ext.IExt):
             vw = int(getattr(viewstream.STATE, "width", 0) or VIEW_W)
             vh = int(getattr(viewstream.STATE, "height", 0) or VIEW_H)
 
-            def _with_uv(aid, ux, uy, uz, yaw, ptype, cls_name: str) -> dict:
+            def _with_uv(aid, ux, uy, uz, yaw, ptype, cls_name: str, speed: float | None = None) -> dict:
                 row = {
                     "id": str(aid),
                     "x": round(float(ux), 2),
@@ -1610,6 +1765,8 @@ class CityLabTrafficExtension(omni.ext.IExt):
                     "cls": cls_name,
                     "type": str(ptype),
                 }
+                if speed is not None:
+                    row["speed"] = round(float(speed), 2)
                 if stage is not None and cls_name == "robot" and _ROBOT_PUBLISH_UV:
                     uv = _project_world_to_uv(stage, cam_path, ux, uy, uz, vw, vh)
                     if uv is not None:
@@ -1643,9 +1800,10 @@ class CityLabTrafficExtension(omni.ext.IExt):
                         "x": round(float(ux), 2),
                         "z": round(float(uz), 2),
                         "yaw": round(float(yaw), 1),
+                        "speed": round(float(speed), 2),
                         "cls": "vehicle",
                     }
-                    for vid, ux, _uy, uz, yaw in vehicles
+                    for vid, ux, _uy, uz, yaw, speed in vehicles
                 ],
                 [
                     _with_uv(
@@ -1656,10 +1814,13 @@ class CityLabTrafficExtension(omni.ext.IExt):
                         yaw,
                         ptype,
                         "robot" if _is_delivery_robot(str(ptype)) else "person",
+                        speed,
                     )
-                    for pid, ux, uy, uz, yaw, ptype in pedestrians
+                    for pid, ux, uy, uz, yaw, ptype, *rest in pedestrians
+                    for speed in [rest[0] if rest else None]
                 ],
                 span_m=CITY_SPAN_M,
+                lights=_tls_snapshot(self._traci),
             )
         except Exception as exc:
             if self._frame % 60 == 0:
@@ -1924,7 +2085,7 @@ class CityLabTrafficExtension(omni.ext.IExt):
 
         live = set()
         for item in actors:
-            aid, x, y, z, yaw = item
+            aid, x, y, z, yaw = item[:5]
             safe = "".join(c if c.isalnum() or c == "_" else "_" for c in str(aid))
             path = f"{parent_path}/car_{_CAR_PRIM_REV}_{safe}"
             live.add(path)

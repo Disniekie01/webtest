@@ -1,0 +1,79 @@
+[
+  {
+    "id": "bot_ns_a.2",
+    "name": "Harbor Runner A2",
+    "kind": "delivery",
+    "battery": 0.82,
+    "speedMps": 1.4,
+    "task": "Pharmacy drop — Harbor Residences",
+    "policy": "reroute",
+    "district": "Harbor",
+    "lastUpdate": "2s ago"
+  },
+  {
+    "id": "bot_ew_c.1",
+    "name": "Edge Walker C1",
+    "kind": "delivery",
+    "battery": 0.61,
+    "speedMps": 0.0,
+    "task": "Hold at curb — accessibility window",
+    "policy": "hold",
+    "district": "Harbor",
+    "lastUpdate": "1s ago"
+  },
+  {
+    "id": "bot_hub_1",
+    "name": "Hub Courier 1",
+    "kind": "delivery",
+    "battery": 0.74,
+    "speedMps": 1.8,
+    "task": "Reroute clear of North Hub platforms",
+    "policy": "reroute",
+    "district": "North Hub",
+    "lastUpdate": "3s ago"
+  },
+  {
+    "id": "bot_hub_3",
+    "name": "Hub Courier 3",
+    "kind": "delivery",
+    "battery": 0.55,
+    "speedMps": 0.6,
+    "task": "Staggered platform approach",
+    "policy": "stagger",
+    "district": "North Hub",
+    "lastUpdate": "4s ago"
+  },
+  {
+    "id": "bot_plaza_2",
+    "name": "Plaza Scout 2",
+    "kind": "delivery",
+    "battery": 0.91,
+    "speedMps": 1.1,
+    "task": "Leave lunch interaction buffer",
+    "policy": "reroute",
+    "district": "Mixed-use core",
+    "lastUpdate": "2s ago"
+  },
+  {
+    "id": "drone_c7",
+    "name": "Corridor Drone C7",
+    "kind": "drone",
+    "battery": 0.68,
+    "speedMps": 8.2,
+    "task": "Shift altitude corridor east",
+    "policy": "stagger",
+    "district": "Mixed-use core",
+    "lastUpdate": "5s ago"
+  },
+  {
+    "id": "av_ring_4",
+    "name": "Ring Shuttle 4",
+    "kind": "vehicle",
+    "battery": 0.77,
+    "speedMps": 6.4,
+    "task": "Proceed — soft yield at plaza",
+    "policy": "proceed",
+    "district": "Ring Road",
+    "lastUpdate": "1s ago"
+  }
+]

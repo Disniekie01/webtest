@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#243028"/>
+      <stop offset="100%" stop-color="#101814"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="500" fill="url(#bg)"/>
+  <circle cx="200" cy="170" r="78" fill="#455850"/>
+  <ellipse cx="200" cy="380" rx="120" ry="140" fill="#2e4038"/>
+  <text x="200" y="185" text-anchor="middle" fill="#e8f0ec" font-family="Georgia, serif" font-size="64" font-weight="600">S</text>
+  <text x="200" y="470" text-anchor="middle" fill="#9ec8b8" font-family="system-ui" font-size="18" letter-spacing="0.12em">SOFIA</text>
+</svg>

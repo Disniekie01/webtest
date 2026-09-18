@@ -19,7 +19,8 @@ export function ComfortZonePublisher() {
       overrides: comfortOverrides,
       selectedId,
       personPos,
-      optInOnly: false,
+      // Lab default: only explicit opt-ins deposit (clears map noise).
+      optInOnly: true,
     });
     const grid = getComfortZoneGrid();
     grid.rebuild(deposits);

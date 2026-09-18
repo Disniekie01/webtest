@@ -1,0 +1,43 @@
+.transit-metrics {
+  top: 28vh;
+  bottom: auto;
+  left: auto;
+  right: 17.5rem;
+  width: min(20rem, calc(100vw - 34rem));
+  border-color: rgba(74, 168, 200, 0.32);
+}
+
+.transit-metrics .transit-bar > i {
+  background: linear-gradient(90deg, #2a6070, #4aa8c8 55%, #7ec8d8);
+}
+
+.transit-metrics .transit-legend .tone-ok {
+  color: #4aa8c8;
+}
+.transit-metrics .transit-legend .tone-warn {
+  color: #c4a05a;
+}
+.transit-metrics .transit-legend .tone-hot {
+  color: #5eb8a0;
+}
+
+.transit-metrics .traffic-metrics__kpis {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.transit-list li {
+  grid-template-columns: 3.2rem 3.6rem 1fr 2.2rem !important;
+}
+
+.transit-lines li {
+  grid-template-columns: 2.4rem 3.2rem 1fr 2.6rem !important;
+}
+
+@media (max-width: 1100px) {
+  .transit-metrics {
+    right: 0.75rem;
+    top: auto;
+    bottom: 4.5rem;
+    width: min(18rem, calc(100vw - 1.5rem));
+  }
+}

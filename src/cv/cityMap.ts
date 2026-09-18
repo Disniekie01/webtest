@@ -164,6 +164,10 @@ export type DrawCityMapOpts = {
   comfortZones?: import("./comfortZones").ComfortZoneSnapshot | null;
   comfortGrid?: import("./comfortZones").ComfortZoneGrid | null;
   showComfort?: boolean;
+  /** Always draw story persona ghost even when Kit actors are live. */
+  storyGhost?: boolean;
+  /** Kit robot id to ring-highlight (nearest story person). */
+  highlightRobotId?: string | null;
 };
 
 export function drawCityMap(
@@ -328,9 +332,22 @@ export function drawCityMap(
   }
 
   // Delivery robots (amber squares on sidewalk)
+  const highlightId = mockFallback?.highlightRobotId ?? null;
   for (const b of bots) {
     const [px, pz] = toPx(b.x, b.z);
     const yaw = ((b.yaw ?? 0) * Math.PI) / 180;
+    if (highlightId && b.id === highlightId) {
+      ctx.beginPath();
+      ctx.arc(px, pz, 11, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(242, 194, 122, 0.95)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(px, pz, 14, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(242, 194, 122, 0.35)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
     ctx.save();
     ctx.translate(px, pz);
     ctx.rotate(yaw);
@@ -372,9 +389,27 @@ export function drawCityMap(
     ctx.fill();
   }
 
+  // Story persona ghost — always when Kit actors live (spatial match to BeatPanel).
+  const live = Boolean(actors && (actors.pedestrians.length || actors.vehicles.length));
+  if (mockFallback && live) {
+    const gx = mockFallback.personPos[0];
+    const gz = mockFallback.personPos[2];
+    const [px, pz] = toPx(gx, gz);
+    ctx.beginPath();
+    ctx.arc(px, pz, 7, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(142, 195, 212, 0.85)";
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([3, 3]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.arc(px, pz, 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(242, 239, 232, 0.9)";
+    ctx.fill();
+  }
+
   ctx.fillStyle = "#9c968b";
   ctx.font = "10px IBM Plex Mono, monospace";
-  const live = actors && (actors.pedestrians.length || actors.vehicles.length);
   const alarmName = conflict ? LEVEL_NAME[conflict.alarm] : "—";
   const heat = mockFallback?.heatmap?.stats;
   const heatBit =

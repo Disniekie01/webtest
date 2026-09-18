@@ -27,6 +27,8 @@ BUSY_FULL_N = float(os.environ.get("CITYLAB_ORCH_BUSY_N", "5.0"))
 SLOW_COST = float(os.environ.get("CITYLAB_ORCH_SLOW_COST", "0.35"))
 HOLD_COST = float(os.environ.get("CITYLAB_ORCH_HOLD_COST", "0.65"))
 ROBOT_SLOW = float(os.environ.get("CITYLAB_ORCH_SLOW", "0.35"))
+# Min seconds to hold an action before allowing a non-escalate change (hysteresis).
+ACTION_DWELL_S = float(os.environ.get("CITYLAB_ORCH_DWELL_S", "1.5"))
 LOG_DIR = Path(os.environ.get("CITYLAB_ORCH_LOG_DIR", "/tmp/citylab_orch_logs"))
 POLICY_PATH = Path(
     os.environ.get(
@@ -100,6 +102,7 @@ class Orchestrator:
     def __init__(self, policy_path: Path | None = None) -> None:
         self.enabled = ORCH_ENABLED
         self._prev: dict[str, str] = {}
+        self._prev_t: dict[str, float] = {}
         self._last_actions: list[dict[str, Any]] = []
         self._log_path: Path | None = None
         self._tick = 0
@@ -167,6 +170,20 @@ class Orchestrator:
         cost = W_COMFORT * (1.0 - comfort) + W_BUSY * busy + W_PROX * prox
         return action, cost
 
+    def _with_hysteresis(self, pid: str, action: str, t: float) -> str:
+        """Keep prior action for ACTION_DWELL_S unless escalating to a safer one."""
+        prev = self._prev.get(pid)
+        if prev is None:
+            return action
+        rank = {"proceed": 0, "slow": 1, "hold": 2}
+        # Always allow escalate (proceed→slow→hold).
+        if rank.get(action, 0) > rank.get(prev, 0):
+            return action
+        started = self._prev_t.get(pid, t)
+        if (t - started) < ACTION_DWELL_S:
+            return prev
+        return action
+
     def step(
         self,
         traci_mod,
@@ -183,12 +200,14 @@ class Orchestrator:
         zones = comfort_zones or {}
         humans = [
             (float(ux), float(uz))
-            for pid, ux, _uy, uz, _yaw, ptype in pedestrians
+            for row in pedestrians
+            for pid, ux, _uy, uz, _yaw, ptype in [row[:6]]
             if not _is_robot(str(ptype))
         ]
         robots = [
             (str(pid), float(ux), float(uz), str(ptype))
-            for pid, ux, _uy, uz, _yaw, ptype in pedestrians
+            for row in pedestrians
+            for pid, ux, _uy, uz, _yaw, ptype in [row[:6]]
             if _is_robot(str(ptype))
         ]
 
@@ -199,6 +218,7 @@ class Orchestrator:
             busy = _busy01(humans, x, z)
             prox = _prox_alarm(humans, x, z)
             action, cost = self._decide(comfort, busy, prox, level)
+            action = self._with_hysteresis(pid, action, t)
             speed = _speed_for_action(action)
             # Clamp: never faster than cruise via positive setSpeed.
             if speed > 1.1:
@@ -227,6 +247,7 @@ class Orchestrator:
             actions.append(row)
             if self._prev.get(pid) != action:
                 self._append_log(row)
+                self._prev_t[pid] = t
                 if self._tick <= 5 or action != "proceed":
                     carb.log_warn(
                         f"[citylab.orch] {pid} → {action} ({self._scorer}) cost={cost:.2f} "
@@ -238,6 +259,7 @@ class Orchestrator:
         for stale in list(self._prev.keys()):
             if stale not in live:
                 self._prev.pop(stale, None)
+                self._prev_t.pop(stale, None)
 
         self._last_actions = actions
         return actions

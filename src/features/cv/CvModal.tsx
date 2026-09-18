@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { LEVEL_NAME } from "../../data/mockTracks";
 import type { ConflictSnapshot } from "../../data/types";
 import { useLabStore } from "../../state/store";
+import { useAscStore } from "../../state/ascStore";
 import { drawCityMap, getCityHeatmap } from "../../cv/cityMap";
 import {
   collectComfortDeposits,
@@ -71,11 +72,12 @@ function drawHeadingArrow(
  * Twin JPEG + city map + tools (PII, calibrate, pairs, briefing, incidents, labels).
  */
 export function CvModal() {
-  const show = useLabStore((s) => s.showCv);
-  const closeCv = useLabStore((s) => s.closeCv);
+  const show = useAscStore((s) => s.mode === "cv");
+  const closeCv = useAscStore((s) => s.closeCv);
   const storeConflict = useLabStore((s) => s.conflict);
   const personPos = useLabStore((s) => s.personPos);
   const robotPos = useLabStore((s) => s.robotPos);
+  const kitHighlightRobotId = useLabStore((s) => s.kitHighlightRobotId);
   const selectedId = useLabStore((s) => s.selectedId);
   const comfortOverrides = useLabStore((s) => s.comfortOverrides);
 
@@ -153,7 +155,7 @@ export function CvModal() {
       overrides: comfortOverrides,
       selectedId,
       personPos,
-      optInOnly: false,
+      optInOnly: true,
     });
     const grid = zoneRef.current;
     grid.rebuild(deposits);
@@ -293,6 +295,8 @@ export function CvModal() {
       comfortGrid: zoneRef.current,
       comfortZones: zoneSnap,
       showComfort,
+      storyGhost: true,
+      highlightRobotId: kitHighlightRobotId,
     });
     setMapConflict(c);
   }, [
@@ -300,6 +304,7 @@ export function CvModal() {
     actors,
     personPos,
     robotPos,
+    kitHighlightRobotId,
     storeConflict,
     showHeat,
     heatWindow,

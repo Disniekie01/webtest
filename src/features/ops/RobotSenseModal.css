@@ -1,0 +1,119 @@
+.robot-sense {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  display: grid;
+  place-items: center;
+  pointer-events: auto;
+}
+
+.robot-sense__backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(4, 8, 12, 0.62);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+}
+
+.robot-sense__panel {
+  position: relative;
+  z-index: 1;
+  width: min(36rem, calc(100vw - 2rem));
+  background:
+    linear-gradient(145deg, rgba(14, 22, 28, 0.96), rgba(8, 12, 16, 0.94));
+  border: 1px solid rgba(94, 184, 176, 0.28);
+  border-radius: 16px;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+  animation: senseIn 0.35s var(--ease-out);
+}
+
+@keyframes senseIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.robot-sense__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.95rem 1.1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.robot-sense__head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.robot-sense__head p {
+  margin: 0.2rem 0 0;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.robot-sense__tabs {
+  display: flex;
+  gap: 0.35rem;
+  align-items: flex-start;
+}
+
+.robot-sense__tabs button {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.4rem 0.65rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.robot-sense__tabs button.on {
+  color: var(--text);
+  border-color: rgba(94, 184, 176, 0.45);
+  background: rgba(94, 184, 176, 0.12);
+}
+
+.robot-sense__close:hover,
+.robot-sense__tabs button:hover {
+  color: var(--text);
+  border-color: rgba(126, 200, 192, 0.4);
+}
+
+.robot-sense__stage {
+  padding: 0.75rem 1rem 0.5rem;
+  background: #04080c;
+}
+
+.robot-sense__canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.robot-sense__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  padding: 0.65rem 1.1rem 0.9rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}

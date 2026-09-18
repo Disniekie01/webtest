@@ -1,24 +1,31 @@
-import { useLabStore } from "./state/store";
+import { useAscStore } from "./state/ascStore";
 import { Hero } from "./features/shell/Hero";
-import { AppShell } from "./features/shell/AppShell";
+import { OpsShell } from "./features/shell/OpsShell";
 import { CvModal } from "./features/cv/CvModal";
-import { ComfortZonePublisher } from "./features/comfort/ComfortZonePublisher";
-import { StoryKitBridge } from "./features/stories/StoryKitBridge";
+import { CityCanvas } from "./scene/CityCanvas";
 import { KitStreamBackground } from "./scene/KitStreamBackground";
+import { StillBackdrop } from "./scene/StillBackdrop";
 import "./App.css";
 
-/** City Lab UI overlays a single embedded Kit WebRTC client (:8210 iframe). */
+/** Adaptive Smart City — low-fi twin by default; High fidelity swaps to Isaac Kit. */
 export default function App() {
-  const mode = useLabStore((s) => s.mode);
+  const mode = useAscStore((s) => s.mode);
+  const viewportMode = useAscStore((s) => s.viewportMode);
+  const transitioning = useAscStore((s) => s.viewportTransitioning);
+
   return (
     <div className="app-root">
       <div className="app-viewport">
-        <KitStreamBackground />
+        {viewportMode === "ops3d" && <CityCanvas />}
+        {viewportMode === "kit" && <KitStreamBackground />}
+        {viewportMode === "still" && <StillBackdrop />}
       </div>
-      <div className="app-chrome">{mode === "hero" ? <Hero /> : <AppShell />}</div>
-      <ComfortZonePublisher />
-      <StoryKitBridge />
-      <CvModal />
+      <div
+        className={`fidelity-veil${transitioning ? " fidelity-veil--on" : ""}`}
+        aria-hidden
+      />
+      <div className="app-chrome">{mode === "hero" ? <Hero /> : <OpsShell />}</div>
+      {mode === "cv" && <CvModal />}
     </div>
   );
 }

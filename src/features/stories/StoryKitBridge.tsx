@@ -198,7 +198,11 @@ export function StoryKitBridge() {
           conflict = buildConflict(tracks);
         }
 
-        const score = person.comfort ?? comfort?.score ?? 0.5;
+        // Prefer opt-in / store comfort when the selected persona has an override.
+        const hasOptIn = Boolean(selectedId && overrides[selectedId]);
+        const score = hasOptIn
+          ? (comfort?.score ?? 0.5)
+          : (person.comfort ?? comfort?.score ?? 0.5);
         store.setPlaybackFrame({
           personPos: person.pos,
           robotPos,
@@ -207,6 +211,7 @@ export function StoryKitBridge() {
           comfort: score,
           label: person.label || null,
           conflict,
+          kitHighlightRobotId: kitBot?.id ?? null,
         });
       }
 
@@ -214,7 +219,7 @@ export function StoryKitBridge() {
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [mode, journey, personTimeline, robotTimeline, comfort]);
+  }, [mode, journey, personTimeline, robotTimeline, comfort, overrides, selectedId]);
 
   return null;
 }

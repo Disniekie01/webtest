@@ -43,6 +43,13 @@ class ViewportStreamState:
             "actions": [],
             "log": None,
         }
+        self.camera: dict = {
+            "eye": [90.0, 120.0, 160.0],
+            "target": [0.0, 0.0, 0.0],
+            "fov": 40.0,
+            "pending": False,
+            "updatedAt": 0.0,
+        }
 
     def publish(self, jpeg: bytes, width: int, height: int, vehicles: int, pedestrians: int) -> None:
         with self.lock:
@@ -59,6 +66,7 @@ class ViewportStreamState:
         vehicles: list[dict],
         pedestrians: list[dict],
         span_m: float = 160.0,
+        lights: list[dict] | None = None,
     ) -> None:
         with self.lock:
             self.actors = {
@@ -66,6 +74,7 @@ class ViewportStreamState:
                 "span_m": float(span_m),
                 "vehicles": vehicles,
                 "pedestrians": pedestrians,
+                "lights": list(lights or []),
             }
 
     def actors_snapshot(self) -> dict:
@@ -89,6 +98,40 @@ class ViewportStreamState:
     def orchestrator_snapshot(self) -> dict:
         with self.lock:
             return dict(self.orchestrator)
+
+    def camera_snapshot(self) -> dict:
+        with self.lock:
+            return {
+                "eye": list(self.camera.get("eye") or [90.0, 120.0, 160.0]),
+                "target": list(self.camera.get("target") or [0.0, 0.0, 0.0]),
+                "fov": float(self.camera.get("fov") or 40.0),
+                "updatedAt": float(self.camera.get("updatedAt") or 0.0),
+            }
+
+    def set_camera(self, payload: dict) -> dict:
+        eye = payload.get("eye") or [90.0, 120.0, 160.0]
+        target = payload.get("target") or [0.0, 0.0, 0.0]
+        fov = float(payload.get("fov") or 40.0)
+        with self.lock:
+            self.camera = {
+                "eye": [float(eye[0]), float(eye[1]), float(eye[2])],
+                "target": [float(target[0]), float(target[1]), float(target[2])],
+                "fov": fov,
+                "pending": True,
+                "updatedAt": time.time(),
+            }
+            return self.camera_snapshot()
+
+    def take_camera_pending(self) -> dict | None:
+        with self.lock:
+            if not self.camera.get("pending"):
+                return None
+            self.camera["pending"] = False
+            return {
+                "eye": list(self.camera["eye"]),
+                "target": list(self.camera["target"]),
+                "fov": float(self.camera["fov"]),
+            }
 
     def status(self) -> dict:
         with self.lock:
@@ -167,6 +210,16 @@ class _Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(body)
             return
+        if path.startswith("/api/camera"):
+            body = json.dumps(STATE.camera_snapshot()).encode("utf-8")
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "application/json")
+            self._cors()
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         # Prefer short single-frame GETs — long MJPEG holds threads and wedges :8790
         if path.startswith("/frame.jpg") or path.startswith("/stream.mjpg"):
             with STATE.lock:
@@ -192,6 +245,31 @@ class _Handler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:  # noqa: N802
         path = self.path.split("?", 1)[0]
+        if path.startswith("/api/camera"):
+            length = int(self.headers.get("Content-Length") or 0)
+            raw = self.rfile.read(length) if length > 0 else b"{}"
+            try:
+                payload = json.loads(raw.decode("utf-8"))
+                if not isinstance(payload, dict):
+                    raise ValueError("expected object")
+                snap = STATE.set_camera(payload)
+            except Exception as exc:
+                body = json.dumps({"ok": False, "error": str(exc)}).encode("utf-8")
+                self.send_response(HTTPStatus.BAD_REQUEST)
+                self.send_header("Content-Type", "application/json")
+                self._cors()
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
+            body = json.dumps({"ok": True, **snap}).encode("utf-8")
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "application/json")
+            self._cors()
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if path.startswith("/api/comfort-zones"):
             length = int(self.headers.get("Content-Length") or 0)
             raw = self.rfile.read(length) if length > 0 else b"{}"

@@ -1,0 +1,35 @@
+/* Pedestrian metrics — teal accent variant of traffic panel */
+.ped-metrics {
+  top: auto;
+  bottom: 4.5rem;
+  right: 17.5rem;
+  border-color: rgba(94, 184, 176, 0.22);
+}
+
+.ped-metrics .ped-bar > i {
+  background: linear-gradient(90deg, #3a7a78, #5eb8b0 55%, #c4a05a);
+}
+
+.ped-metrics .ped-legend .tone-ok {
+  color: #5eb8b0;
+}
+.ped-metrics .ped-legend .tone-warn {
+  color: #7ec8c0;
+}
+.ped-metrics .ped-legend .tone-hot {
+  color: #c4a05a;
+}
+.ped-metrics .ped-legend .tone-crit {
+  color: #d4a15a;
+}
+
+.ped-metrics .traffic-metrics__kpis {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (max-width: 1100px) {
+  .ped-metrics {
+    right: 0.75rem;
+    bottom: 4.5rem;
+  }
+}

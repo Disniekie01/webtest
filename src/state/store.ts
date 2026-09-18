@@ -43,6 +43,8 @@ type LabState = {
   orchPolicy: string | null;
   orchLive: boolean;
   kitRobotLive: boolean;
+  /** Kit delivery-robot id nearest the story persona (map ring). */
+  kitHighlightRobotId: string | null;
 
   enterLab: (personId?: string) => void;
   backHero: () => void;
@@ -62,6 +64,7 @@ type LabState = {
     label: string | null;
     live: boolean;
     kitRobotLive: boolean;
+    kitHighlightRobotId?: string | null;
   }) => void;
   setPlaybackFrame: (frame: {
     personPos: [number, number, number];
@@ -71,6 +74,7 @@ type LabState = {
     comfort: number;
     label: string | null;
     conflict: ConflictSnapshot | null;
+    kitHighlightRobotId?: string | null;
   }) => void;
 
   getPack: (id: string | null) => PersonPack | null;
@@ -128,17 +132,19 @@ export const useLabStore = create<LabState>()(
       orchPolicy: null,
       orchLive: false,
       kitRobotLive: false,
+      kitHighlightRobotId: null,
 
       enterLab: (personId) => {
         const id = personId || peopleIndexJson[0]?.id || null;
-        set({ mode: "lab", selectedId: id, timeS: 0, playing: false, arcMode: false });
+        // Auto-play on first lab enter so beats advance without hunting Transport.
+        set({ mode: "lab", selectedId: id, timeS: 0, playing: true, arcMode: false });
       },
       backHero: () => set({ mode: "hero", playing: false }),
       selectPerson: (id) =>
         set({
           selectedId: id,
           timeS: 0,
-          playing: false,
+          playing: true,
           arcMode: false,
           currentBeat: null,
           currentLabel: null,
@@ -189,11 +195,16 @@ export const useLabStore = create<LabState>()(
       },
       setOrchPolicy: (p) => {
         const cur = get();
+        const highlight =
+          p.kitHighlightRobotId !== undefined
+            ? p.kitHighlightRobotId
+            : cur.kitHighlightRobotId;
         if (
           cur.orchAction === p.action &&
           cur.orchPolicy === p.label &&
           cur.orchLive === p.live &&
-          cur.kitRobotLive === p.kitRobotLive
+          cur.kitRobotLive === p.kitRobotLive &&
+          cur.kitHighlightRobotId === highlight
         ) {
           return;
         }
@@ -202,10 +213,15 @@ export const useLabStore = create<LabState>()(
           orchPolicy: p.label,
           orchLive: p.live,
           kitRobotLive: p.kitRobotLive,
+          kitHighlightRobotId: highlight,
         });
       },
       setPlaybackFrame: (frame) => {
         const cur = get();
+        const highlight =
+          frame.kitHighlightRobotId !== undefined
+            ? frame.kitHighlightRobotId
+            : cur.kitHighlightRobotId;
         const samePos =
           cur.personPos[0] === frame.personPos[0] &&
           cur.personPos[1] === frame.personPos[1] &&
@@ -222,6 +238,7 @@ export const useLabStore = create<LabState>()(
           cur.currentBeat === frame.beat &&
           cur.currentComfort === frame.comfort &&
           cur.currentLabel === frame.label &&
+          cur.kitHighlightRobotId === highlight &&
           cur.conflict?.alarm === frame.conflict?.alarm &&
           cur.conflict?.pairs[0]?.distance_m === frame.conflict?.pairs[0]?.distance_m &&
           cur.conflict?.pairs[0]?.ttc_s === frame.conflict?.pairs[0]?.ttc_s
@@ -236,6 +253,7 @@ export const useLabStore = create<LabState>()(
           currentComfort: frame.comfort,
           currentLabel: frame.label,
           conflict: frame.conflict,
+          kitHighlightRobotId: highlight,
         });
       },
 

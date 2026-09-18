@@ -114,6 +114,13 @@ export function KitStreamBackground() {
     }
   }, [phase, showIframe, busy, connectHere]);
 
+  // Release NVST slot when leaving high-fidelity viewport (unmount).
+  useEffect(() => {
+    return () => {
+      void fetch("/api/release-stream-slot", { method: "POST" }).catch(() => undefined);
+    };
+  }, []);
+
   return (
     <div className="kit-bg kit-bg--webrtc-host">
       {showIframe && (

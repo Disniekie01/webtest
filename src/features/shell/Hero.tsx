@@ -1,43 +1,18 @@
-import { useLabStore } from "../../state/store";
+import { useAscStore } from "../../state/ascStore";
 import "./Hero.css";
 
 export function Hero() {
-  const enterLab = useLabStore((s) => s.enterLab);
-  const playAssistiveArc = useLabStore((s) => s.playAssistiveArc);
+  const enterOps = useAscStore((s) => s.enterOps);
 
   return (
-    <div className="hero">
-      <div className="hero-veil" />
-      <div className="hero-copy">
-        <h1 className="hero-brand">City Lab</h1>
-        <p className="hero-line">
-          Live Kit city stream behind the console — comfort, stories, and CV on top.
-        </p>
-        <div className="hero-ctas">
-          <button type="button" className="cta primary" onClick={() => enterLab("elena_voss")}>
-            Play story
-          </button>
-          <button
-            type="button"
-            className="cta"
-            onClick={() => {
-              useLabStore.getState().openCv();
-            }}
-          >
-            CV
-          </button>
-          <button
-            type="button"
-            className="cta"
-            onClick={() => {
-              useLabStore.setState({ showOptIn: true });
-              enterLab("noor_rahman");
-            }}
-          >
-            Comfort opt-in
-          </button>
-          <button type="button" className="cta ghost" onClick={playAssistiveArc}>
-            Assistive arc
+    <div className="asc-hero">
+      <div className="asc-hero__copy">
+        <p className="asc-hero__eyebrow mono">Intelligence layer</p>
+        <h1 className="asc-hero__brand">Adaptive Smart City</h1>
+        <p className="asc-hero__line">A city that understands.</p>
+        <div className="asc-hero__ctas">
+          <button type="button" className="asc-cta primary" onClick={enterOps}>
+            Enter
           </button>
         </div>
       </div>

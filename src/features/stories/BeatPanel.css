@@ -84,6 +84,21 @@
   border-color: rgba(212, 91, 74, 0.55);
 }
 
+.policy-chip--flash {
+  animation: policyFlash 0.7s var(--ease-out);
+}
+
+@keyframes policyFlash {
+  0% {
+    box-shadow: 0 0 0 0 rgba(242, 194, 122, 0.55);
+    transform: scale(1.08);
+  }
+  100% {
+    box-shadow: 0 0 0 8px rgba(242, 194, 122, 0);
+    transform: none;
+  }
+}
+
 .policy-source {
   margin-left: auto;
   font-size: 0.65rem;

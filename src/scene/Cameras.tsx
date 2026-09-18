@@ -1,14 +1,16 @@
 import { useMemo } from "react";
+import { CITY_SPAN_M } from "../data/twinCamera";
 
 export function Cameras() {
+  const half = CITY_SPAN_M * 0.42;
   const cams = useMemo(
     () =>
       [
-        { pos: [-16, 5.5, -16] as [number, number, number], yaw: 0.8 },
-        { pos: [16, 5.5, 16] as [number, number, number], yaw: -2.4 },
-        { pos: [0, 6.2, 20] as [number, number, number], yaw: Math.PI },
+        { pos: [-half, 8, -half] as [number, number, number], yaw: 0.8 },
+        { pos: [half, 8, half] as [number, number, number], yaw: -2.4 },
+        { pos: [0, 9, half * 1.05] as [number, number, number], yaw: Math.PI },
       ],
-    [],
+    [half],
   );
 
   return (
@@ -16,11 +18,11 @@ export function Cameras() {
       {cams.map((c, i) => (
         <group key={i} position={c.pos} rotation={[0, c.yaw, 0]}>
           <mesh>
-            <boxGeometry args={[0.28, 0.2, 0.4]} />
+            <boxGeometry args={[0.35, 0.25, 0.5]} />
             <meshStandardMaterial color="#2a3034" metalness={0.55} />
           </mesh>
-          <mesh position={[0, 0, 0.24]}>
-            <sphereGeometry args={[0.09, 12, 12]} />
+          <mesh position={[0, 0, 0.28]}>
+            <sphereGeometry args={[0.11, 12, 12]} />
             <meshStandardMaterial
               color="#5eb8b0"
               emissive="#2f6f6c"

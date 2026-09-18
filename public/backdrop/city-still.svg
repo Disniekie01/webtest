@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a1620"/>
+      <stop offset="45%" stop-color="#143044"/>
+      <stop offset="78%" stop-color="#2a3a38"/>
+      <stop offset="100%" stop-color="#1a2220"/>
+    </linearGradient>
+    <linearGradient id="haze" x1="0" y1="0" x2="1" y2="0.4">
+      <stop offset="0%" stop-color="#5eb8b0" stop-opacity="0.12"/>
+      <stop offset="50%" stop-color="#d4a15a" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#2f6f6c" stop-opacity="0.1"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e3a42" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#0e181c" stop-opacity="0.98"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#sky)"/>
+  <rect width="1920" height="1080" fill="url(#haze)"/>
+  <!-- distant skyline -->
+  <g fill="#0c1418" opacity="0.85">
+    <rect x="40" y="420" width="70" height="380"/>
+    <rect x="120" y="360" width="90" height="440"/>
+    <rect x="220" y="480" width="55" height="320"/>
+    <rect x="290" y="300" width="110" height="500"/>
+    <rect x="420" y="440" width="80" height="360"/>
+    <rect x="520" y="280" width="95" height="520"/>
+    <rect x="630" y="380" width="70" height="420"/>
+    <rect x="720" y="240" width="130" height="560"/>
+    <rect x="870" y="400" width="75" height="400"/>
+    <rect x="960" y="320" width="100" height="480"/>
+    <rect x="1080" y="460" width="60" height="340"/>
+    <rect x="1160" y="260" width="120" height="540"/>
+    <rect x="1300" y="380" width="85" height="420"/>
+    <rect x="1400" y="300" width="105" height="500"/>
+    <rect x="1520" y="440" width="70" height="360"/>
+    <rect x="1610" y="340" width="95" height="460"/>
+    <rect x="1720" y="400" width="80" height="400"/>
+    <rect x="1820" y="480" width="70" height="320"/>
+  </g>
+  <!-- window lights -->
+  <g fill="#7ec8c0" opacity="0.35">
+    <rect x="135" y="400" width="6" height="8"/><rect x="150" y="420" width="6" height="8"/>
+    <rect x="310" y="340" width="6" height="8"/><rect x="330" y="360" width="6" height="8"/>
+    <rect x="540" y="320" width="6" height="8"/><rect x="560" y="350" width="6" height="8"/>
+    <rect x="750" y="280" width="6" height="8"/><rect x="780" y="310" width="6" height="8"/>
+    <rect x="990" y="360" width="6" height="8"/><rect x="1010" y="390" width="6" height="8"/>
+    <rect x="1190" y="300" width="6" height="8"/><rect x="1220" y="330" width="6" height="8"/>
+    <rect x="1430" y="340" width="6" height="8"/><rect x="1450" y="370" width="6" height="8"/>
+    <rect x="1640" y="380" width="6" height="8"/><rect x="1660" y="410" width="6" height="8"/>
+  </g>
+  <g fill="#d4a15a" opacity="0.28">
+    <rect x="165" y="500" width="5" height="7"/><rect x="350" y="480" width="5" height="7"/>
+    <rect x="580" y="450" width="5" height="7"/><rect x="800" y="420" width="5" height="7"/>
+    <rect x="1030" y="470" width="5" height="7"/><rect x="1240" y="440" width="5" height="7"/>
+    <rect x="1470" y="460" width="5" height="7"/><rect x="1680" y="490" width="5" height="7"/>
+  </g>
+  <!-- street plane -->
+  <rect x="0" y="780" width="1920" height="300" fill="#0a1014"/>
+  <g stroke="#2f6f6c" stroke-width="1.5" opacity="0.25" fill="none">
+    <path d="M0 820 L1920 820"/><path d="M0 860 L1920 860"/><path d="M0 920 L1920 920"/>
+    <path d="M480 780 L400 1080"/><path d="M960 780 L960 1080"/><path d="M1440 780 L1520 1080"/>
+  </g>
+  <!-- ambient glow -->
+  <ellipse cx="960" cy="760" rx="700" ry="80" fill="#5eb8b0" opacity="0.06"/>
+</svg>

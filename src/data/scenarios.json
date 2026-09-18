@@ -1,0 +1,125 @@
+[
+  {
+    "id": "margaret_sidewalk",
+    "citizenId": "margaret",
+    "slot": "morning",
+    "title": "Sidewalk closed",
+    "summary": "Construction reduces sidewalk access; crossings prioritized.",
+    "layers": ["traffic", "pedestrians", "comfort", "robots"],
+    "impactCells": [
+      { "x": 0.28, "y": 0.42, "w": 0.12, "h": 0.08 },
+      { "x": 0.35, "y": 0.48, "w": 0.1, "h": 0.06 }
+    ],
+    "comfortCells": [
+      { "x": 0.22, "y": 0.55, "w": 0.14, "h": 0.1, "level": 0.3 },
+      { "x": 0.42, "y": 0.52, "w": 0.12, "h": 0.09, "level": 0.45 }
+    ],
+    "replans": [
+      {
+        "robotId": "bot_ns_a.2",
+        "action": "reroute",
+        "path": [
+          [0.3, 0.7],
+          [0.38, 0.62],
+          [0.48, 0.58],
+          [0.55, 0.5]
+        ]
+      },
+      {
+        "robotId": "bot_ew_c.1",
+        "action": "hold",
+        "path": [
+          [0.5, 0.45],
+          [0.5, 0.45]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "amir_delay",
+    "citizenId": "amir",
+    "slot": "morning",
+    "title": "Transit line delay",
+    "summary": "Crowd formation at North Hub; fleets leave pedestrian corridors.",
+    "layers": ["transit", "pedestrians", "sensors", "robots"],
+    "impactCells": [
+      { "x": 0.48, "y": 0.28, "w": 0.18, "h": 0.14 },
+      { "x": 0.55, "y": 0.38, "w": 0.1, "h": 0.08 }
+    ],
+    "comfortCells": [
+      { "x": 0.4, "y": 0.35, "w": 0.2, "h": 0.12, "level": 0.55 }
+    ],
+    "replans": [
+      {
+        "robotId": "bot_hub_1",
+        "action": "reroute",
+        "path": [
+          [0.52, 0.4],
+          [0.62, 0.48],
+          [0.7, 0.55],
+          [0.78, 0.6]
+        ]
+      },
+      {
+        "robotId": "bot_hub_3",
+        "action": "stagger",
+        "path": [
+          [0.45, 0.5],
+          [0.42, 0.58],
+          [0.4, 0.68]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sofia_lunch",
+    "citizenId": "sofia",
+    "slot": "midday",
+    "title": "Lunch surge",
+    "summary": "Dynamic interaction zones tighten; deliveries stagger.",
+    "layers": ["pedestrians", "robots", "comfort", "activity"],
+    "impactCells": [
+      { "x": 0.58, "y": 0.48, "w": 0.16, "h": 0.12 },
+      { "x": 0.62, "y": 0.58, "w": 0.1, "h": 0.08 }
+    ],
+    "comfortCells": [
+      { "x": 0.55, "y": 0.45, "w": 0.22, "h": 0.18, "level": 0.6 },
+      { "x": 0.7, "y": 0.52, "w": 0.1, "h": 0.1, "level": 0.4 }
+    ],
+    "replans": [
+      {
+        "robotId": "bot_plaza_2",
+        "action": "reroute",
+        "path": [
+          [0.6, 0.55],
+          [0.68, 0.62],
+          [0.75, 0.7],
+          [0.82, 0.72]
+        ]
+      },
+      {
+        "robotId": "drone_c7",
+        "action": "stagger",
+        "path": [
+          [0.65, 0.4],
+          [0.72, 0.35],
+          [0.8, 0.32]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "clear_evening",
+    "citizenId": null,
+    "slot": "evening",
+    "title": "Clear evening",
+    "summary": "Baseline conditions — soft comfort bands only.",
+    "layers": ["traffic", "activity"],
+    "impactCells": [],
+    "comfortCells": [
+      { "x": 0.3, "y": 0.5, "w": 0.15, "h": 0.1, "level": 0.7 },
+      { "x": 0.6, "y": 0.45, "w": 0.12, "h": 0.1, "level": 0.75 }
+    ],
+    "replans": []
+  }
+]

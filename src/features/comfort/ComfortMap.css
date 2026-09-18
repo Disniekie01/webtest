@@ -1,0 +1,291 @@
+.comfort-map {
+  position: absolute;
+  inset: 4.6rem 0.75rem 4.25rem;
+  background: rgba(10, 12, 16, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  backdrop-filter: blur(22px);
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: panelIn 0.4s var(--ease-out);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+}
+
+.comfort-map__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1.1rem;
+  border-bottom: var(--hairline);
+}
+
+.comfort-map__toolbar h2 {
+  margin: 0;
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.comfort-map__toolbar button {
+  appearance: none;
+  border: var(--hairline);
+  background: transparent;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.comfort-map__toolbar button.primary {
+  color: var(--text);
+  background: rgba(47, 111, 108, 0.4);
+  border-color: rgba(94, 184, 176, 0.4);
+}
+
+.comfort-map__layout {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 11rem 16rem 1fr;
+  gap: 0;
+}
+
+/* Legacy form layout kept for non-studio; Agent Studio overrides via .agent-studio__layout */
+.agent-studio .comfort-map__layout {
+  display: none;
+}
+
+
+.comfort-map__profiles,
+.comfort-map__editor {
+  border-right: var(--hairline);
+  padding: 0.85rem;
+  overflow-y: auto;
+}
+
+.comfort-map__profiles h3,
+.comfort-map__editor legend,
+.comfort-map__editor label {
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+
+.comfort-map__profiles ul {
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.comfort-map__profiles button {
+  appearance: none;
+  width: 100%;
+  border: var(--hairline);
+  background: rgba(8, 14, 18, 0.4);
+  text-align: left;
+  padding: 0.55rem 0.6rem;
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-muted);
+}
+
+.comfort-map__profiles button.on {
+  color: var(--text);
+  border-color: rgba(94, 184, 176, 0.45);
+}
+
+.comfort-map__editor label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.85rem;
+  color: var(--text-muted);
+}
+
+.comfort-map__editor input[type="text"],
+.comfort-map__editor input:not([type]) {
+  appearance: none;
+  border: var(--hairline);
+  background: rgba(0, 0, 0, 0.35);
+  padding: 0.45rem 0.55rem;
+  color: var(--text);
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 0.9rem;
+}
+
+.comfort-map__editor fieldset {
+  border: var(--hairline);
+  margin: 0 0 0.85rem;
+  padding: 0.55rem 0.65rem;
+}
+
+.comfort-map__editor .check {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.45rem;
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.comfort-map__editor .danger {
+  appearance: none;
+  border: 1px solid rgba(196, 92, 74, 0.45);
+  background: transparent;
+  color: #e8a090;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.75rem;
+}
+
+.comfort-map__canvas-wrap {
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.comfort-map__scenarios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.65rem;
+}
+
+.comfort-map__scenarios button {
+  appearance: none;
+  border: var(--hairline);
+  background: transparent;
+  color: var(--text-muted);
+  padding: 0.35rem 0.6rem;
+  font-size: 0.72rem;
+}
+
+.comfort-map__scenarios button.on {
+  color: var(--text);
+  border-color: rgba(196, 92, 74, 0.5);
+  background: rgba(196, 92, 74, 0.12);
+}
+
+.comfort-map__canvas {
+  position: relative;
+  flex: 1;
+  min-height: 220px;
+  border: var(--hairline);
+  background: #0a1216;
+  overflow: hidden;
+}
+
+.cmap-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(126, 200, 192, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(126, 200, 192, 0.06) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.cmap-cell {
+  position: absolute;
+  display: block;
+}
+
+.cmap-cell.soft {
+  background: rgba(94, 184, 176, 0.28);
+  border: 1px solid rgba(126, 200, 192, 0.4);
+}
+
+.cmap-cell.impact {
+  background: rgba(196, 92, 74, 0.4);
+  border: 1px solid rgba(196, 92, 74, 0.75);
+  box-shadow: 0 0 20px rgba(196, 92, 74, 0.3);
+}
+
+.cmap-replan {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: var(--amber);
+  overflow: visible;
+}
+
+.comfort-map__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.65rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.comfort-map__legend i {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 6px;
+  vertical-align: middle;
+  border: 1px solid transparent;
+}
+
+.comfort-map__legend i.soft {
+  background: rgba(94, 184, 176, 0.4);
+  border-color: rgba(126, 200, 192, 0.5);
+}
+
+.comfort-map__legend i.impact {
+  background: rgba(196, 92, 74, 0.5);
+  border-color: rgba(196, 92, 74, 0.8);
+}
+
+.comfort-map__legend i.path {
+  background: transparent;
+  border-bottom: 2px dashed var(--amber);
+  height: 0;
+  width: 16px;
+}
+
+.comfort-map__summary {
+  margin: 0.55rem 0 0;
+  font-size: 0.8rem;
+}
+
+.comfort-map__summary strong {
+  color: var(--text);
+}
+
+@keyframes panelIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1000px) {
+  .comfort-map__layout {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+
+  .comfort-map__profiles,
+  .comfort-map__editor {
+    border-right: 0;
+    border-bottom: var(--hairline);
+  }
+
+  .comfort-map__canvas {
+    min-height: 260px;
+  }
+}

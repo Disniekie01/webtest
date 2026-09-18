@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Curb delivery robots — sidewalk person vType (JuPedSim-friendly). -->
+<!-- Curb delivery robots — looping sidewalk circuits (JuPedSim-friendly). -->
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
 
@@ -9,17 +9,30 @@
          minGap="0.80" color="1.00,0.62,0.20"
          guiShape="pedestrian"/>
 
-  <!-- Sorted by begin — depot → dropoff loops on baked sidewalk edges -->
-  <personFlow id="bot_ns_b" type="delivery_robot" begin="5" number="2" period="90" departPos="random_free">
+  <!-- Continuous flows + multi-leg out-and-back so bots stay on the curb for the hour.
+       Kit still caps follow set via CITYLAB_MAX_ROBOT. -->
+  <personFlow id="bot_ns_b" type="delivery_robot" begin="5" end="3600" period="55" departPos="random_free">
     <walk from="SW_NS_1_0_1_R" to="SW_NS_1_3_4_R"/>
-  </personFlow>
-  <personFlow id="bot_ew_1" type="delivery_robot" begin="12" number="2" period="100" departPos="random_free">
-    <walk from="SW_EW_1_0_1_T" to="SW_EW_1_3_4_T"/>
-  </personFlow>
-  <personFlow id="bot_ns_br" type="delivery_robot" begin="20" number="2" period="95" departPos="random_free">
+    <walk from="SW_NS_1_3_4_R" to="SW_NS_1_0_1_R"/>
+    <walk from="SW_NS_1_0_1_R" to="SW_NS_1_3_4_R"/>
     <walk from="SW_NS_1_3_4_R" to="SW_NS_1_0_1_R"/>
   </personFlow>
-  <personFlow id="bot_diag" type="delivery_robot" begin="30" number="2" period="110" departPos="random_free">
+  <personFlow id="bot_ew_1" type="delivery_robot" begin="12" end="3600" period="60" departPos="random_free">
+    <walk from="SW_EW_1_0_1_T" to="SW_EW_1_3_4_T"/>
+    <walk from="SW_EW_1_3_4_T" to="SW_EW_1_0_1_T"/>
+    <walk from="SW_EW_1_0_1_T" to="SW_EW_1_3_4_T"/>
+    <walk from="SW_EW_1_3_4_T" to="SW_EW_1_0_1_T"/>
+  </personFlow>
+  <personFlow id="bot_ns_br" type="delivery_robot" begin="20" end="3600" period="58" departPos="random_free">
+    <walk from="SW_NS_1_3_4_R" to="SW_NS_1_0_1_R"/>
+    <walk from="SW_NS_1_0_1_R" to="SW_NS_1_3_4_R"/>
+    <walk from="SW_NS_1_3_4_R" to="SW_NS_1_0_1_R"/>
+    <walk from="SW_NS_1_0_1_R" to="SW_NS_1_3_4_R"/>
+  </personFlow>
+  <personFlow id="bot_diag" type="delivery_robot" begin="30" end="3600" period="70" departPos="random_free">
     <walk from="SW_NS_0_0_1_R" to="SW_EW_3_3_4_T"/>
+    <walk from="SW_EW_3_3_4_T" to="SW_NS_0_0_1_R"/>
+    <walk from="SW_NS_0_0_1_R" to="SW_EW_3_3_4_T"/>
+    <walk from="SW_EW_3_3_4_T" to="SW_NS_0_0_1_R"/>
   </personFlow>
 </routes>

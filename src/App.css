@@ -3,37 +3,67 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #0c121a;
+  background: var(--bg-deep);
 }
 
 .app-viewport {
   position: absolute;
   inset: 0;
   z-index: 0;
+  pointer-events: auto;
 }
 
 .app-chrome {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 3;
+  /* Must stay none so empty space reaches the Twin canvas for OrbitControls. */
   pointer-events: none;
 }
 
-/* Only interactive chrome receives clicks — Kit video + stream HUD stay reachable underneath */
+/* Interactive chrome only — never the full-bleed shell wrappers. */
 .app-chrome button,
 .app-chrome a,
 .app-chrome input,
 .app-chrome textarea,
 .app-chrome select,
-.app-chrome .lab-top,
-.app-chrome .lab-left,
-.app-chrome .lab-right,
-.app-chrome .lab-bottom,
-.app-chrome .cv-modal-backdrop {
+.app-chrome .ops-top,
+.app-chrome .ops-modules,
+.app-chrome .ops-personas,
+.app-chrome .ops-scenario-chip,
+.app-chrome .ops-dock,
+.app-chrome .live-feeds,
+.app-chrome .telemetry-drawer,
+.app-chrome .traffic-metrics,
+.app-chrome .ped-metrics,
+.app-chrome .fleet-metrics,
+.app-chrome .transit-metrics,
+.app-chrome .aq-metrics,
+.app-chrome .comfort-metrics,
+.app-chrome .citizen-panel,
+.app-chrome .comfort-map,
+.app-chrome .asc-hero__copy {
   pointer-events: auto;
 }
 
-body.cv-modal-open .kit-bg__iframe {
+/* FuseLab-style fidelity switch veil */
+.fidelity-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
   pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 45%, rgba(8, 18, 22, 0.15), rgba(2, 6, 10, 0.85)),
+    linear-gradient(180deg, rgba(4, 10, 14, 0.35), rgba(4, 10, 14, 0.7));
+  opacity: 0;
+  backdrop-filter: blur(0px) saturate(1);
+  transition:
+    opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    backdrop-filter 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+.fidelity-veil--on {
+  opacity: 1;
+  backdrop-filter: blur(10px) saturate(1.15);
+  pointer-events: auto;
+}

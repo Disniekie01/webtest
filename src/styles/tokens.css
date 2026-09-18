@@ -1,25 +1,22 @@
 :root {
-  /* Cool concrete + deep teal glass + signal amber / assistive cyan */
-  --bg-dusk-top: #1a2430;
-  --bg-dusk-mid: #243442;
-  --bg-dusk-bot: #3d4a3f;
-  --concrete: #8a9299;
-  --concrete-deep: #5c646c;
-  --glass: rgba(18, 42, 48, 0.72);
-  --glass-edge: rgba(120, 190, 188, 0.28);
-  --teal: #2f6f6c;
+  --bg-deep: #04090d;
+  --bg-panel: rgba(6, 14, 18, 0.72);
+  --bg-panel-solid: #0a141a;
+  --glass-edge: rgba(126, 200, 192, 0.2);
+  --teal: #2a6a68;
   --teal-bright: #5eb8b0;
-  --cyan-assist: #7ec8c0;
-  --amber-stress: #d4a15a;
+  --cyan: #7ec8c0;
+  --amber: #d4a15a;
   --crit: #c45c4a;
-  --text: #eef2f0;
-  --text-muted: #9aa8a6;
-  --ink: #0e1618;
-  --font-display: "Fraunces", Georgia, serif;
-  --font-body: "IBM Plex Sans", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
-  --panel-radius: 2px;
+  --crit-soft: rgba(196, 92, 74, 0.45);
+  --text: #eef4f2;
+  --text-muted: #7f9490;
+  --ink: #04080c;
+  --font-display: "Outfit", "IBM Plex Sans", system-ui, sans-serif;
+  --font-body: "Outfit", "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --hairline: 1px solid rgba(126, 200, 192, 0.16);
 }
 
 *,
@@ -35,30 +32,37 @@ body,
   height: 100%;
   width: 100%;
   overflow: hidden;
-  background: var(--bg-dusk-mid);
+  background: var(--bg-deep);
   color: var(--text);
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 15px;
+  line-height: 1.45;
   -webkit-font-smoothing: antialiased;
 }
 
-button {
-  font-family: inherit;
-  cursor: pointer;
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
 }
 
-.panel {
-  background: var(--glass);
-  border: 1px solid var(--glass-edge);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-radius: var(--panel-radius);
+button {
+  cursor: pointer;
 }
 
 .mono {
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 .muted {
   color: var(--text-muted);
+}
+
+/* thin scrollbars for HUD panels */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(94, 184, 176, 0.35) transparent;
 }

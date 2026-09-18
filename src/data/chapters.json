@@ -1,0 +1,71 @@
+[
+  {
+    "id": "opening",
+    "title": "Opening",
+    "narration": "Today's cities generate enormous amounts of data. Traffic cameras capture video. Sensors monitor infrastructure. Connected systems collect information from every corner of the urban environment. Yet most of these systems remain passive.",
+    "layers": ["traffic", "sensors"],
+    "videoUrl": null
+  },
+  {
+    "id": "challenge",
+    "title": "The Challenge",
+    "narration": "Interactions between humans and robotic systems are largely managed at the device level. As Physical AI becomes part of everyday life, a new challenge emerges: how does the city itself understand these interactions — not just at scale, but at an individual level?",
+    "layers": ["robots", "pedestrians"],
+    "videoUrl": null
+  },
+  {
+    "id": "twin",
+    "title": "Adaptive Smart City",
+    "narration": "A continuously evolving digital twin. Real-time information from sensors, transportation, infrastructure, computer vision, and robotic platforms creates a living model of the city. AI analyzes what is happening now, predicts what may happen next, and helps robotic systems safely interact around people.",
+    "layers": ["activity", "comfort", "robots"],
+    "videoUrl": null
+  },
+  {
+    "id": "margaret",
+    "title": "Margaret",
+    "narration": "Margaret is 78 and values her independence. Construction has reduced sidewalk access. Routes are adjusted. Crossings are prioritized. Assistance options are made available. Margaret remains independent while the city quietly adapts around her.",
+    "layers": ["comfort", "pedestrians", "robots"],
+    "scenarioId": "margaret_sidewalk",
+    "citizenId": "margaret",
+    "videoUrl": null
+  },
+  {
+    "id": "amir",
+    "title": "Amir",
+    "narration": "Every morning Amir commutes across the city. A disruption begins creating congestion. Before commuters arrive, the city has already detected the issue. What could have become a bottleneck becomes a seamless journey.",
+    "layers": ["transit", "sensors", "robots"],
+    "scenarioId": "amir_delay",
+    "citizenId": "amir",
+    "videoUrl": null
+  },
+  {
+    "id": "sofia",
+    "title": "Sofia",
+    "narration": "Sofia works where robots, drones, and autonomous services operate throughout the day. As lunchtime crowds increase, dynamic interaction zones form. Robot routes adjust. Deliveries are staggered. The city understands not only where people are — but how they want technology to behave around them.",
+    "layers": ["comfort", "robots", "pedestrians", "activity"],
+    "scenarioId": "sofia_lunch",
+    "citizenId": "sofia",
+    "videoUrl": null
+  },
+  {
+    "id": "intelligence",
+    "title": "Intelligence Layer",
+    "narration": "These stories are signals feeding an ever-evolving urban intelligence platform. The platform evaluates city conditions, identifies emerging patterns, refines policies, retrains models, and deploys those learnings across connected fleets.",
+    "layers": ["activity", "robots", "sensors"],
+    "videoUrl": null
+  },
+  {
+    "id": "physical_ai",
+    "title": "Physical AI",
+    "narration": "Intelligence alone is not enough. Autonomous robots, drones, vehicles, and connected infrastructure operate as a coordinated ecosystem — understanding the rules of the city and adapting in real time.",
+    "layers": ["robots", "traffic", "transit"],
+    "videoUrl": null
+  },
+  {
+    "id": "close",
+    "title": "Close",
+    "narration": "The future of cities is not more sensors, more cameras, or simply more robots. The future is a city that understands. A city that learns. A city that continuously adapts to the people it serves.",
+    "layers": ["activity"],
+    "videoUrl": null
+  }
+]

@@ -1,0 +1,621 @@
+.ops-shell {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  color: var(--text);
+}
+
+/* Only interactive chrome captures clicks — empty viewport space passes through to Twin orbit. */
+.ops-shell .ops-top,
+.ops-shell .ops-modules,
+.ops-shell .ops-personas,
+.ops-shell .ops-scenario-chip,
+.ops-shell .ops-dock,
+.ops-shell .live-feeds,
+.ops-shell .telemetry-drawer,
+.ops-shell .traffic-metrics,
+.ops-shell .ped-metrics,
+.ops-shell .fleet-metrics,
+.ops-shell .transit-metrics,
+.ops-shell .aq-metrics,
+.ops-shell .comfort-metrics,
+.ops-shell .citizen-panel,
+.ops-shell .comfort-map {
+  pointer-events: auto;
+}
+
+.ops-shell .layer-overlay {
+  pointer-events: none;
+}
+
+/* —— Top chrome (DMF) —— */
+.ops-top {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  right: 0.75rem;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: 1.2fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.55rem 0.85rem;
+  background: rgba(12, 14, 18, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  backdrop-filter: blur(22px) saturate(1.2);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+.ops-top__left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.ops-brand {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.ops-crumb {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ops-crumb i {
+  font-style: normal;
+  opacity: 0.4;
+}
+
+.ops-crumb .current {
+  color: var(--text);
+}
+
+.ops-top__center {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.ops-wx {
+  color: #c8d4dc;
+}
+
+.ops-sep {
+  width: 1px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.ops-live {
+  color: #5ee0c8;
+  letter-spacing: 0.14em;
+  font-weight: 500;
+}
+
+.ops-live::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: #5ee0c8;
+  box-shadow: 0 0 10px rgba(94, 224, 200, 0.7);
+  vertical-align: middle;
+  animation: opsPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes opsPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.ops-top__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+
+.ops-action {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
+  padding: 0.4rem 0.75rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  border-radius: 8px;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.ops-action:hover {
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.ops-action.on {
+  color: #e8d4b0;
+  border-color: rgba(212, 161, 90, 0.45);
+  background: rgba(212, 161, 90, 0.12);
+}
+
+.ops-action.ghost {
+  color: var(--cyan);
+}
+
+/* —— Left modules rail (DMF Layers) —— */
+.ops-modules {
+  position: absolute;
+  top: 4.6rem;
+  left: 0.75rem;
+  width: 13.5rem;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.65rem;
+  background: rgba(10, 12, 16, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  backdrop-filter: blur(20px) saturate(1.15);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+  max-height: calc(100% - 8.5rem);
+  overflow: hidden;
+}
+
+.ops-modules__tabs {
+  display: flex;
+  gap: 0.15rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.ops-modules__tabs span {
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+}
+
+.ops-modules__tabs .on {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ops-modules__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+}
+
+.ops-mod {
+  appearance: none;
+  width: 100%;
+  border: 1px solid transparent;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.5rem;
+  border-radius: 9px;
+  text-align: left;
+  color: var(--text-muted);
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.ops-mod:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.ops-mod.on {
+  color: var(--text);
+  background: rgba(94, 184, 176, 0.12);
+  border-color: rgba(94, 184, 176, 0.28);
+}
+
+.ops-mod__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: rgba(138, 154, 152, 0.5);
+}
+
+.ops-mod.on .ops-mod__dot {
+  box-shadow: 0 0 10px currentColor;
+}
+
+.ops-mod__text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.ops-mod__text strong {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.ops-mod__text em {
+  font-style: normal;
+  font-size: 0.62rem;
+  opacity: 0.65;
+}
+
+.ops-modules__quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ops-chip {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-muted);
+  font-size: 0.58rem;
+  letter-spacing: 0.04em;
+  padding: 0.28rem 0.4rem;
+  border-radius: 6px;
+}
+
+.ops-chip.on {
+  color: var(--text);
+  border-color: rgba(94, 184, 176, 0.4);
+  background: rgba(47, 111, 108, 0.25);
+}
+
+.layer-traffic {
+  background: #d4a15a;
+  color: #d4a15a;
+}
+.layer-pedestrians {
+  background: #7ec8c0;
+  color: #7ec8c0;
+}
+.layer-robots {
+  background: #e8c07a;
+  color: #e8c07a;
+}
+.layer-sensors {
+  background: #5eb8b0;
+  color: #5eb8b0;
+}
+.layer-comfort {
+  background: #8fd4b8;
+  color: #8fd4b8;
+}
+.layer-transit {
+  background: #6aa8d4;
+  color: #6aa8d4;
+}
+.layer-activity {
+  background: #a89ad4;
+  color: #a89ad4;
+}
+
+/* —— Live feeds sit under modules or mid-left —— */
+.dmf .live-feeds {
+  top: auto;
+  bottom: 4.5rem;
+  left: 0.75rem;
+  width: 13.5rem;
+  max-height: min(38vh, 22rem);
+}
+
+.dmf .live-feeds__head,
+.dmf .live-feeds__ticker,
+.dmf .feed-card {
+  border-radius: 12px;
+  border-color: rgba(255, 255, 255, 0.07);
+  background: rgba(10, 12, 16, 0.62);
+}
+
+/* —— Personas (right) —— */
+.ops-personas {
+  position: absolute;
+  top: 4.6rem;
+  right: 0.75rem;
+  width: min(16.5rem, calc(100vw - 2rem));
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 4;
+  max-height: calc(100% - 8rem);
+  overflow-y: auto;
+}
+
+.ops-personas__head {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 0.2rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.ops-persona {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(10, 12, 16, 0.62);
+  backdrop-filter: blur(18px) saturate(1.15);
+  padding: 0;
+  display: grid;
+  grid-template-columns: 4.2rem 1fr;
+  overflow: hidden;
+  text-align: left;
+  border-radius: 12px;
+  transition: border-color 0.25s, transform 0.25s var(--ease-out), box-shadow 0.25s;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.3);
+}
+
+.ops-persona:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateX(-2px);
+}
+
+.ops-persona.active {
+  border-color: rgba(94, 224, 200, 0.45);
+  box-shadow: 0 0 0 1px rgba(94, 224, 200, 0.15), 0 14px 40px rgba(0, 0, 0, 0.4);
+}
+
+.ops-persona__photo {
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: #0a1216;
+}
+
+.ops-persona__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+  filter: saturate(0.9) contrast(1.05);
+}
+
+.ops-persona__meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.18rem;
+  padding: 0.55rem 0.7rem;
+  min-width: 0;
+}
+
+.ops-persona__meta strong {
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.ops-persona__meta span {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  line-height: 1.25;
+}
+
+.ops-persona__meta .score {
+  margin-top: 0.2rem;
+  font-size: 0.62rem;
+  color: #9ed4c8;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ops-scenario-chip {
+  position: absolute;
+  top: 4.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  max-width: min(24rem, 36vw);
+  padding: 0.65rem 0.9rem;
+  background: rgba(10, 12, 16, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  backdrop-filter: blur(16px);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.78rem;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.3);
+}
+
+.ops-scenario-chip strong {
+  font-weight: 600;
+}
+
+/* —— Bottom dock —— */
+.ops-dock {
+  position: absolute;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem;
+  background: rgba(10, 12, 16, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  backdrop-filter: blur(18px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+.ops-dock__btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 0.45rem 0.75rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  border-radius: 8px;
+}
+
+.ops-dock__btn:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ops-dock__btn.on {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.ops-dock__sep {
+  width: 1px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 0.2rem;
+}
+
+@media (max-width: 1100px) {
+  .ops-top {
+    grid-template-columns: 1fr;
+    gap: 0.45rem;
+  }
+
+  .ops-scenario-chip {
+    display: none;
+  }
+
+  .ops-modules {
+    width: 11.5rem;
+  }
+
+  .dmf .live-feeds {
+    width: 11.5rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .ops-modules {
+    display: none;
+  }
+
+  .dmf .live-feeds {
+    position: relative;
+    top: auto;
+    bottom: auto;
+    left: auto;
+    width: 100%;
+    max-height: none;
+    padding: 0 0.75rem;
+  }
+
+  .ops-personas {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: 100%;
+    max-height: none;
+    padding: 0 0.75rem;
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .ops-persona {
+    min-width: 14rem;
+    flex: 0 0 auto;
+  }
+}
+
+/* —— High fidelity (Kit): fade twin layers chrome; restore City pulse —— */
+.ops-shell--kit .ops-modules,
+.ops-shell--kit .layer-overlay,
+.ops-shell--kit .traffic-metrics,
+.ops-shell--kit .ped-metrics,
+.ops-shell--kit .fleet-metrics,
+.ops-shell--kit .transit-metrics,
+.ops-shell--kit .aq-metrics,
+.ops-shell--kit .comfort-metrics,
+.ops-shell--kit .ops-scenario-chip {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none !important;
+  transform: translateX(-12px);
+  transition:
+    opacity 0.45s var(--ease-out),
+    transform 0.45s var(--ease-out),
+    visibility 0.45s;
+}
+
+.ops-shell--kit .ped-metrics {
+  transform: translateY(12px);
+}
+
+.ops-shell:not(.ops-shell--kit) .ops-modules,
+.ops-shell:not(.ops-shell--kit) .layer-overlay,
+.ops-shell:not(.ops-shell--kit) .traffic-metrics,
+.ops-shell:not(.ops-shell--kit) .ped-metrics,
+.ops-shell:not(.ops-shell--kit) .fleet-metrics,
+.ops-shell:not(.ops-shell--kit) .transit-metrics,
+.ops-shell:not(.ops-shell--kit) .aq-metrics,
+.ops-shell:not(.ops-shell--kit) .comfort-metrics,
+.ops-shell:not(.ops-shell--kit) .ops-scenario-chip {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity 0.45s var(--ease-out),
+    transform 0.45s var(--ease-out),
+    visibility 0.45s;
+}
+
+/* City pulse returns to original top-left feed stack over the Kit stream */
+.ops-shell--kit.dmf .live-feeds {
+  top: 5.25rem;
+  bottom: auto;
+  left: 1.25rem;
+  width: min(20.5rem, calc(100vw - 2.5rem));
+  max-height: calc(100% - 7.5rem);
+  transition:
+    top 0.45s var(--ease-out),
+    bottom 0.45s var(--ease-out),
+    width 0.45s var(--ease-out),
+    max-height 0.45s var(--ease-out);
+}
+
+.ops-shell.dmf:not(.ops-shell--kit) .live-feeds {
+  transition:
+    top 0.45s var(--ease-out),
+    bottom 0.45s var(--ease-out),
+    width 0.45s var(--ease-out),
+    max-height 0.45s var(--ease-out);
+}
