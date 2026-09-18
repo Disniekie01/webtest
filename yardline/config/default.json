@@ -1,0 +1,80 @@
+{
+  "detector": {
+    "weights": "weights/yolov8n.engine",
+    "conf": 0.18,
+    "iou": 0.5,
+    "imgsz": 960
+  },
+  "classes": {
+    "worker": {
+      "coco": [0],
+      "radius_m": 0.45,
+      "conf": 0.28,
+      "min_area_frac": 0.0,
+      "min_height_frac": 0.022
+    },
+    "vehicle": {
+      "coco": [2, 3, 5, 7],
+      "radius_m": 1.4,
+      "conf": 0.24,
+      "min_area_frac": 0.0008,
+      "min_height_frac": 0.04,
+      "min_foot_frac": 0.14,
+      "max_aspect": 4.8
+    },
+    "machine": {
+      "coco": [4, 6, 8],
+      "radius_m": 2.4,
+      "conf": 0.16,
+      "min_area_frac": 0.012,
+      "min_height_frac": 0.10,
+      "min_foot_frac": 0.22,
+      "max_aspect": 3.5
+    }
+  },
+  "tracker": {
+    "backend": "bytetrack",
+    "iou_match": 0.12,
+    "max_age": 28,
+    "min_hits": 2,
+    "high_thresh": 0.25,
+    "low_thresh": 0.1,
+    "match_thresh": 0.7,
+    "second_match": 0.5
+  },
+  "risk": {
+    "horizon_s": 5.0,
+    "dt_s": 0.1,
+    "warning_ttc_s": 2.5,
+    "critical_ttc_s": 1.2,
+    "advisory_distance_m": 4.0,
+    "warning_distance_m": 2.0,
+    "critical_distance_m": 0.5,
+    "escalate_frames": 3,
+    "clear_frames": 12,
+    "min_hold_s": 0.8,
+    "cooldown_s": 5.0,
+    "zone_dwell_s": 0.0
+  },
+  "incidents": {
+    "enabled": true,
+    "pre_roll_frames": 48,
+    "webhook_url": ""
+  },
+  "heatmap": {
+    "enabled": true,
+    "cell_m": 0.5,
+    "decay": 0.985
+  },
+  "stream": {
+    "max_width": 960,
+    "jpeg_quality": 78
+  },
+  "privacy": {
+    "blur_faces": true
+  },
+  "youtube": {
+    "cookies_from_browser": "firefox",
+    "cookies_file": ""
+  }
+}

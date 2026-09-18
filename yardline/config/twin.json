@@ -1,0 +1,34 @@
+{
+  "detector": {
+    "weights": "weights/yolov8n.pt",
+    "conf": 0.28,
+    "iou": 0.5,
+    "imgsz": 416
+  },
+  "tracker": {
+    "max_age": 5,
+    "min_hits": 2,
+    "iou_match": 0.2,
+    "match_thresh": 0.25,
+    "high_thresh": 0.3,
+    "low_thresh": 0.12
+  },
+  "heatmap": {
+    "enabled": false
+  },
+  "incidents": {
+    "enabled": false,
+    "pre_roll_frames": 8
+  },
+  "stream": {
+    "max_width": 640,
+    "jpeg_quality": 50,
+    "target_fps": 20,
+    "send_jpeg": true,
+    "slim_packet": true,
+    "lag_frames": 0
+  },
+  "privacy": {
+    "blur_faces": false
+  }
+}

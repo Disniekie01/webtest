@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>irl CVtest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,480;9..144,600&family=Outfit:wght@360;450;550&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/styles.css?v=clipfix1" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+</head>
+<body class="platform">
+  <div class="app-frame">
+  <header class="shell">
+    <div class="shell-main">
+      <div class="brand">
+        <span class="mark">irl</span>
+        <div class="brand-copy">
+          <span class="tag">CVtest</span>
+          <span class="product">Smart-city clearance</span>
+        </div>
+      </div>
+
+      <div class="kpi-bar" id="kpi-bar" aria-label="Live metrics">
+        <span id="alarm-pill" class="kpi alarm">Clear</span>
+        <span id="m-ttc" class="kpi">TTC —</span>
+        <span id="m-dist" class="kpi">Clr —</span>
+        <span id="m-workers" class="kpi">P 0</span>
+        <span id="m-machines" class="kpi">V 0</span>
+        <span id="m-trips" class="kpi">Cross 0</span>
+        <span id="m-inc" class="kpi">Inc 0</span>
+        <span id="m-kpi" class="kpi muted">KPI —</span>
+        <span id="m-site" class="kpi muted">Site —</span>
+        <span id="m-lat" class="kpi muted">— ms</span>
+        <span id="plane-pill" class="kpi muted">No plane</span>
+        <span id="health" class="kpi muted">GPU</span>
+      </div>
+
+      <div class="shell-actions">
+        <label class="field severity-field">
+          <span>Alerts</span>
+          <select id="severity-filter" title="Minimum severity to toast / beep">
+            <option value="0">All</option>
+            <option value="1">Advisory+</option>
+            <option value="2" selected>Warning+</option>
+            <option value="3">Critical</option>
+          </select>
+        </label>
+        <button type="button" id="btn-sound" class="ghost icon-btn active" title="Alert sound on">♪</button>
+        <button type="button" id="btn-report" class="ghost" title="Export shift report">Report</button>
+        <button type="button" id="btn-geo-pick" class="ghost" title="Pick site geo on a map">Geo</button>
+        <button type="button" id="btn-gis" class="ghost" title="Export site GeoJSON">GIS</button>
+        <button type="button" id="btn-incidents" class="ghost" title="Open incidents">Incidents <span id="inc-badge" class="badge" hidden>0</span></button>
+        <button type="button" id="btn-calibrate" class="ghost">Calibrate</button>
+        <button type="button" id="btn-step" class="ghost">Step</button>
+        <button type="button" id="btn-play" class="primary">Play</button>
+      </div>
+    </div>
+
+    <div class="shell-source">
+      <div class="shell-source-scroll">
+        <label class="field">
+          <span>Site</span>
+          <select id="site-select"><option value="">—</option></select>
+        </label>
+        <label class="field">
+          <span>Preset</span>
+          <select id="preset-select"><option value="">—</option></select>
+        </label>
+        <label class="field grow clip-field">
+          <span>Clip</span>
+          <div class="clip-pop" id="clip-pop">
+            <button type="button" id="clip-trigger" class="clip-trigger" aria-haspopup="listbox" aria-expanded="false">
+              <span id="clip-label">Select clip…</span>
+            </button>
+            <select id="source" hidden></select>
+            <div id="clip-menu" class="clip-menu" role="listbox" hidden></div>
+          </div>
+        </label>
+        <label class="field grow live-field">
+          <span>Live URL</span>
+          <input id="live-url" type="url" placeholder="YouTube, RTSP, or HTTP" value="https://www.youtube.com/watch?v=zMCea32gpmg" />
+        </label>
+        <button type="button" id="btn-live" class="ghost">Open live</button>
+        <button type="button" id="btn-save-preset" class="ghost">Save preset</button>
+        <button type="button" id="btn-bind-cam" class="ghost" title="Bind current source to active site">Bind cam</button>
+      </div>
+
+      <details class="tools-pop" id="tools-pop">
+        <summary class="ghost">Tools</summary>
+        <div class="tools-menu">
+          <button type="button" id="btn-rescan" class="menu-item">Rescan clips</button>
+          <a class="menu-item" href="/annotate">Annotate &amp; train</a>
+          <button type="button" id="btn-setup" class="menu-item">Setup</button>
+          <button type="button" id="btn-pii" class="menu-item active">Redact PII</button>
+          <button type="button" id="btn-restart" class="menu-item">Restart source</button>
+          <button type="button" id="btn-dismiss-coach" class="menu-item">Hide coach</button>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <div id="coach" class="coach" hidden>
+    <ol class="coach-steps">
+      <li data-step="source" class="on">Open a live URL or clip</li>
+      <li data-step="plane">Calibrate a ground rectangle</li>
+      <li data-step="zone">Draw an exclusion zone or tripwire</li>
+      <li data-step="run">Play — clearance &amp; TTC go live</li>
+    </ol>
+    <button type="button" id="coach-close" class="ghost">Dismiss</button>
+  </div>
+
+  <div class="cam-tabs" id="cam-tabs" aria-label="Camera tabs">
+    <button type="button" class="cam-tab active" data-slot="0">Cam 1</button>
+    <button type="button" class="cam-tab" data-slot="1">Cam 2</button>
+    <button type="button" class="cam-tab" data-slot="2">Cam 3</button>
+    <button type="button" class="cam-tab" data-slot="3">Cam 4</button>
+    <span class="fine cam-tabs-note">Tabs switch one pipeline; bind cams to a site for shared geo / KPI.</span>
+  </div>
+
+  <div class="workspace">
+    <section class="panel video-panel">
+      <div class="panel-head">
+        <h2>Camera</h2>
+        <p id="video-meta">Open a city stream or clip. Space plays and pauses.</p>
+        <div class="legend" aria-hidden="true">
+          <span class="lg worker">Person</span>
+          <span class="lg vehicle">Vehicle</span>
+          <span class="lg robot">Robot</span>
+          <span class="lg zone">Zone</span>
+        </div>
+      </div>
+      <form id="cal-dock" class="cal-dock" hidden>
+        <label class="field">
+          <span>Preset</span>
+          <select id="cal-preset">
+            <option value="40,28">Junction 40 × 28 m</option>
+            <option value="12,10">Crossing 12 × 10 m</option>
+            <option value="20,3.5">Lane 20 × 3.5 m</option>
+            <option value="16,12">Plaza 16 × 12 m</option>
+            <option value="8,6">Pad 8 × 6 m</option>
+            <option value="4,4">Square 4 × 4 m</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Width +X (m)</span>
+          <input id="cal-width" type="number" min="0.2" step="0.1" value="40" />
+        </label>
+        <label class="field">
+          <span>Depth +Y (m)</span>
+          <input id="cal-depth" type="number" min="0.2" step="0.1" value="28" />
+        </label>
+        <button type="submit" class="primary" id="cal-apply">Apply plane</button>
+        <button type="button" class="ghost" id="cal-cancel">Cancel</button>
+        <button type="button" class="ghost" id="cal-clear">Clear saved</button>
+        <label class="field">
+          <span>Site lat</span>
+          <input id="geo-lat" type="number" step="0.000001" placeholder="37.7749" />
+        </label>
+        <label class="field">
+          <span>Site lon</span>
+          <input id="geo-lon" type="number" step="0.000001" placeholder="-122.4194" />
+        </label>
+        <label class="field">
+          <span>Bearing °</span>
+          <input id="geo-bearing" type="number" step="0.1" value="0" title="Compass heading of +Y" />
+        </label>
+        <button type="button" class="ghost" id="btn-geo-save">Save geo</button>
+        <button type="button" class="ghost" id="btn-geo-pick-dock">Pick on map</button>
+        <p class="fine" id="cal-status">Drag Origin, +X, Far, and +Y onto a real rectangle. Use Geo / Pick on map to set lat/lon automatically.</p>
+      </form>
+      <div class="canvas-wrap" id="video-wrap">
+        <canvas id="video"></canvas>
+      </div>
+      <div class="transport">
+        <input id="scrub" type="range" min="0" max="0" value="0" />
+        <span id="frame-readout">Frame — / —</span>
+        <label class="field speed">
+          <span>Speed</span>
+          <select id="speed">
+            <option value="0.5">0.5×</option>
+            <option value="1" selected>1×</option>
+            <option value="2">2×</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <section class="panel plan-panel">
+      <div class="panel-head">
+        <h2>Ground plane</h2>
+        <p id="plan-meta">3D street after a homography. Drag to orbit · click tracks · Map for underlay.</p>
+        <div class="head-actions zone-tools">
+          <select id="zone-kind" title="Zone kind">
+            <option value="exclusion">Exclusion</option>
+            <option value="work">Work</option>
+            <option value="path">Path</option>
+            <option value="tripwire">Tripwire</option>
+          </select>
+          <button type="button" id="btn-cam" class="ghost active">Match cam</button>
+          <button type="button" id="btn-zone" class="ghost">Draw</button>
+          <button type="button" id="btn-heatmap" class="ghost active">Heatmap</button>
+          <button type="button" id="btn-map" class="ghost">Map</button>
+          <button type="button" id="btn-clearance" class="ghost active">Clearance</button>
+          <input type="file" id="map-file" accept="image/*" hidden />
+          <select id="heatmap-window" title="Heatmap window">
+            <option value="30">30s</option>
+            <option value="120" selected>2m</option>
+            <option value="28800">Shift</option>
+            <option value="0">Live EWMA</option>
+          </select>
+          <button type="button" id="btn-heatmap-clear" class="ghost">Clear heat</button>
+          <button type="button" id="btn-map-clear" class="ghost">Clear map</button>
+          <button type="button" id="btn-zone-undo" class="ghost">Undo</button>
+          <button type="button" id="btn-zone-clear" class="ghost">Clear</button>
+        </div>
+      </div>
+      <div class="canvas-wrap plan-orbit" id="plan-wrap">
+        <canvas id="plan"></canvas>
+        <div id="zone-hint" class="hint" hidden>Click vertices on the plan. Enter or double-click to close. Tripwire needs two clicks.</div>
+      </div>
+      <div class="zone-rail">
+        <ul id="zone-list" class="zone-list"></ul>
+        <form id="zone-inspector" class="zone-inspector" hidden>
+          <h3>Zone</h3>
+          <label class="field">Name <input id="zi-name" type="text" /></label>
+          <label class="field">Kind
+            <select id="zi-kind">
+              <option value="exclusion">Exclusion</option>
+              <option value="work">Work</option>
+              <option value="path">Path</option>
+              <option value="tripwire">Tripwire</option>
+            </select>
+          </label>
+          <label class="field">Level
+            <select id="zi-level">
+              <option value="0">0 clear</option>
+              <option value="1">1 advisory</option>
+              <option value="2">2 warning</option>
+              <option value="3">3 critical</option>
+            </select>
+          </label>
+          <label class="field">Dwell (s) <input id="zi-dwell" type="number" min="0" max="60" step="0.5" /></label>
+          <div class="zi-actions">
+            <button type="submit" class="primary">Apply</button>
+            <button type="button" id="zi-delete" class="ghost">Delete</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="panel table-wrap event-panel">
+      <h2>Alarm &amp; events</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Frame</th>
+            <th>Event</th>
+            <th>TTC / clr</th>
+            <th>Detail</th>
+          </tr>
+        </thead>
+        <tbody id="event-rows">
+          <tr><td colspan="4">Warnings, tripwires, and critical states appear here.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="panel table-wrap pair-panel">
+      <h2>Person–hazard pairs</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Pair</th>
+            <th>Clearance</th>
+            <th>TTC</th>
+            <th>Closing</th>
+          </tr>
+        </thead>
+        <tbody id="pair-rows">
+          <tr><td colspan="4">Calibrate to score person–vehicle / robot pairs</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <aside class="panel note">
+      <h2>Scene note</h2>
+      <pre id="briefing">Play a source. This note is assembled from the last inferred frame, not from a language model.</pre>
+      <div class="label-row">
+        <button type="button" data-kind="near_miss" class="ghost">Near-miss</button>
+        <button type="button" data-kind="false_alarm" class="ghost">False alarm</button>
+        <button type="button" data-kind="controlled" class="ghost">Controlled</button>
+      </div>
+      <p class="fine" id="label-status">Labels append to data/labels.jsonl.</p>
+    </aside>
+  </div>
+  </div>
+
+  <div id="banner" class="banner toast" hidden></div>
+
+  <aside id="incident-drawer" class="drawer" hidden>
+    <header class="drawer-head">
+      <h2>Incidents</h2>
+      <p class="fine">Stills and pre-roll clips. Review labels write to data/labels.jsonl.</p>
+      <button type="button" id="drawer-close" class="ghost">Close</button>
+    </header>
+    <div class="drawer-tools">
+      <button type="button" id="btn-report-drawer" class="ghost">Export CSV</button>
+    </div>
+    <div id="incident-grid" class="incident-grid">
+      <p class="fine empty">No incidents yet. Escalate a clearance alarm to capture one.</p>
+    </div>
+  </aside>
+  <div id="drawer-backdrop" class="drawer-backdrop" hidden></div>
+
+  <div id="geo-overlay" class="setup-overlay" hidden>
+    <div class="setup-sheet geo-sheet" role="dialog" aria-labelledby="geo-title">
+      <header class="setup-head">
+        <div>
+          <h2 id="geo-title">Site geo</h2>
+          <p class="fine">Search an address, paste coords, or click the map. Second click sets +Y bearing.</p>
+        </div>
+        <button type="button" id="geo-close" class="ghost">Close</button>
+      </header>
+      <div class="geo-tools">
+        <label class="field grow">
+          <span>Search</span>
+          <input id="geo-search" type="search" placeholder="Intersection, street, landmark…" />
+        </label>
+        <button type="button" id="geo-search-btn" class="ghost">Find</button>
+        <button type="button" id="geo-paste" class="ghost" title="Paste lat,lon">Paste</button>
+        <button type="button" id="geo-here" class="ghost" title="Use device location">Here</button>
+        <button type="button" id="geo-site" class="ghost" title="Reuse active site origin">Site</button>
+      </div>
+      <ul id="geo-hits" class="geo-hits" hidden></ul>
+      <div id="geo-map" class="geo-map"></div>
+      <div class="geo-footer">
+        <span id="geo-readout" class="fine">Click map for origin · click again along +Y for bearing</span>
+        <div class="geo-actions">
+          <button type="button" id="geo-apply" class="primary">Save &amp; use</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="incident-preview" class="preview" hidden>
+    <button type="button" id="preview-close" class="ghost preview-close">Close</button>
+    <img id="preview-still" alt="Incident still" hidden />
+    <video id="preview-clip" controls hidden></video>
+  </div>
+
+  <div id="setup-overlay" class="setup-overlay" hidden>
+    <div class="setup-sheet" role="dialog" aria-labelledby="setup-title">
+      <header class="setup-head">
+        <div>
+          <h2 id="setup-title">Setup</h2>
+          <p class="fine" id="setup-sub">Detector, tracker, risk, and stream. Saved to config/local.json.</p>
+        </div>
+        <button type="button" id="setup-close" class="ghost">Close</button>
+      </header>
+
+      <div class="setup-body">
+        <section class="setup-col">
+          <h3>Roadmap</h3>
+          <ul id="setup-roadmap" class="roadmap"></ul>
+
+          <h3>Detector</h3>
+          <label class="field">
+            <span>Weights</span>
+            <select id="setup-weights"></select>
+          </label>
+          <div class="setup-grid">
+            <label class="field">
+              <span>Conf floor</span>
+              <input id="setup-det-conf" type="number" min="0.01" max="0.99" step="0.01" />
+            </label>
+            <label class="field">
+              <span>NMS IoU</span>
+              <input id="setup-det-iou" type="number" min="0.1" max="0.95" step="0.05" />
+            </label>
+            <label class="field">
+              <span>Img size</span>
+              <input id="setup-det-imgsz" type="number" min="320" max="1280" step="32" />
+            </label>
+          </div>
+
+          <h3>Classes</h3>
+          <div class="setup-grid class-grid">
+            <span class="col-h"></span>
+            <span class="col-h">Conf</span>
+            <span class="col-h">Min H</span>
+            <span class="col-h">Min foot</span>
+            <span class="row-h">Person</span>
+            <input id="setup-w-conf" type="number" min="0.05" max="0.99" step="0.01" />
+            <input id="setup-w-h" type="number" min="0" max="0.5" step="0.001" />
+            <input id="setup-w-foot" type="number" min="0" max="0.9" step="0.01" />
+            <span class="row-h">Vehicle</span>
+            <input id="setup-v-conf" type="number" min="0.05" max="0.99" step="0.01" />
+            <input id="setup-v-h" type="number" min="0" max="0.5" step="0.001" />
+            <input id="setup-v-foot" type="number" min="0" max="0.9" step="0.01" />
+            <span class="row-h">Robot</span>
+            <input id="setup-m-conf" type="number" min="0.05" max="0.99" step="0.01" />
+            <input id="setup-m-h" type="number" min="0" max="0.5" step="0.001" />
+            <input id="setup-m-foot" type="number" min="0" max="0.9" step="0.01" />
+          </div>
+        </section>
+
+        <section class="setup-col">
+          <h3>Tracker</h3>
+          <label class="field">
+            <span>Backend</span>
+            <select id="setup-trk-backend">
+              <option value="bytetrack">ByteTrack (high + low score)</option>
+              <option value="iou">Simple IoU</option>
+            </select>
+          </label>
+          <div class="setup-grid">
+            <label class="field">
+              <span>Match IoU</span>
+              <input id="setup-trk-iou" type="number" min="0.05" max="0.9" step="0.01" />
+            </label>
+            <label class="field">
+              <span>Max age</span>
+              <input id="setup-trk-age" type="number" min="1" max="120" step="1" />
+            </label>
+            <label class="field">
+              <span>Min hits</span>
+              <input id="setup-trk-hits" type="number" min="1" max="10" step="1" />
+            </label>
+            <label class="field">
+              <span>High thresh</span>
+              <input id="setup-trk-high" type="number" min="0.05" max="0.95" step="0.01" />
+            </label>
+            <label class="field">
+              <span>Low thresh</span>
+              <input id="setup-trk-low" type="number" min="0.01" max="0.5" step="0.01" />
+            </label>
+            <label class="field">
+              <span>2nd match IoU</span>
+              <input id="setup-trk-second" type="number" min="0.1" max="0.9" step="0.05" />
+            </label>
+          </div>
+
+          <h3>Risk / clearance</h3>
+          <p class="fine">Alarms fire on edge clearance (metres of air between discs) or TTC — whichever is worse.</p>
+          <div class="setup-grid">
+            <label class="field">
+              <span>Advisory (m)</span>
+              <input id="setup-risk-adv-m" type="number" min="0.5" max="20" step="0.1" />
+            </label>
+            <label class="field">
+              <span>Warning (m)</span>
+              <input id="setup-risk-warn-m" type="number" min="0.2" max="15" step="0.1" />
+            </label>
+            <label class="field">
+              <span>Critical (m)</span>
+              <input id="setup-risk-crit-m" type="number" min="0" max="5" step="0.1" />
+            </label>
+            <label class="field">
+              <span>TTC horizon (s)</span>
+              <input id="setup-risk-horizon" type="number" min="1" max="15" step="0.5" />
+            </label>
+            <label class="field">
+              <span>TTC warning (s)</span>
+              <input id="setup-risk-warn" type="number" min="0.5" max="10" step="0.1" />
+            </label>
+            <label class="field">
+              <span>TTC critical (s)</span>
+              <input id="setup-risk-crit" type="number" min="0.2" max="5" step="0.1" />
+            </label>
+          </div>
+
+          <h3>Alert timing</h3>
+          <div class="setup-grid">
+            <label>Hold (s)
+              <input id="setup-risk-hold" type="number" min="0" max="10" step="0.1" />
+            </label>
+            <label>Cooldown (s)
+              <input id="setup-risk-cool" type="number" min="0" max="60" step="0.5" />
+            </label>
+            <label>Zone dwell (s)
+              <input id="setup-risk-dwell" type="number" min="0" max="30" step="0.5" />
+            </label>
+          </div>
+
+          <h3>Incidents &amp; heatmap</h3>
+          <div class="setup-grid">
+            <label class="check">
+              <input id="setup-inc-enabled" type="checkbox" />
+              Save incident clips
+            </label>
+            <label>Pre-roll frames
+              <input id="setup-inc-preroll" type="number" min="8" max="120" step="1" />
+            </label>
+            <label class="check">
+              <input id="setup-hm-enabled" type="checkbox" />
+              Occupancy heatmap
+            </label>
+          </div>
+          <label>Webhook URL
+            <input id="setup-webhook" type="url" placeholder="https://hooks.slack.com/… or any POST endpoint" />
+          </label>
+
+          <h3>Stream</h3>
+          <div class="setup-grid">
+            <label class="field">
+              <span>Max width</span>
+              <input id="setup-stream-w" type="number" min="480" max="1920" step="16" />
+            </label>
+            <label class="field">
+              <span>JPEG quality</span>
+              <input id="setup-stream-q" type="number" min="40" max="95" step="1" />
+            </label>
+            <label class="field check">
+              <span>Blur faces</span>
+              <input id="setup-pii" type="checkbox" />
+            </label>
+          </div>
+
+          <h3>YouTube</h3>
+          <p class="fine">Live URLs need cookies from a browser where you are signed into YouTube. Firefox is the default here.</p>
+          <label class="field">
+            <span>Cookies from browser</span>
+            <select id="setup-yt-browser">
+              <option value="firefox">Firefox</option>
+              <option value="chrome">Chrome</option>
+              <option value="chromium">Chromium</option>
+              <option value="brave">Brave</option>
+              <option value="edge">Edge</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Or cookies.txt path</span>
+            <input id="setup-yt-cookies" type="text" placeholder="optional /path/to/cookies.txt" />
+          </label>
+
+          <p class="fine" id="setup-status">GPU —</p>
+        </section>
+      </div>
+
+      <footer class="setup-foot">
+        <button type="button" id="setup-reset" class="ghost">Reset defaults</button>
+        <button type="button" id="setup-save" class="primary">Save &amp; apply</button>
+      </footer>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="/static/app.js?v=clipfix1" type="module"></script>
+</body>
+</html>

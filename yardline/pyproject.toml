@@ -1,0 +1,28 @@
+[project]
+name = "yardline"
+version = "0.1.0"
+description = "Metric work-zone clearance from cameras: detect, track, calibrate, TTC."
+requires-python = ">=3.11"
+dependencies = [
+    "torch",
+    "torchvision",
+    "ultralytics",
+    "opencv-python",
+    "numpy",
+    "scipy",
+    "shapely",
+    "fastapi",
+    "uvicorn[standard]",
+    "python-multipart",
+    "pydantic>=2",
+    "yt-dlp",
+    "onnx",
+    "tensorrt",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["yardline*"]

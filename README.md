@@ -113,16 +113,17 @@ the NVIDIA container runtime, and access to the Isaac Sim image.
 
 ### Yardline CV on the twin
 
-1. Start Isaac with viewport HTTP (default): `ov-citylab/scripts/run_isaac6_streaming.sh`
+Yardline lives in-repo at [`yardline/`](yardline/) (Python package + twin config + weights).
+
+1. One-time venv: `cd yardline && python3 -m venv .venv && .venv/bin/pip install -e .`
+2. Start Isaac with viewport HTTP (default): `ov-citylab/scripts/run_isaac6_streaming.sh`
    — sets `CITYLAB_VIEWPORT_HTTP=1`. Confirm `GET http://127.0.0.1:5175/viewport/frame.jpg`.
-2. Start Yardline: `ov-citylab/scripts/run_yardline_twin.sh` (or `uvicorn` on `:8010`).
-3. Open City Lab UI, leave **Yardline CV** on. The panel shows twin detections;
-   **City Map** plots SUMO/Kit ped+vehicle poses with proximity. Use **Calibrate**
-   (4 ground clicks) for metric TTC overlays.
+3. Start Yardline: `ov-citylab/scripts/run_yardline_twin.sh` (defaults to `./yardline`, twin profile on).
+4. Open City Lab UI → **Yardline**. Prefer the twin profile (`YARDLINE_TWIN=1`) so nano YOLO
+   shares a GPU with Isaac; viewport JPEG capture should stay near stream rate.
 
 Do **not** open a second `:8210` tab — one NVST client only. Yardline samples
-JPEG (`/viewport/frame.jpg`), not WebRTC pixels. Prefer `yolov8n` at ~5–10 Hz
-if Isaac and Yardline share one GPU.
+JPEG (`/viewport/frame.jpg`), not WebRTC pixels.
 
 ### Comfort zones (Phase 1)
 

@@ -1,0 +1,32 @@
+{
+  "sites": [
+    {
+      "id": "demo-corridor",
+      "name": "Demo corridor",
+      "kpi": "near_miss",
+      "note": "London demo origin",
+      "origin_geo": {
+        "lat": 49.294533,
+        "lon": -123.136907,
+        "alt": 6.0,
+        "crs": "EPSG:4326",
+        "bearing_deg": 180.0
+      },
+      "cameras": [
+        {
+          "camera_id": "cam-excavator",
+          "label": "Worker excavator demo",
+          "source": "data/videos/Worker_and_excavator_near_barrier.mp4",
+          "preset_id": null,
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "note": ""
+        }
+      ],
+      "updated_at": "2026-09-15T08:10:34.799818+00:00"
+    }
+  ],
+  "active_site_id": "demo-corridor"
+}

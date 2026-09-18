@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.agent/
+*.log
+config/local.json
+data/train/images/
+data/train/labels/
+data/train/runs/
+data/train/jobs/
+data/train/coco/
+data/train/samples.jsonl
+data/tao/results/
+.DS_Store

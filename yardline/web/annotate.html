@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>irl CVtest · Annotate &amp; Train</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,480;9..144,600&family=Outfit:wght@360;450;550&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/styles.css?v=groundtao1" />
+</head>
+<body class="annotate-page">
+  <header class="top">
+    <div class="brand">
+      <span class="mark">irl</span>
+      <span class="tag">Annotate</span>
+    </div>
+    <div class="pills">
+      <span id="stat-samples" class="pill">0 stills</span>
+      <span id="stat-labeled" class="pill">0 labeled</span>
+      <span id="stat-boxes" class="pill">0 boxes</span>
+      <span id="train-pill" class="pill muted">Train idle</span>
+    </div>
+    <div class="top-controls">
+      <a class="ghost btn-link" href="/">Live</a>
+      <button type="button" id="btn-capture" class="primary">Capture from live</button>
+      <button type="button" id="btn-ground" class="ghost">Ground</button>
+      <button type="button" id="btn-save" class="ghost">Save labels</button>
+      <button type="button" id="btn-delete" class="ghost">Delete</button>
+      <button type="button" id="btn-export-coco" class="ghost">Export COCO</button>
+    </div>
+  </header>
+
+  <div class="annotate-workspace">
+    <aside class="panel sample-rail">
+      <div class="panel-head">
+        <h2>Stills</h2>
+        <p id="rail-meta">Capture while the live page is playing.</p>
+      </div>
+      <div id="sample-list" class="sample-list"></div>
+    </aside>
+
+    <section class="panel annotate-stage">
+      <div class="panel-head">
+        <h2>Canvas</h2>
+        <p id="canvas-meta">Drag to draw. Ground fills open-vocab boxes. Delete removes selection.</p>
+        <div class="head-actions class-picks">
+          <button type="button" class="ghost active" data-cls="person">Person</button>
+          <button type="button" class="ghost" data-cls="vehicle">Vehicle</button>
+          <button type="button" class="ghost" data-cls="robot">Robot</button>
+        </div>
+      </div>
+      <div class="ground-bar">
+        <label class="field grow">
+          <span>Grounding prompts</span>
+          <input id="ground-prompts" type="text" value="person, car, bus, truck, bicycle, robot" />
+        </label>
+        <label class="field">
+          <span>Conf</span>
+          <input id="ground-conf" type="number" min="0.05" max="0.9" step="0.05" value="0.15" />
+        </label>
+      </div>
+      <div class="canvas-wrap annotate-wrap" id="anno-wrap">
+        <canvas id="anno"></canvas>
+      </div>
+    </section>
+
+    <aside class="panel train-rail">
+      <div class="panel-head">
+        <h2>Train</h2>
+        <p>Ultralytics (fast) or TAO Docker (RT-DETR / Grounding DINO).</p>
+      </div>
+      <div class="train-form">
+        <label class="field">
+          <span>Backend</span>
+          <select id="train-backend">
+            <option value="ultralytics">Ultralytics YOLO</option>
+            <option value="tao_rtdetr">TAO RT-DETR (live detector)</option>
+            <option value="tao_grounding_dino">TAO Grounding DINO</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Epochs</span>
+          <input id="train-epochs" type="number" min="1" max="200" value="30" />
+        </label>
+        <label class="field">
+          <span>Image size</span>
+          <input id="train-imgsz" type="number" min="320" max="1280" step="32" value="640" />
+        </label>
+        <label class="field">
+          <span>Batch</span>
+          <input id="train-batch" type="number" min="1" max="32" value="8" />
+        </label>
+        <label class="field">
+          <span>Base weights (Ultralytics)</span>
+          <input id="train-model" type="text" value="weights/yolov8n.pt" />
+        </label>
+        <div class="label-row">
+          <button type="button" id="btn-train" class="primary">Start train</button>
+          <button type="button" id="btn-train-stop" class="ghost">Stop</button>
+          <button type="button" id="btn-promote" class="ghost">Promote to live</button>
+        </div>
+        <p class="fine" id="train-meta">Need ≥5 labeled stills. TAO exports COCO automatically; first TAO run may pull the pyt toolkit image. If pull fails: docker login nvcr.io</p>
+        <pre id="train-log" class="train-log">No job yet.</pre>
+      </div>
+    </aside>
+  </div>
+
+  <div id="banner" class="banner" hidden></div>
+  <script src="/static/annotate.js?v=groundtao1" type="module"></script>
+</body>
+</html>

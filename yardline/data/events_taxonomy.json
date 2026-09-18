@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "events": [
+    {
+      "code": "CITY.NEAR_MISS",
+      "label": "Near-miss conflict",
+      "category": "conflict",
+      "severity": "critical",
+      "match": { "kind": "alarm", "alarm": "critical" }
+    },
+    {
+      "code": "CITY.CLEARANCE_WARN",
+      "label": "Clearance warning",
+      "category": "conflict",
+      "severity": "warning",
+      "match": { "kind": "alarm", "alarm": "warning" }
+    },
+    {
+      "code": "CITY.CLEARANCE_ADVISORY",
+      "label": "Clearance advisory",
+      "category": "conflict",
+      "severity": "advisory",
+      "match": { "kind": "alarm", "alarm": "advisory" }
+    },
+    {
+      "code": "CITY.ZONE_INTRUSION",
+      "label": "Exclusion zone intrusion",
+      "category": "zone",
+      "severity": "warning",
+      "match": { "zone_kind": "exclusion" }
+    },
+    {
+      "code": "CITY.CURB_DWELL",
+      "label": "Curb / loading dwell",
+      "category": "curb",
+      "severity": "advisory",
+      "match": { "zone_kind": "work" }
+    },
+    {
+      "code": "CITY.PATH_CONFLICT",
+      "label": "Shared-path conflict",
+      "category": "path",
+      "severity": "warning",
+      "match": { "zone_kind": "path" }
+    },
+    {
+      "code": "CITY.TRIPWIRE.CROSS",
+      "label": "Crossing / tripwire",
+      "category": "crossing",
+      "severity": "advisory",
+      "match": { "kind": "tripwire" }
+    },
+    {
+      "code": "CITY.QUEUE_SPILL",
+      "label": "Queue spillback",
+      "category": "traffic",
+      "severity": "warning",
+      "match": { "kind": "queue_spill" }
+    }
+  ],
+  "kpis": [
+    {
+      "id": "near_miss",
+      "label": "Near-miss conflicts",
+      "event_codes": ["CITY.NEAR_MISS"]
+    },
+    {
+      "id": "crossing_events",
+      "label": "Crossing / tripwire events",
+      "event_codes": ["CITY.TRIPWIRE.CROSS"]
+    },
+    {
+      "id": "zone_intrusions",
+      "label": "Exclusion intrusions",
+      "event_codes": ["CITY.ZONE_INTRUSION"]
+    },
+    {
+      "id": "curb_dwell",
+      "label": "Curb / loading dwell",
+      "event_codes": ["CITY.CURB_DWELL"]
+    },
+    {
+      "id": "all_warnings",
+      "label": "All warning+ events",
+      "event_codes": ["CITY.NEAR_MISS", "CITY.CLEARANCE_WARN", "CITY.ZONE_INTRUSION", "CITY.PATH_CONFLICT"]
+    }
+  ]
+}

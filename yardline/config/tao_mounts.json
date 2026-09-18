@@ -1,0 +1,31 @@
+{
+  "Mounts": [
+    {
+      "source": "/media/disniekie/Working3/CV/Yardline/data/train",
+      "destination": "/data"
+    },
+    {
+      "source": "/media/disniekie/Working3/CV/Yardline/data/tao",
+      "destination": "/tao"
+    },
+    {
+      "source": "/media/disniekie/Working3/CV/Yardline/weights",
+      "destination": "/weights"
+    }
+  ],
+  "Envs": [
+    {
+      "variable": "MAXSMVER",
+      "value": "120"
+    }
+  ],
+  "DockerOptions": {
+    "tty": false,
+    "user": "1000:1000",
+    "shm_size": "16G",
+    "ulimits": {
+      "memlock": -1,
+      "stack": 67108864
+    }
+  }
+}

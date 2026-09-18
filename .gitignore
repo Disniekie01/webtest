@@ -58,3 +58,15 @@ tools/**/blender_assets*
 __pycache__/
 *.pyc
 tools/city-generator-vfxmed/
+
+# Vendored Yardline CV (in-repo at ./yardline)
+yardline/.venv/
+yardline/config/local.json
+yardline/data/incidents/
+yardline/data/videos/
+yardline/data/train/images/
+yardline/data/train/labels/
+yardline/data/train/runs/
+yardline/data/train/jobs/
+yardline/data/train/coco/
+yardline/data/tao/results/

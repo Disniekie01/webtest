@@ -1,0 +1,42 @@
+results_dir: /tao/results/grounding_dino
+encryption_key: yardline
+model:
+  backbone: swin_tiny_224_1k
+  train_backbone: true
+  num_feature_levels: 4
+  dec_layers: 6
+  enc_layers: 6
+  num_queries: 900
+  dropout_ratio: 0.0
+  dim_feedforward: 2048
+  log_scale: auto
+  class_embed_bias: true
+train:
+  num_epochs: 30
+  checkpoint_interval: 5
+  validation_interval: 5
+  precision: bf16
+  num_gpus: 1
+  gpu_ids: [0]
+  num_nodes: 1
+  freeze: ["backbone.0", "bert"]
+  optim:
+    lr: 0.0002
+    lr_backbone: 0.00002
+    momentum: 0.9
+    weight_decay: 0.0001
+    lr_scheduler: MultiStep
+    lr_steps: [10, 20]
+    lr_decay: 0.1
+dataset:
+  train_data_sources:
+    - image_dir: /data/coco/images
+      json_file: /data/coco/annotations/instances_train.jsonl
+      label_map: /data/coco/annotations/label_map.json
+  val_data_sources:
+    image_dir: /data/coco/images
+    json_file: /data/coco/annotations/instances_val.json
+  max_labels: 80
+  batch_size: 2
+  workers: 4
+  dataset_type: serialized

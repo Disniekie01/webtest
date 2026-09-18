@@ -1,0 +1,40 @@
+{
+  "presets": [
+    {
+      "id": "abbey_road",
+      "name": "Abbey Road crossing",
+      "match": ["zMCea32gpmg", "abbey"],
+      "cal_preset": "12,10",
+      "width_m": 12,
+      "depth_m": 10,
+      "note": "Zebra / crossing rectangle"
+    },
+    {
+      "id": "scramble",
+      "name": "Scramble junction",
+      "match": ["shinjuku", "scramble", "shibuya"],
+      "cal_preset": "40,28",
+      "width_m": 40,
+      "depth_m": 28,
+      "note": "Large junction pad"
+    },
+    {
+      "id": "yard_lane",
+      "name": "Yard lane",
+      "match": ["excavator", "yard", "site"],
+      "cal_preset": "20,3.5",
+      "width_m": 20,
+      "depth_m": 3.5,
+      "note": "Single lane / machine path"
+    },
+    {
+      "id": "plaza",
+      "name": "Plaza / pad",
+      "match": [],
+      "cal_preset": "16,12",
+      "width_m": 16,
+      "depth_m": 12,
+      "note": "Default open pad"
+    }
+  ]
+}

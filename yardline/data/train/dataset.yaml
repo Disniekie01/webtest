@@ -1,0 +1,7 @@
+path: /media/disniekie/Working3/CV/Yardline/data/train
+train: images
+val: images
+names:
+  0: person
+  1: vehicle
+  2: robot
