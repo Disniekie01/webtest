@@ -409,7 +409,7 @@ export function drawCityMap(
   }
 
   ctx.fillStyle = "#9c968b";
-  ctx.font = "10px IBM Plex Mono, monospace";
+  ctx.font = '10px "IBM Plex Mono", monospace';
   const alarmName = conflict ? LEVEL_NAME[conflict.alarm] : "—";
   const heat = mockFallback?.heatmap?.stats;
   const heatBit =

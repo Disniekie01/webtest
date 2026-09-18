@@ -22,7 +22,7 @@ export function RobotSenseModal({ robot, mode, onMode, onClose }: Props) {
             <h2>{robot.name}</h2>
             <p className="mono muted">
               {mode === "lidar" ? `LiDAR · ${robot.lidarHz} Hz · ${robot.rangeM.toFixed(0)} m` : "Ego camera feed"}
-              {" · "}
+              {" · simulated · "}
               {robot.district}
             </p>
           </div>

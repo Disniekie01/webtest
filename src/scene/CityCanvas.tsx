@@ -1,6 +1,7 @@
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
+import * as THREE from "three";
 import { CityScene } from "./CityScene";
 import { HumanAgent, RobotAgent } from "./Agents";
 import { Cameras } from "./Cameras";
@@ -11,8 +12,9 @@ import { FleetFlowLayer } from "./FleetFlowLayer";
 import { TransitFlowLayer } from "./TransitFlowLayer";
 import { AqPulseLayer } from "./AqPulseLayer";
 import { ComfortFlowLayer } from "./ComfortFlowLayer";
+import { TwinPostFX } from "./TwinPostFX";
 import { citizens, telemetry, useAscStore } from "../state/ascStore";
-import { CITY_SPAN_M, DEFAULT_TWIN_CAMERA } from "../data/twinCamera";
+import { CITY_SPAN_M, DEFAULT_TWIN_CAMERA, HERO_TWIN_CAMERA } from "../data/twinCamera";
 import { useSumoActors } from "./useSumoActors";
 import "./CityCanvas.css";
 
@@ -77,97 +79,102 @@ function OpsAgentsLive() {
   const layers = useAscStore((s) => s.activeLayers);
   const sumo = useSumoActors(120);
   const mocks = useMemo(() => buildMockAgents(), []);
-  const accum = useRef(0);
-  const [, setTick] = useState(0);
-
-  useFrame((_, dt) => {
-    accum.current += dt;
-    if (accum.current > 1 / 20) {
-      accum.current = 0;
-      setTick((n) => n + 1);
-    }
-  });
+  const group = useRef<THREE.Group>(null);
 
   const showHumans =
     layers.includes("pedestrians") ||
     layers.includes("activity") ||
     layers.includes("comfort");
   const showRobots = layers.includes("robots") || layers.includes("activity");
-  // Vehicles are drawn by TrafficFlowLayer when the traffic module is on.
+
+  useFrame((state) => {
+    if (sumo.live || !group.current) return;
+    const t = state.clock.elapsedTime;
+    let i = 0;
+    group.current.children.forEach((child) => {
+      const a = mocks[i++];
+      if (!a) return;
+      if (a.kind === "human" && !showHumans) {
+        child.visible = false;
+        return;
+      }
+      if (a.kind === "robot" && (!showRobots || layers.includes("robots"))) {
+        child.visible = false;
+        return;
+      }
+      child.visible = true;
+      const x = a.base[0] + Math.sin(t * a.speed + a.phase) * a.amp;
+      const z = a.base[2] + Math.cos(t * a.speed * 0.85 + a.phase) * a.amp * 0.7;
+      child.position.set(x, 0, z);
+    });
+  });
 
   if (sumo.live) {
     const peds = showHumans ? sumo.pedestrians.filter((p) => p.cls !== "robot") : [];
     const robots = showRobots
-      ? [
-          ...sumo.pedestrians.filter((p) => p.cls === "robot"),
-          // Keep non-car fleet markers off the traffic layer path
-        ]
+      ? [...sumo.pedestrians.filter((p) => p.cls === "robot")]
       : [];
     return (
       <>
-        {peds.slice(0, 80).map((p) => (
-          <HumanAgent
-            key={`p-${p.id}`}
-            position={[p.x, 0, p.z]}
-            comfort={0.55}
-          />
+        {peds.slice(0, 60).map((p) => (
+          <HumanAgent key={`p-${p.id}`} position={[p.x, 0, p.z]} comfort={0.55} />
         ))}
-        {robots.slice(0, 60).map((r) => (
-          <RobotAgent
-            key={`r-${r.id}`}
-            position={[r.x, 0, r.z]}
-            kind="delivery"
-          />
+        {robots.slice(0, 40).map((r) => (
+          <RobotAgent key={`r-${r.id}`} position={[r.x, 0, r.z]} kind="delivery" />
         ))}
       </>
     );
   }
 
-  const t = performance.now() / 1000;
   return (
-    <>
+    <group ref={group}>
       {mocks.map((a) => {
-        if (a.kind === "human" && !showHumans) return null;
-        // FleetFlowLayer owns offline delivery bots when Fleet layer is on
-        if (a.kind === "robot" && (!showRobots || layers.includes("robots"))) return null;
-        const x = a.base[0] + Math.sin(t * a.speed + a.phase) * a.amp;
-        const z = a.base[2] + Math.cos(t * a.speed * 0.85 + a.phase) * a.amp * 0.7;
-        const pos: [number, number, number] = [x, 0, z];
         if (a.kind === "human") {
           return (
-            <HumanAgent
-              key={a.id}
-              position={pos}
-              comfort={a.comfort}
-              name={a.name}
-              wheelchair={a.wheelchair}
-            />
+            <group key={a.id}>
+              <HumanAgent
+                position={[0, 0, 0]}
+                comfort={a.comfort}
+                name={a.name}
+                wheelchair={a.wheelchair}
+              />
+            </group>
           );
         }
         return (
-          <RobotAgent key={a.id} position={pos} kind={a.robotKind || "delivery"} />
+          <group key={a.id}>
+            <RobotAgent position={[0, 0, 0]} kind={a.robotKind || "delivery"} />
+          </group>
         );
       })}
-    </>
+    </group>
   );
 }
 
 function CameraBridge() {
+  const mode = useAscStore((s) => s.mode);
+  const isHero = mode === "hero";
   const setCameraPose = useAscStore((s) => s.setCameraPose);
   const controls = useRef<{
     target: { x: number; y: number; z: number; set: (x: number, y: number, z: number) => void };
     update: () => void;
+    enabled: boolean;
   } | null>(null);
   const { camera } = useThree();
+  const heroAngle = useRef(Math.atan2(HERO_TWIN_CAMERA.eye[2], HERO_TWIN_CAMERA.eye[0]));
 
   // Seed from store once on mount (after Twin ← Kit handoff).
   useEffect(() => {
-    const pose = useAscStore.getState().cameraPose;
+    const pose = isHero ? HERO_TWIN_CAMERA : useAscStore.getState().cameraPose;
     camera.position.set(pose.eye[0], pose.eye[1], pose.eye[2]);
     camera.lookAt(pose.target[0], pose.target[1], pose.target[2]);
     if ("fov" in camera) {
       (camera as typeof camera & { fov: number }).fov = pose.fov;
       camera.updateProjectionMatrix();
+    }
+    if (isHero) {
+      heroAngle.current = Math.atan2(pose.eye[2], pose.eye[0]);
+      setCameraPose(pose);
     }
     const id = window.requestAnimationFrame(() => {
       if (controls.current) {
@@ -176,11 +183,31 @@ function CameraBridge() {
       }
     });
     return () => window.cancelAnimationFrame(id);
-  }, [camera]);
+    // Only re-seed when entering/leaving hero so ops orbit is preserved
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- camera is stable; isHero drives reset
+  }, [camera, isHero]);
 
-  useFrame(() => {
+  useFrame((_, dt) => {
     if (!controls.current) return;
     const c = controls.current;
+    c.enabled = !isHero;
+
+    if (isHero) {
+      // Slow orbital drift + soft height bob — establishing shot presence
+      heroAngle.current += Math.min(dt, 0.05) * 0.045;
+      const radius = 265 + Math.sin(heroAngle.current * 0.55) * 12;
+      const height = 175 + Math.sin(heroAngle.current * 0.9) * 10;
+      const tx = Math.sin(heroAngle.current * 0.35) * 6;
+      const tz = Math.cos(heroAngle.current * 0.28) * 6;
+      camera.position.set(
+        Math.cos(heroAngle.current) * radius * 0.72,
+        height,
+        Math.sin(heroAngle.current) * radius * 0.78,
+      );
+      c.target.set(tx, 4, tz);
+      c.update();
+    }
+
     const eye: [number, number, number] = [
       camera.position.x,
       camera.position.y,
@@ -202,7 +229,7 @@ function CameraBridge() {
     }
   });
 
-  const initial = useAscStore.getState().cameraPose;
+  const initial = isHero ? HERO_TWIN_CAMERA : useAscStore.getState().cameraPose;
 
   return (
     <OrbitControls
@@ -210,12 +237,12 @@ function CameraBridge() {
       ref={controls as never}
       enableDamping
       dampingFactor={0.08}
-      enablePan
-      enableZoom
-      enableRotate
+      enablePan={!isHero}
+      enableZoom={!isHero}
+      enableRotate={!isHero}
       maxPolarAngle={Math.PI / 2.05}
       minDistance={12}
-      maxDistance={CITY_SPAN_M * 1.6}
+      maxDistance={CITY_SPAN_M * 2.4}
       target={initial.target}
     />
   );
@@ -232,6 +259,13 @@ function LoaderFallback() {
 
 function SumoLiveBadge() {
   const sumo = useSumoActors(1000);
+  const setLinkHealth = useAscStore((s) => s.setLinkHealth);
+
+  useEffect(() => {
+    if (sumo.live) setLinkHealth("live", true);
+    else setLinkHealth(useAscStore.getState().linkHealth, false);
+  }, [sumo.live, setLinkHealth]);
+
   if (!sumo.live) return null;
   return (
     <div className="city-canvas__sumo mono">
@@ -243,12 +277,22 @@ function SumoLiveBadge() {
 /** Low-fi Adaptive Smart City twin — same 160 m City Generator + SUMO when Kit is up. */
 export function CityCanvas() {
   // Seed once — do NOT bind position to live store or OrbitControls fights the React prop.
-  const initial = useMemo(() => useAscStore.getState().cameraPose, []);
+  const initial = useMemo(() => {
+    const pose = useAscStore.getState().mode === "hero"
+      ? HERO_TWIN_CAMERA
+      : useAscStore.getState().cameraPose;
+    return pose;
+  }, []);
 
   return (
     <div className="city-canvas">
       <SumoLiveBadge />
-      <Canvas shadows dpr={[1, 1.5]} gl={{ antialias: true }} style={{ touchAction: "none" }}>
+      <Canvas
+        shadows
+        dpr={[1, 1.5]}
+        gl={{ antialias: false, powerPreference: "high-performance" }}
+        style={{ touchAction: "none" }}
+      >
         <PerspectiveCamera
           makeDefault
           position={initial.eye}
@@ -267,6 +311,7 @@ export function CityCanvas() {
           <AqPulseLayer />
           <ComfortFlowLayer />
           <OpsAgentsLive />
+          <TwinPostFX />
         </Suspense>
         <CameraBridge />
       </Canvas>

@@ -1,12 +1,12 @@
 import { useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { Html } from "@react-three/drei";
 import cityMapJson from "../data/cityMap2d.json";
 import { CITY_SPAN_M, JUNCTION_XS } from "../data/cityGrid";
 import { useAscStore } from "../state/ascStore";
 import { useSumoActors, type SumoActor } from "./useSumoActors";
 import { HumanAgent } from "./Agents";
+import { HtmlLabel } from "./HtmlLabel";
 
 const HEAT_Y = 0.18;
 const HOTSPOT_Y = 0.28;
@@ -160,7 +160,7 @@ function SidewalkHeat({ seg, density }: { seg: WalkSeg; density: number }) {
   );
 }
 
-function PlazaHotspot({ p }: { p: PlazaLoad }) {
+function PlazaHotspot({ p, showLabel }: { p: PlazaLoad; showLabel: boolean }) {
   const ring = useRef<THREE.Mesh>(null);
   const color = pedColor(Math.max(0.1, p.load));
   const radius = 4.5 + p.load * 6;
@@ -196,23 +196,25 @@ function PlazaHotspot({ p }: { p: PlazaLoad }) {
           toneMapped={false}
         />
       </mesh>
-      <Html distanceFactor={42} position={[0, 2.1, 0]} center style={{ pointerEvents: "none" }}>
-        <div
-          style={{
-            fontFamily: "IBM Plex Mono, ui-monospace, monospace",
-            fontSize: 11,
-            letterSpacing: "0.06em",
-            color: "#eef2f0",
-            background: "rgba(8,16,18,0.78)",
-            border: `1px solid ${color.getStyle()}`,
-            padding: "3px 8px",
-            borderRadius: 6,
-            whiteSpace: "nowrap",
-          }}
-        >
-          {p.count} · {crowdLabel(p.load)}
-        </div>
-      </Html>
+      {showLabel && (
+        <HtmlLabel distanceFactor={42} maxDist={90} position={[0, 2.1, 0]}>
+          <div
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 11,
+              letterSpacing: "0.06em",
+              color: "#eef2f0",
+              background: "rgba(8,16,18,0.78)",
+              border: `1px solid ${color.getStyle()}`,
+              padding: "3px 8px",
+              borderRadius: 6,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {p.count} · {crowdLabel(p.load)}
+          </div>
+        </HtmlLabel>
+      )}
     </group>
   );
 }
@@ -235,12 +237,11 @@ export function PedestrianFlowLayer() {
     setTSec(state.clock.elapsedTime);
   });
 
-  const { segLoads, plazas, livePeds } = useMemo(() => {
+  const { segLoads, plazas } = useMemo(() => {
     if (!on) {
       return {
         segLoads: [] as { seg: WalkSeg; density: number }[],
         plazas: [] as PlazaLoad[],
-        livePeds: [] as SumoActor[],
       };
     }
 
@@ -249,7 +250,6 @@ export function PedestrianFlowLayer() {
       return {
         segLoads: segs.map((seg) => ({ seg, density: segDensity(seg, peds).density })),
         plazas: JUNCTION_XS.flatMap((jx) => JUNCTION_XS.map((jz) => plazaLoad(jx, jz, peds))),
-        livePeds: peds,
       };
     }
 
@@ -273,11 +273,17 @@ export function PedestrianFlowLayer() {
           };
         }),
       ),
-      livePeds: [] as SumoActor[],
     };
   }, [on, segs, sumo.live, sumo.updatedAt, sumo.pedestrians, tSec]);
 
   if (!on) return null;
+
+  const labeled = new Set(
+    [...plazas]
+      .sort((a, b) => b.load - a.load)
+      .slice(0, 5)
+      .map((p) => p.id),
+  );
 
   // Live peds are also drawn by OpsAgentsLive — only add extras offline via MockWalkers
   return (
@@ -286,11 +292,9 @@ export function PedestrianFlowLayer() {
         <SidewalkHeat key={seg.id} seg={seg} density={density} />
       ))}
       {plazas.map((p) => (
-        <PlazaHotspot key={p.id} p={p} />
+        <PlazaHotspot key={p.id} p={p} showLabel={labeled.has(p.id) && p.load >= 0.22} />
       ))}
       {!sumo.live && <MockWalkers />}
-      {/* When live, heat uses livePeds; agents come from OpsAgentsLive */}
-      {sumo.live && livePeds.length === 0 && null}
     </group>
   );
 }

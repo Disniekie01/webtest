@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { CITY_SPAN_M } from "../data/twinCamera";
 
 export type SumoActor = {
@@ -63,7 +63,6 @@ function normalizeLights(raw: unknown): TrafficLightState[] {
       });
       continue;
     }
-    // Raw SUMO state string e.g. GGgrrrGGgrrr → ns from [0], ew from mid
     const state = String(row.state || "");
     if (state.length >= 2) {
       const mid = Math.floor(state.length / 2);
@@ -77,54 +76,97 @@ function normalizeLights(raw: unknown): TrafficLightState[] {
   return out;
 }
 
-/** Poll Kit TraCI mirror — same SUMO that drives Isaac actors. */
-export function useSumoActors(pollMs = 120): SumoActorsSnapshot {
-  const [snap, setSnap] = useState<SumoActorsSnapshot>(EMPTY);
-  const failStreak = useRef(0);
+type Listener = (s: SumoActorsSnapshot) => void;
+
+/** One shared Kit TraCI poll for every layer / metrics hook. */
+const actorsBus = {
+  snap: EMPTY as SumoActorsSnapshot,
+  listeners: new Set<Listener>(),
+  failStreak: 0,
+  timer: 0 as number,
+  inFlight: false,
+  refs: 0,
+  pollMs: 150,
+
+  publish(s: SumoActorsSnapshot) {
+    this.snap = s;
+    this.listeners.forEach((l) => l(s));
+  },
+
+  async tick() {
+    if (this.inFlight) return;
+    this.inFlight = true;
+    try {
+      const res = await fetch("/viewport/api/actors", {
+        cache: "no-store",
+        signal: AbortSignal.timeout(800),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      const data = (await res.json()) as {
+        updatedAt?: number;
+        span_m?: number;
+        vehicles?: SumoActor[];
+        pedestrians?: SumoActor[];
+        lights?: unknown;
+      };
+      const updatedAt = Number(data.updatedAt || 0);
+      const age = Date.now() / 1000 - updatedAt;
+      const live = updatedAt > 0 && age < 3.5;
+      this.failStreak = 0;
+      this.publish({
+        live,
+        span_m: Number(data.span_m) || CITY_SPAN_M,
+        vehicles: Array.isArray(data.vehicles) ? data.vehicles : [],
+        pedestrians: Array.isArray(data.pedestrians) ? data.pedestrians : [],
+        lights: normalizeLights(data.lights),
+        updatedAt,
+      });
+    } catch {
+      this.failStreak += 1;
+      if (this.failStreak > 2 && this.snap.live) {
+        this.publish({ ...EMPTY });
+      }
+    } finally {
+      this.inFlight = false;
+    }
+  },
+
+  ensure() {
+    if (this.timer) return;
+    void this.tick();
+    this.timer = window.setInterval(() => void this.tick(), this.pollMs);
+  },
+
+  release() {
+    if (this.refs > 0) return;
+    if (this.timer) {
+      window.clearInterval(this.timer);
+      this.timer = 0;
+    }
+  },
+};
+
+/** Poll Kit TraCI mirror — shared singleton (same SUMO that drives Isaac actors). */
+export function useSumoActors(_pollMs = 150): SumoActorsSnapshot {
+  const [snap, setSnap] = useState<SumoActorsSnapshot>(() => actorsBus.snap);
 
   useEffect(() => {
-    let cancelled = false;
-    const tick = async () => {
-      try {
-        const res = await fetch("/viewport/api/actors", {
-          cache: "no-store",
-          signal: AbortSignal.timeout(800),
-        });
-        if (!res.ok) throw new Error(String(res.status));
-        const data = (await res.json()) as {
-          updatedAt?: number;
-          span_m?: number;
-          vehicles?: SumoActor[];
-          pedestrians?: SumoActor[];
-          lights?: unknown;
-        };
-        if (cancelled) return;
-        const updatedAt = Number(data.updatedAt || 0);
-        const age = Date.now() / 1000 - updatedAt;
-        const live = updatedAt > 0 && age < 3.5;
-        failStreak.current = 0;
-        setSnap({
-          live,
-          span_m: Number(data.span_m) || CITY_SPAN_M,
-          vehicles: Array.isArray(data.vehicles) ? data.vehicles : [],
-          pedestrians: Array.isArray(data.pedestrians) ? data.pedestrians : [],
-          lights: normalizeLights(data.lights),
-          updatedAt,
-        });
-      } catch {
-        failStreak.current += 1;
-        if (!cancelled && failStreak.current > 2) {
-          setSnap((s) => (s.live ? { ...EMPTY } : s));
-        }
-      }
-    };
-    void tick();
-    const id = window.setInterval(() => void tick(), pollMs);
+    const listener: Listener = (s) => setSnap(s);
+    actorsBus.listeners.add(listener);
+    actorsBus.refs += 1;
+    actorsBus.ensure();
+    setSnap(actorsBus.snap);
     return () => {
-      cancelled = true;
-      window.clearInterval(id);
+      actorsBus.listeners.delete(listener);
+      actorsBus.refs = Math.max(0, actorsBus.refs - 1);
+      actorsBus.release();
     };
-  }, [pollMs]);
+  }, []);
 
   return snap;
+}
+
+/** Imperative read for non-React callers (badges, health). */
+export function getSumoActorsSnap() {
+  return actorsBus.snap;
 }

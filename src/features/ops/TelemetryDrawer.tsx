@@ -99,12 +99,14 @@ function RobotCard({
 export function TelemetryDrawer() {
   const open = useAscStore((s) => s.telemetryOpen);
   const setOpen = useAscStore((s) => s.setTelemetryOpen);
+  const sumoLive = useAscStore((s) => s.sumoLive);
   const robots = useLiveTelemetry(open);
   const [sense, setSense] = useState<{ id: string; mode: SenseMode } | null>(null);
 
   if (!open) return null;
 
   const active = sense ? robots.find((r) => r.id === sense.id) : null;
+  const feedLabel = sumoLive ? "SUMO-linked · simulated sensors" : "Mock fleet · simulated sensors";
 
   return (
     <>
@@ -112,7 +114,7 @@ export function TelemetryDrawer() {
         <div className="telemetry-drawer__head">
           <div>
             <h2>Robot telemetry</h2>
-            <p className="muted mono">Live fleet · {robots.length} agents</p>
+            <p className="muted mono">{feedLabel} · {robots.length} agents</p>
           </div>
           <button type="button" className="telemetry-close" onClick={() => setOpen(false)}>
             Close

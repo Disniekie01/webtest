@@ -12,9 +12,10 @@
   --text: #eef4f2;
   --text-muted: #7f9490;
   --ink: #04080c;
-  --font-display: "Outfit", "IBM Plex Sans", system-ui, sans-serif;
-  --font-body: "Outfit", "IBM Plex Sans", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  /* Syne = brand/display · Figtree = UI · Plex Mono = telemetry */
+  --font-display: "Syne", "Figtree", system-ui, sans-serif;
+  --font-body: "Figtree", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --hairline: 1px solid rgba(126, 200, 192, 0.16);
 }
@@ -36,8 +37,11 @@ body,
   color: var(--text);
   font-family: var(--font-body);
   font-size: 15px;
+  font-weight: 450;
   line-height: 1.45;
+  letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 button,
@@ -55,6 +59,12 @@ button {
 .mono {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.display {
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
 }
 
 .muted {

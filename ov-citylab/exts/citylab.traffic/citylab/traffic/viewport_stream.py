@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import threading
 import time
 from http import HTTPStatus
@@ -377,7 +378,13 @@ def buffer_to_jpeg(buffer, size, width: int, height: int) -> bytes | None:
         else:
             return None
         buf = io.BytesIO()
-        img.save(buf, format="JPEG", quality=70)
+        # Downscale for Yardline / MJPEG — WebRTC uses the live viewport, not this JPEG.
+        max_w = int(os.environ.get("CITYLAB_VIEWPORT_JPEG_MAX_W", "960"))
+        if max_w > 0 and img.width > max_w:
+            nh = max(1, int(round(img.height * (max_w / float(img.width)))))
+            img = img.resize((max_w, nh))
+        quality = int(os.environ.get("CITYLAB_VIEWPORT_JPEG_QUALITY", "62"))
+        img.save(buf, format="JPEG", quality=max(40, min(90, quality)))
         return buf.getvalue()
     except Exception as exc:
         carb.log_warn(f"[citylab.view] jpeg: {exc}")

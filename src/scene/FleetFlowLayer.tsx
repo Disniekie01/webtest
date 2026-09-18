@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Html, Line } from "@react-three/drei";
+import { Line } from "@react-three/drei";
 import * as THREE from "three";
 import { useAscStore } from "../state/ascStore";
 import { useSumoActors, type SumoActor } from "./useSumoActors";
 import { RobotAgent } from "./Agents";
+import { HtmlLabel } from "./HtmlLabel";
 import {
   createFleetBots,
   positionOnPath,
@@ -23,10 +24,12 @@ function StopMarker({
   position,
   kind,
   label,
+  showLabel = true,
 }: {
   position: [number, number, number];
   kind: "pickup" | "dropoff";
   label: string;
+  showLabel?: boolean;
 }) {
   const color = kind === "pickup" ? "#5eb8b0" : "#e0a05a";
   return (
@@ -50,25 +53,27 @@ function StopMarker({
           toneMapped={false}
         />
       </mesh>
-      <Html distanceFactor={36} position={[0, 1.6, 0]} center style={{ pointerEvents: "none" }}>
-        <div
-          style={{
-            fontFamily: "IBM Plex Mono, ui-monospace, monospace",
-            fontSize: 10,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            color: "#eef2f0",
-            background: "rgba(10,14,18,0.82)",
-            border: `1px solid ${color}`,
-            padding: "2px 7px",
-            borderRadius: 6,
-            whiteSpace: "nowrap",
-          }}
-        >
-          {kind === "pickup" ? "P · " : "D · "}
-          {label}
-        </div>
-      </Html>
+      {showLabel && (
+        <HtmlLabel distanceFactor={36} maxDist={70} position={[0, 1.6, 0]}>
+          <div
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 10,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "#eef2f0",
+              background: "rgba(10,14,18,0.82)",
+              border: `1px solid ${color}`,
+              padding: "2px 7px",
+              borderRadius: 6,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {kind === "pickup" ? "P · " : "D · "}
+            {label}
+          </div>
+        </HtmlLabel>
+      )}
     </group>
   );
 }
@@ -78,11 +83,13 @@ function RobotHighlight({
   name,
   policy,
   phase,
+  showLabel = true,
 }: {
   position: [number, number, number];
   name: string;
   policy: string;
   phase: FleetBotState["phase"];
+  showLabel?: boolean;
 }) {
   const ring = useRef<THREE.Mesh>(null);
   const color =
@@ -128,30 +135,32 @@ function RobotHighlight({
         <sphereGeometry args={[0.18, 12, 12]} />
         <meshStandardMaterial color={color} emissive={color} emissiveIntensity={1.2} />
       </mesh>
-      <Html distanceFactor={34} position={[0, 3.5, 0]} center style={{ pointerEvents: "none" }}>
-        <div
-          style={{
-            fontFamily: "IBM Plex Sans, system-ui, sans-serif",
-            fontSize: 11,
-            color: "#eef2f0",
-            background: "rgba(10,14,18,0.82)",
-            border: `1px solid ${color}`,
-            padding: "3px 8px",
-            borderRadius: 6,
-            whiteSpace: "nowrap",
-          }}
-        >
-          <strong style={{ fontFamily: "IBM Plex Mono, monospace", fontWeight: 500 }}>{name}</strong>
-          <span style={{ opacity: 0.7, marginLeft: 6, fontSize: 10 }}>
-            {phaseTxt} · {policy}
-          </span>
-        </div>
-      </Html>
+      {showLabel && (
+        <HtmlLabel distanceFactor={34} maxDist={80} position={[0, 3.5, 0]}>
+          <div
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: 11,
+              color: "#eef2f0",
+              background: "rgba(10,14,18,0.82)",
+              border: `1px solid ${color}`,
+              padding: "3px 8px",
+              borderRadius: 6,
+              whiteSpace: "nowrap",
+            }}
+          >
+            <strong style={{ fontFamily: "var(--font-mono)", fontWeight: 500 }}>{name}</strong>
+            <span style={{ opacity: 0.7, marginLeft: 6, fontSize: 10 }}>
+              {phaseTxt} · {policy}
+            </span>
+          </div>
+        </HtmlLabel>
+      )}
     </group>
   );
 }
 
-function MissionRoute({ bot }: { bot: FleetBotState }) {
+function MissionRoute({ bot, showLabels }: { bot: FleetBotState; showLabels: boolean }) {
   const idx = progressIndex(bot.path, bot.progress);
   const done = bot.path.slice(0, Math.max(1, idx + 1));
   const todo = bot.path.slice(Math.max(0, idx));
@@ -179,11 +188,13 @@ function MissionRoute({ bot }: { bot: FleetBotState }) {
         position={[bot.pickup.x, MARK_Y, bot.pickup.z]}
         kind="pickup"
         label={bot.pickup.label}
+        showLabel={showLabels}
       />
       <StopMarker
         position={[bot.dropoff.x, MARK_Y, bot.dropoff.z]}
         kind="dropoff"
         label={bot.dropoff.label}
+        showLabel={showLabels}
       />
     </group>
   );
@@ -282,12 +293,13 @@ export function FleetFlowLayer() {
         const pos: [number, number, number] = [xz[0], 0, xz[1]];
         return (
           <group key={bot.id}>
-            <MissionRoute bot={bot} />
+            <MissionRoute bot={bot} showLabels={i < 3} />
             <RobotHighlight
               position={pos}
               name={bot.name}
               policy={bot.policy}
               phase={bot.phase}
+              showLabel={i < 3}
             />
             {!sumo.live && <RobotAgent position={pos} kind={bot.kind} />}
           </group>
@@ -316,7 +328,9 @@ export const fleetBus = {
   subscribe(l: Listener) {
     this.listeners.add(l);
     l(this.snap);
-    return () => this.listeners.delete(l);
+    return () => {
+      this.listeners.delete(l);
+    };
   },
 };
 

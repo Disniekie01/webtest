@@ -117,8 +117,8 @@ export function routeBetween(a: CurbStop, b: CurbStop): [number, number][] {
   return path;
 }
 
-function nearestJunction(v: number) {
-  let best = JUNCTION_XS[0];
+function nearestJunction(v: number): (typeof JUNCTION_XS)[number] {
+  let best: (typeof JUNCTION_XS)[number] = JUNCTION_XS[0];
   let bestD = Infinity;
   for (const j of JUNCTION_XS) {
     const d = Math.abs(j - v);

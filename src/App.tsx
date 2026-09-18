@@ -7,7 +7,8 @@ import { KitStreamBackground } from "./scene/KitStreamBackground";
 import { StillBackdrop } from "./scene/StillBackdrop";
 import "./App.css";
 
-/** Adaptive Smart City — low-fi twin by default; High fidelity swaps to Isaac Kit. */
+/** Adaptive Smart City — low-fi twin by default; High fidelity swaps to Isaac Kit.
+ * Yardline CV pauses the live viewport (still backdrop) so YOLO isn't fighting R3F/WebRTC. */
 export default function App() {
   const mode = useAscStore((s) => s.mode);
   const viewportMode = useAscStore((s) => s.viewportMode);

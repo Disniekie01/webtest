@@ -1,8 +1,8 @@
 .traffic-metrics {
   position: absolute;
   top: 4.6rem;
-  right: 17.5rem;
-  width: min(22rem, calc(100vw - 32rem));
+  right: 14.75rem;
+  width: min(22rem, calc(100vw - 29rem));
   z-index: 5;
   display: flex;
   flex-direction: column;
@@ -128,9 +128,9 @@
 .traffic-metrics__head h2 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.28rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.035em;
   display: flex;
   align-items: center;
   gap: 0.45rem;

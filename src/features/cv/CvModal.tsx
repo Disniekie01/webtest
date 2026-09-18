@@ -20,6 +20,7 @@ import {
   fetchYardlineIncidents,
   getYardlineClient,
   postYardlineLabel,
+  TWIN_FEED_URL,
   trackAimUv,
   type KitActorsPayload,
   type OrchestratorPayload,
@@ -137,7 +138,7 @@ export function CvModal() {
       if (policy) setOrch(policy);
     };
     tick();
-    const id = window.setInterval(tick, 400);
+    const id = window.setInterval(tick, 1000);
     return () => {
       alive = false;
       window.clearInterval(id);
@@ -174,12 +175,12 @@ export function CvModal() {
       setIncidents(inc);
     };
     refresh();
-    const id = window.setInterval(refresh, 4000);
+    const id = window.setInterval(refresh, 8000);
     return () => {
       alive = false;
       window.clearInterval(id);
     };
-  }, [show, yl?.lastFrame?.frame_index]);
+  }, [show]);
 
   useEffect(() => {
     if (!show) return;
@@ -211,11 +212,11 @@ export function CvModal() {
       fctx.fillStyle = "#12181a";
       fctx.fillRect(0, 0, fw, fh);
       fctx.fillStyle = "#9aa8a6";
-      fctx.font = "14px IBM Plex Mono, monospace";
+      fctx.font = '14px "IBM Plex Mono", monospace';
       fctx.fillText(label, 20, 36);
     };
 
-    if (!frame?.jpeg) {
+    if (!frame) {
       drawFallback(
         yl?.connected
           ? "Waiting for twin frames…"
@@ -224,30 +225,37 @@ export function CvModal() {
       return;
     }
 
-    const src = `data:image/jpeg;base64,${frame.jpeg}`;
+    const src = frame.jpeg
+      ? `data:image/jpeg;base64,${frame.jpeg}`
+      : `${TWIN_FEED_URL}?t=${frame.frame_index}`;
     const img = jpegImg.current ?? new Image();
     jpegImg.current = img;
     const paint = (bmp: HTMLImageElement, f: YardlineFrame) => {
-      const scale = Math.min(fw / f.width, fh / f.height);
-      const dw = f.width * scale;
-      const dh = f.height * scale;
+      const iw = bmp.naturalWidth || f.width;
+      const ih = bmp.naturalHeight || f.height;
+      const scale = Math.min(fw / iw, fh / ih);
+      const dw = iw * scale;
+      const dh = ih * scale;
       const dx = (fw - dw) * 0.5;
       const dy = (fh - dh) * 0.5;
       fctx.fillStyle = "#0e1618";
       fctx.fillRect(0, 0, fw, fh);
-      fctx.drawImage(bmp, 0, 0, f.width, f.height, dx, dy, dw, dh);
-      const mapX = (x: number) => dx + x * scale;
-      const mapY = (y: number) => dy + y * scale;
+      fctx.drawImage(bmp, 0, 0, iw, ih, dx, dy, dw, dh);
+      // Boxes are in Yardline's resized frame space — map onto displayed image.
+      const mapX = (x: number) => dx + (x / Math.max(1, f.width)) * dw;
+      const mapY = (y: number) => dy + (y / Math.max(1, f.height)) * dh;
 
       for (const t of f.tracks || []) {
         if (!t.bbox || t.bbox.length < 4 || t.confirmed === false) continue;
+        // Skip coasting tracks (duplicate ghost at last seen spot).
+        if (typeof t.time_since_update === "number" && t.time_since_update > 0) continue;
         const [x1, y1, x2, y2] = t.bbox;
         const color = TRACK_COLORS[t.class_name] || "#c4a574";
         fctx.strokeStyle = color;
         fctx.lineWidth = 2;
         fctx.strokeRect(mapX(x1), mapY(y1), mapX(x2) - mapX(x1), mapY(y2) - mapY(y1));
         fctx.fillStyle = color;
-        fctx.font = "12px IBM Plex Mono, monospace";
+        fctx.font = '12px "IBM Plex Mono", monospace';
         fctx.fillText(`${t.class_name} #${t.id}`, mapX(x1), mapY(y1) - 6);
         const foot = t.foot ?? ([0.5 * (x1 + x2), y2] as [number, number]);
         fctx.beginPath();
@@ -272,7 +280,7 @@ export function CvModal() {
       }
     };
 
-    if (img.src === src && img.complete) paint(img, frame);
+    if (img.src === src && img.complete && img.naturalWidth > 0) paint(img, frame);
     else {
       img.onload = () => paint(img, frame);
       img.src = src;
@@ -383,7 +391,7 @@ export function CvModal() {
         <header className="cv-modal-head">
           <div className="cv-modal-title">
             <span className="brand-mark">Yardline</span>
-            <span className="mono muted">CV · twin camera</span>
+            <span className="mono muted">CV · twin paused · JPEG only</span>
           </div>
           <div className="cv-kpi-bar mono">
             <span className={`alarm alarm-${alarm}`}>{LEVEL_NAME[alarm as 0 | 1 | 2 | 3]}</span>

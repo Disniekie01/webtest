@@ -10,6 +10,7 @@ export type YardlineTrackMsg = {
   bbox: [number, number, number, number];
   conf?: number;
   foot?: [number, number];
+  time_since_update?: number;
   /** Camera UV heading segment [u0,v0,u1,v1] from Yardline (plane or px velocity). */
   aim_uv?: [number, number, number, number] | null;
   hx?: number;
@@ -30,7 +31,9 @@ export type YardlineFrame = {
   frame_index: number;
   width: number;
   height: number;
-  jpeg: string;
+  jpeg: string | null;
+  /** When jpeg is null, UI should paint twin /viewport/frame.jpg */
+  feed?: string;
   calibrated: boolean;
   pii_redacted?: boolean;
   latency_ms?: number;
@@ -71,6 +74,8 @@ export type YardlineStatus = {
 type Listener = (status: YardlineStatus) => void;
 
 const TWIN_SOURCE = "http://127.0.0.1:5175/viewport/frame.jpg";
+/** Same-origin twin JPEG for the CV canvas (avoids WS base64). */
+export const TWIN_FEED_URL = "/viewport/frame.jpg";
 
 function mapCls(name: string): YardTrack["cls"] {
   const n = name.toLowerCase();
@@ -318,17 +323,18 @@ export async function setPiiRedaction(enabled: boolean): Promise<boolean> {
 export function trackAimUv(t: YardlineTrackMsg): [number, number, number, number] | null {
   if (t.aim_uv && t.aim_uv.length === 4) {
     const [a, b, c, d] = t.aim_uv;
-    if (Math.hypot(c - a, d - b) >= 8) return [a, b, c, d];
+    if (Math.hypot(c - a, d - b) >= 6) return [a, b, c, d];
   }
   const foot = t.foot ?? (t.bbox ? ([0.5 * (t.bbox[0] + t.bbox[2]), t.bbox[3]] as [number, number]) : null);
   if (!foot) return null;
   const vx = t.vx_px ?? 0;
   const vy = t.vy_px ?? 0;
   const mag = Math.hypot(vx, vy);
-  if (mag >= 8) {
-    return [foot[0], foot[1], foot[0] + vx * 0.55, foot[1] + vy * 0.55];
-  }
-  return null;
+  if (mag < 2) return null;
+  const tip = mag >= 12 ? Math.min(48, mag * 0.55) : 28;
+  const ux = vx / mag;
+  const uy = vy / mag;
+  return [foot[0], foot[1], foot[0] + ux * tip, foot[1] + uy * tip];
 }
 
 export type KitActor = {

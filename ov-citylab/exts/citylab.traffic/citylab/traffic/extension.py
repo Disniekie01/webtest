@@ -6,6 +6,7 @@ import json
 import math
 import os
 import sys
+import time
 import zlib
 from pathlib import Path
 
@@ -59,17 +60,19 @@ _CAR_PAINT = (
     Gf.Vec3f(0.55, 0.15, 0.55),
 )
 # Bump path suffix when mesh/yaw convention changes so live actors respawn.
-_CAR_PRIM_REV = "v18"
+_CAR_PRIM_REV = "v20"
 # Temporary uniform shrink so KayKit bodies fit 2.0–3.0 m SUMO lanes
 # (meshes are ~2.1 m wide). Replace with properly sized assets later.
 _CAR_MESH_SCALE = float(os.environ.get("CITYLAB_CAR_SCALE", "0.85"))
 # Car / people USDs are authored Y-up, grounded at y=0, no body tilt.
-# SUMO 0°=north (−Z), 90°=east (+X). yaw = 90 - angle, so the 180° offset below
-# means the meshes point their nose down −X. verify_cars.py enforces that.
+# SUMO 0°=north (−Z), 90°=east (+X). KayKit / Quaternius nose is −X → offset 180
+# (see assets/vehicles/kaykit/SOURCE.md). Do NOT use motion yaw as primary:
+# standstill / sidewalk snap jitter flips heading when motion falls back.
 _CAR_YAW_OFFSET_DEG = float(os.environ.get("CITYLAB_CAR_YAW_OFFSET", "180"))
-# Peds: export_quaternius_people.py bakes +90° into vertices before forward=+X
-# export. Cars use 180; peds need 270 (= 90 + 180) so they face their motion.
-_PED_YAW_OFFSET_DEG = float(os.environ.get("CITYLAB_PED_YAW_OFFSET", "270"))
+# Quaternius export bakes +90° so people share the car −X nose convention.
+_PED_YAW_OFFSET_DEG = float(os.environ.get("CITYLAB_PED_YAW_OFFSET", "180"))
+# Hold last heading below this speed (m/s) so stopped actors don't twitch.
+_YAW_HOLD_SPEED = float(os.environ.get("CITYLAB_YAW_HOLD_SPEED", "0.15"))
 
 # ped_behaviors.rou.xml type → display color (cube fallback) / mesh file
 _PED_COLORS = {
@@ -85,10 +88,11 @@ _ROBOT_CUBE_SIZE = Gf.Vec3f(0.75, 0.55, 0.70)
 _ROBOT_MESH_SCALE = float(os.environ.get("CITYLAB_ROBOT_MESH_SCALE", "0.32"))
 _ROBOT_ASSET_NAME = os.environ.get("CITYLAB_ROBOT_ASSET", "deliveryrobot_001.usd")
 _ROBOT_PRIM_PATH = os.environ.get("CITYLAB_ROBOT_PRIM", "/deliveryrobot_001")
-_ROBOT_PRIM_REV = "v2"
+_ROBOT_PRIM_REV = "v3"
 # Camera UV overlays were drifting (blank CV boxes). Off until plane is city-aligned.
 _ROBOT_PUBLISH_UV = os.environ.get("CITYLAB_ROBOT_UV", "0") == "1"
-_ROBOT_YAW_OFFSET_DEG = float(os.environ.get("CITYLAB_ROBOT_YAW_OFFSET", "0"))
+# deliveryrobot_001 faces +Z; traffic yaw is −X-nose → +90° relative to people.
+_ROBOT_YAW_OFFSET_DEG = float(os.environ.get("CITYLAB_ROBOT_YAW_OFFSET", "90"))
 # Quaternius outfits — static walk mid-poses only (max stream FPS).
 _PED_MESH_POOL = (
     "male_casual",
@@ -108,13 +112,42 @@ _PED_MESHES = {
 }
 _PED_MESH_DEFAULT = "male_casual"
 # Static walk pose only (no skel, no idle swap) — best stream FPS.
-_PED_PRIM_REV = "v9"
+_PED_PRIM_REV = "v10"
 MAX_PED = int(os.environ.get("CITYLAB_MAX_PED", "24"))
 MAX_ROBOT = int(os.environ.get("CITYLAB_MAX_ROBOT", "6"))
 MAX_VEH = int(os.environ.get("CITYLAB_MAX_VEH", "32"))
-# TraCI sync every N Kit frames (higher = cheaper).
+# Legacy frame-skip — only used when CITYLAB_SUMO_WALL_CLOCK=0
 _TRAFFIC_SYNC_EVERY = int(os.environ.get("CITYLAB_TRAFFIC_SYNC_EVERY", "3"))
+# Wall-clock SUMO pacing (1.0 = realtime). Matches city.sumocfg step-length 0.05s.
+_SUMO_WALL_CLOCK = os.environ.get("CITYLAB_SUMO_WALL_CLOCK", "1") == "1"
+_SUMO_STEP_S = float(os.environ.get("CITYLAB_SUMO_STEP_S", "0.05"))
+_SUMO_REALTIME = float(os.environ.get("CITYLAB_SUMO_REALTIME", "1.0"))
+_SUMO_MAX_STEPS = int(os.environ.get("CITYLAB_SUMO_MAX_STEPS", "2"))
+# JPEG capture every N Kit frames (actors JSON still updates every traffic tick).
+# Twin CV needs near-stream rate — every 20 frames (~3 Hz) makes Yardline look jumpy.
+_VIEWPORT_CAPTURE_EVERY = int(os.environ.get("CITYLAB_VIEWPORT_CAPTURE_EVERY", "2"))
 _BLOCK_M = 40.0
+
+
+def _yaw_from_sumo_angle(angle_deg: float, offset_deg: float) -> float:
+    """SUMO 0°=north (−Z), 90°=east (+X) → USD RotateY degrees for nose−X meshes."""
+    return -(float(angle_deg) - 90.0) + float(offset_deg)
+
+
+def _stable_actor_yaw(
+    actor_id: str,
+    angle_deg: float,
+    offset_deg: float,
+    speed: float,
+    last_yaw: dict[str, float],
+) -> float:
+    """SUMO heading with hold-when-stopped so standstill doesn't flip the mesh."""
+    yaw = _yaw_from_sumo_angle(angle_deg, offset_deg)
+    key = str(actor_id)
+    if float(speed) < _YAW_HOLD_SPEED and key in last_yaw:
+        yaw = last_yaw[key]
+    last_yaw[key] = float(yaw)
+    return float(yaw)
 
 
 def _sumo_to_usd(sx: float, sy: float, net_w: float, net_h: float) -> tuple[float, float]:
@@ -815,9 +848,13 @@ class CityLabTrafficExtension(omni.ext.IExt):
 
     def _arm_update(self) -> None:
         self._running = True
-        # Prefer Kit update subscription; also keep asyncio fallback — livestream
-        # sometimes never delivers update_event_stream pops, which stalls deferred
-        # Dynamic Sky / SUMO forever (ticking stays false).
+        self._sumo_wall_t = time.monotonic()
+        self._sumo_owed = 0.0
+        self._veh_last_yaw: dict[str, float] = {}
+        self._ped_last_yaw: dict[str, float] = {}
+        # Prefer Kit update subscription; asyncio is fallback ONLY — dual ticks
+        # raced SUMO ~2× realtime and crushed stream FPS.
+        self._update_sub = None
         try:
             self._update_sub = (
                 omni.kit.app.get_app()
@@ -829,7 +866,10 @@ class CityLabTrafficExtension(omni.ext.IExt):
             carb.log_error(f"[citylab.traffic] update sub failed: {exc}")
         if self._loop_task is None:
             self._loop_task = asyncio.ensure_future(self._tick_loop())
-            carb.log_warn("[citylab.traffic] asyncio tick loop armed")
+            carb.log_warn(
+                "[citylab.traffic] asyncio tick loop armed"
+                + (" (fallback only)" if self._update_sub is not None else "")
+            )
 
     async def _ensure_city_stage(self, reason: str) -> None:
         app = omni.kit.app.get_app()
@@ -1465,6 +1505,9 @@ class CityLabTrafficExtension(omni.ext.IExt):
         app = omni.kit.app.get_app()
         while self._running:
             await app.next_update_async()
+            # Subscription already drives the sim — do not double-step.
+            if self._update_sub is not None:
+                continue
             self._on_update(None)
 
     async def _frame_city_camera(self) -> None:
@@ -1618,18 +1661,33 @@ class CityLabTrafficExtension(omni.ext.IExt):
         if self._capture_enabled:
             if self._capture_pending and self._frame - self._capture_started_at > 45:
                 self._capture_pending = False
-            # ~10 Hz capture — enough for UI, lighter than every other frame
-            if self._frame % 6 == 0:
+            # Near livestream rate for Yardline CV (CAPTURE_EVERY≈2 → ~30 Hz @60fps Kit).
+            if self._frame % max(1, _VIEWPORT_CAPTURE_EVERY) == 0:
                 self._capture_viewport()
         if self._frame == 1 or self._frame % 300 == 0:
             carb.log_warn(f"[citylab.traffic] tick frame={self._frame} capture={self._capture_enabled}")
         if self._traci is None:
             return
         try:
-            # ~traffic Hz vs Kit frame rate
-            if self._frame % max(1, _TRAFFIC_SYNC_EVERY) != 0:
-                return
-            self._traci.simulationStep()
+            # Wall-clock pacing → ~1× realtime (not tied to Kit FPS spikes).
+            if _SUMO_WALL_CLOCK:
+                now = time.monotonic()
+                dt = min(0.25, max(0.0, now - getattr(self, "_sumo_wall_t", now)))
+                self._sumo_wall_t = now
+                self._sumo_owed = getattr(self, "_sumo_owed", 0.0) + dt * max(0.05, _SUMO_REALTIME)
+                steps = 0
+                while self._sumo_owed >= _SUMO_STEP_S and steps < max(1, _SUMO_MAX_STEPS):
+                    self._traci.simulationStep()
+                    self._sumo_owed -= _SUMO_STEP_S
+                    steps += 1
+                # Prefer realtime over catch-up spirals when the stream hitchs.
+                if self._sumo_owed > _SUMO_STEP_S * 6:
+                    self._sumo_owed = _SUMO_STEP_S
+            else:
+                if self._frame % max(1, _TRAFFIC_SYNC_EVERY) != 0:
+                    return
+                self._traci.simulationStep()
+
             if (
                 not self._traci.vehicle.getIDList()
                 and not self._traci.person.getIDList()
@@ -1649,7 +1707,9 @@ class CityLabTrafficExtension(omni.ext.IExt):
                 except Exception:
                     speed = 0.0
                 ux, uz = _sumo_to_usd(sx, sy, self._net_w, self._net_h)
-                yaw = -(angle - 90.0) + _CAR_YAW_OFFSET_DEG
+                yaw = _stable_actor_yaw(
+                    vid, angle, _CAR_YAW_OFFSET_DEG, speed, self._veh_last_yaw
+                )
                 # Mesh grounded at y=0 (wheel contact); tiny lift avoids z-fight
                 vehicles.append((vid, ux, 0.02, uz, yaw, speed))
 
@@ -1716,7 +1776,9 @@ class CityLabTrafficExtension(omni.ext.IExt):
                     if offset:
                         sx, sy = _sidewalk_offset_sumo(sx, sy, angle, offset)
                 ux, uz = _sumo_to_usd(sx, sy, self._net_w, self._net_h)
-                yaw = -(angle - 90.0) + _PED_YAW_OFFSET_DEG
+                yaw = _stable_actor_yaw(
+                    pid, angle, _PED_YAW_OFFSET_DEG, speed, self._ped_last_yaw
+                )
                 try:
                     ptype = self._traci.person.getTypeID(pid)
                 except Exception:

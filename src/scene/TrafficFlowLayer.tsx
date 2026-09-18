@@ -1,10 +1,10 @@
 import { useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { Html } from "@react-three/drei";
 import { CITY_SPAN_M, JUNCTION_XS, STREET_W } from "../data/cityGrid";
 import { useAscStore } from "../state/ascStore";
 import { useSumoActors, type SumoActor } from "./useSumoActors";
+import { HtmlLabel } from "./HtmlLabel";
 
 const HEAT_Y = 0.24;
 const RING_Y = 0.32;
@@ -133,7 +133,7 @@ function RoadHeat({ seg, density }: { seg: RoadSeg; density: number }) {
   );
 }
 
-function IntersectionBusy({ j }: { j: JunctionLoad }) {
+function IntersectionBusy({ j, showLabel }: { j: JunctionLoad; showLabel: boolean }) {
   const ring = useRef<THREE.Mesh>(null);
   const color = loadColor(Math.max(0.08, j.load));
   const radius = 5.5 + j.load * 7;
@@ -170,23 +170,25 @@ function IntersectionBusy({ j }: { j: JunctionLoad }) {
           toneMapped={false}
         />
       </mesh>
-      <Html distanceFactor={40} position={[0, 2.4, 0]} center style={{ pointerEvents: "none" }}>
-        <div
-          style={{
-            fontFamily: "IBM Plex Mono, ui-monospace, monospace",
-            fontSize: 11,
-            letterSpacing: "0.06em",
-            color: "#eef2f0",
-            background: "rgba(10,14,18,0.78)",
-            border: `1px solid ${color.getStyle()}`,
-            padding: "3px 8px",
-            borderRadius: 6,
-            whiteSpace: "nowrap",
-          }}
-        >
-          {j.count} · {busyLabel(j.load)}
-        </div>
-      </Html>
+      {showLabel && (
+        <HtmlLabel distanceFactor={40} maxDist={90} position={[0, 2.4, 0]}>
+          <div
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 11,
+              letterSpacing: "0.06em",
+              color: "#eef2f0",
+              background: "rgba(10,14,18,0.78)",
+              border: `1px solid ${color.getStyle()}`,
+              padding: "3px 8px",
+              borderRadius: 6,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {j.count} · {busyLabel(j.load)}
+          </div>
+        </HtmlLabel>
+      )}
     </group>
   );
 }
@@ -290,13 +292,20 @@ export function TrafficFlowLayer() {
 
   if (!on) return null;
 
+  const labeled = new Set(
+    [...junctions]
+      .sort((a, b) => b.load - a.load)
+      .slice(0, 5)
+      .map((j) => j.id),
+  );
+
   return (
     <group>
       {segLoads.map(({ seg, density }) => (
         <RoadHeat key={seg.id} seg={seg} density={density} />
       ))}
       {junctions.map((j) => (
-        <IntersectionBusy key={j.id} j={j} />
+        <IntersectionBusy key={j.id} j={j} showLabel={labeled.has(j.id) && j.load >= 0.2} />
       ))}
       {vehicles.map((v) => (
         <TrafficCar
@@ -336,10 +345,12 @@ function MockTrafficCars() {
       const u = ((state.clock.elapsedTime * c.speed + c.phase) % CITY_SPAN_M) - half;
       if (c.alongEw) {
         child.position.set(u, 0.08, c.line + c.lane);
-        child.rotation.y = Math.PI / 2;
+        // Box length is along X — face +X when driving east–west
+        child.rotation.y = 0;
       } else {
         child.position.set(c.line + c.lane, 0.08, u);
-        child.rotation.y = 0;
+        // Face +Z when driving north–south
+        child.rotation.y = Math.PI / 2;
       }
     });
   });

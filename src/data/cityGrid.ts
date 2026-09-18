@@ -16,7 +16,7 @@ const COL = ["A", "B", "C", "D", "E"] as const;
 export function mainJunctions(): JunctionNode[] {
   const out: JunctionNode[] = [];
   COL.forEach((letter, i) => {
-    JUNCTION_XS.forEach((z, j) => {
+    JUNCTION_XS.forEach((_z, j) => {
       // SUMO: letter → x (0..160), digit → y (0..160)
       const sx = i * 40;
       const sy = j * 40;

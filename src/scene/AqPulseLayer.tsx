@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Html } from "@react-three/drei";
+import { HtmlLabel } from "./HtmlLabel";
 import * as THREE from "three";
 import { useAscStore } from "../state/ascStore";
 import {
@@ -53,7 +53,9 @@ export const aqBus = {
   subscribe(l: Listener) {
     this.listeners.add(l);
     l(this.snap);
-    return () => this.listeners.delete(l);
+    return () => {
+      this.listeners.delete(l);
+    };
   },
 };
 
@@ -100,10 +102,10 @@ function SensorMote({
         <cylinderGeometry args={[0.05, 0.06, 4, 5]} />
         <meshBasicMaterial color="#2a3438" transparent opacity={0.65} />
       </mesh>
-      <Html distanceFactor={44} position={[0, 5.6, 0]} center style={{ pointerEvents: "none" }}>
+      <HtmlLabel distanceFactor={44} maxDist={100} position={[0, 5.6, 0]}>
         <div
           style={{
-            fontFamily: "IBM Plex Mono, ui-monospace, monospace",
+            fontFamily: "var(--font-mono)",
             fontSize: 10,
             color: "#eef2f0",
             background: "rgba(8,12,14,0.82)",
@@ -117,7 +119,7 @@ function SensorMote({
           <span style={{ opacity: 0.6, marginLeft: 5 }}>{bandLabel(band)}</span>
           <span style={{ opacity: 0.4, marginLeft: 5 }}>{label.split(" ")[0]}</span>
         </div>
-      </Html>
+      </HtmlLabel>
     </group>
   );
 }

@@ -53,7 +53,7 @@ export function HumanAgent({
         <Html distanceFactor={18} position={[0, 1.45, 0]} center>
           <div
             style={{
-              fontFamily: "IBM Plex Sans, sans-serif",
+              fontFamily: "var(--font-body)",
               fontSize: 11,
               color: "#eef2f0",
               background: "rgba(14,22,24,0.72)",

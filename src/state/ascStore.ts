@@ -9,7 +9,7 @@ import type {
   Scenario,
   ViewportMode,
 } from "../data/ascTypes";
-import { DEFAULT_TWIN_CAMERA, type TwinCameraPose } from "../data/twinCamera";
+import { DEFAULT_TWIN_CAMERA, HERO_TWIN_CAMERA, type TwinCameraPose } from "../data/twinCamera";
 import citizensJson from "../data/citizens.json";
 import scenariosJson from "../data/scenarios.json";
 import telemetryJson from "../data/telemetry.json";
@@ -23,9 +23,23 @@ export const chapters = chaptersJson as Chapter[];
 
 const DEFAULT_LAYERS: DataLayer[] = ["traffic", "pedestrians", "robots", "sensors"];
 
+/** Banner after Agent Studio “Run day” — storytelling pulse into ops. */
+export type StoryPulse = {
+  agentName: string;
+  policy: string | null;
+  eventLabel: string | null;
+  blurb: string;
+  comfortEnd: number;
+  at: number;
+};
+
+export type LinkHealth = "live" | "degraded" | "offline" | "checking";
+
 type AscState = {
   mode: AppMode;
   viewportMode: ViewportMode;
+  /** Viewport to restore after leaving Yardline CV (3D/Kit paused while CV is open). */
+  viewportBeforeCv: ViewportMode | null;
   viewportTransitioning: boolean;
   cameraPose: TwinCameraPose;
   activeLayers: DataLayer[];
@@ -34,6 +48,10 @@ type AscState = {
   activeChapterId: string | null;
   telemetryOpen: boolean;
   comfortDrafts: ComfortDraft[];
+  metricsTab: DataLayer | null;
+  storyPulse: StoryPulse | null;
+  linkHealth: LinkHealth;
+  sumoLive: boolean;
 
   enterOps: () => void;
   backHero: () => void;
@@ -54,6 +72,10 @@ type AscState = {
   toggleTelemetry: () => void;
   upsertComfortDraft: (d: ComfortDraft) => void;
   removeComfortDraft: (id: string) => void;
+  setMetricsTab: (tab: DataLayer | null) => void;
+  setLinkHealth: (h: LinkHealth, sumoLive?: boolean) => void;
+  applyStoryRun: (pulse: Omit<StoryPulse, "at"> & { scenarioId?: string | null; citizenId?: string | null }) => void;
+  clearStoryPulse: () => void;
 };
 
 function draftsFromCitizens(): ComfortDraft[] {
@@ -71,6 +93,7 @@ export const useAscStore = create<AscState>()(
     (set, get) => ({
       mode: "hero",
       viewportMode: "ops3d",
+      viewportBeforeCv: null,
       viewportTransitioning: false,
       cameraPose: { ...DEFAULT_TWIN_CAMERA },
       activeLayers: [...DEFAULT_LAYERS],
@@ -79,6 +102,10 @@ export const useAscStore = create<AscState>()(
       activeChapterId: chapters[0]?.id ?? null,
       telemetryOpen: false,
       comfortDrafts: draftsFromCitizens(),
+      metricsTab: null,
+      storyPulse: null,
+      linkHealth: "checking",
+      sumoLive: false,
 
       enterOps: () =>
         set({
@@ -87,8 +114,15 @@ export const useAscStore = create<AscState>()(
           activeLayers: [...DEFAULT_LAYERS],
           selectedCitizenId: null,
           telemetryOpen: false,
+          storyPulse: null,
         }),
-      backHero: () => set({ mode: "hero", telemetryOpen: false }),
+      backHero: () =>
+        set({
+          mode: "hero",
+          telemetryOpen: false,
+          storyPulse: null,
+          cameraPose: { ...HERO_TWIN_CAMERA },
+        }),
       setMode: (m) => set({ mode: m }),
       setViewportMode: (m) => set({ viewportMode: m }),
       setViewportTransitioning: (v) => set({ viewportTransitioning: v }),
@@ -136,12 +170,19 @@ export const useAscStore = create<AscState>()(
       },
       toggleLayer: (layer) => {
         const cur = get().activeLayers;
-        const next = cur.includes(layer)
-          ? cur.filter((l) => l !== layer)
-          : [...cur, layer];
-        set({ activeLayers: next.length ? next : [layer] });
+        const wasOn = cur.includes(layer);
+        const next = wasOn ? cur.filter((l) => l !== layer) : [...cur, layer];
+        const activeLayers = next.length ? next : [layer];
+        set({
+          activeLayers,
+          metricsTab: wasOn ? get().metricsTab : layer,
+        });
       },
-      setLayers: (layers) => set({ activeLayers: layers.length ? layers : [...DEFAULT_LAYERS] }),
+      setLayers: (layers) =>
+        set({
+          activeLayers: layers.length ? layers : [...DEFAULT_LAYERS],
+          metricsTab: layers[0] ?? get().metricsTab,
+        }),
       openCitizen: (id) => {
         const scenario = scenarios.find((s) => s.citizenId === id);
         set({
@@ -152,8 +193,25 @@ export const useAscStore = create<AscState>()(
         });
       },
       openComfort: () => set({ mode: "comfort", telemetryOpen: false }),
-      openCv: () => set({ mode: "cv", telemetryOpen: false }),
-      closeCv: () => set({ mode: "ops" }),
+      // Pause R3F / Kit WebRTC while Yardline runs — they share the same GPU as YOLO.
+      // Isaac keeps serving /viewport/frame.jpg for CV; UI twin remounts on close.
+      openCv: () => {
+        const cur = get().viewportMode;
+        set({
+          mode: "cv",
+          telemetryOpen: false,
+          viewportBeforeCv: cur === "still" ? get().viewportBeforeCv ?? "ops3d" : cur,
+          viewportMode: "still",
+        });
+      },
+      closeCv: () => {
+        const restore = get().viewportBeforeCv ?? "ops3d";
+        set({
+          mode: "ops",
+          viewportMode: restore,
+          viewportBeforeCv: null,
+        });
+      },
       openChapter: (id) => {
         const ch = chapters.find((c) => c.id === id);
         if (!ch) return;
@@ -184,6 +242,44 @@ export const useAscStore = create<AscState>()(
         set((s) => ({
           comfortDrafts: s.comfortDrafts.filter((x) => x.id !== id),
         })),
+      setMetricsTab: (tab) => set({ metricsTab: tab }),
+      setLinkHealth: (h, sumoLive) =>
+        set((s) => ({
+          linkHealth: h,
+          sumoLive: typeof sumoLive === "boolean" ? sumoLive : s.sumoLive,
+        })),
+      applyStoryRun: (pulse) => {
+        const sc = pulse.scenarioId ? scenarios.find((s) => s.id === pulse.scenarioId) : null;
+        const layers = new Set<DataLayer>(get().activeLayers);
+        layers.add("comfort");
+        layers.add("robots");
+        if (sc?.layers) sc.layers.forEach((l) => layers.add(l));
+
+        const drafts = get().comfortDrafts.map((d) => {
+          const match =
+            d.name === pulse.agentName ||
+            (pulse.citizenId && d.id === pulse.citizenId);
+          return match ? { ...d, score: pulse.comfortEnd } : d;
+        });
+
+        set({
+          mode: "ops",
+          activeLayers: [...layers],
+          metricsTab: "comfort",
+          activeScenarioId: pulse.scenarioId ?? get().activeScenarioId,
+          selectedCitizenId: pulse.citizenId ?? get().selectedCitizenId,
+          comfortDrafts: drafts,
+          storyPulse: {
+            agentName: pulse.agentName,
+            policy: pulse.policy,
+            eventLabel: pulse.eventLabel,
+            blurb: pulse.blurb,
+            comfortEnd: pulse.comfortEnd,
+            at: Date.now(),
+          },
+        });
+      },
+      clearStoryPulse: () => set({ storyPulse: null }),
     }),
     {
       name: "asc-demo-v1",

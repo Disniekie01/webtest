@@ -30,6 +30,8 @@ export function ComfortMap() {
   const setScenario = useAscStore((s) => s.setScenario);
   const activeScenarioId = useAscStore((s) => s.activeScenarioId);
 
+  const applyStoryRun = useAscStore((s) => s.applyStoryRun);
+
   const [graph, setGraph] = useState<Graph>(() => seedAgentGraph());
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [linkingFrom, setLinkingFrom] = useState<string | null>(null);
@@ -77,12 +79,23 @@ export function ComfortMap() {
     const r = buildMockReport(graph, agentId);
     setReport(r);
     setShowReport(true);
-    if (!agentId) return;
+    if (!agentId || !r) return;
+    const agent = graph.nodes.find((n) => n.id === agentId);
     const evId = graph.edges
       .filter((e) => e.from === agentId)
       .map((e) => graph.nodes.find((n) => n.id === e.to))
       .find((n) => n?.kind === "cityEvent")?.ref;
     if (evId) setScenario(evId);
+    // Push storytelling pulse into ops: comfort heat + layers + banner
+    applyStoryRun({
+      agentName: r.agentName,
+      policy: r.policyLabel,
+      eventLabel: r.eventLabel,
+      blurb: r.blurb,
+      comfortEnd: r.comfortEnd,
+      scenarioId: evId ?? null,
+      citizenId: agent?.ref ?? null,
+    });
   };
 
   return (

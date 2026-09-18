@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Html } from "@react-three/drei";
 import * as THREE from "three";
 import { getScenario, useAscStore } from "../state/ascStore";
 import { useSumoActors } from "./useSumoActors";
+import { HtmlLabel } from "./HtmlLabel";
 import {
   buildComfortGrid,
   comfortBand,
@@ -58,20 +58,27 @@ export const comfortBus = {
   subscribe(l: Listener) {
     this.listeners.add(l);
     l(this.snap);
-    return () => this.listeners.delete(l);
+    return () => {
+      this.listeners.delete(l);
+    };
   },
 };
 
-function HeatTile({ cell, score }: { cell: ComfortCell; score: number }) {
-  const color = comfortColor(score);
-  const opacity = 0.14 + (1 - score) * 0.4;
+function HeatTile({
+  cell,
+  matRef,
+}: {
+  cell: ComfortCell;
+  matRef: (m: THREE.MeshBasicMaterial | null) => void;
+}) {
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[cell.x, 0.15, cell.z]} renderOrder={2}>
       <planeGeometry args={[cell.hs * 2.05, cell.hs * 2.05]} />
       <meshBasicMaterial
-        color={color}
+        ref={matRef}
+        color={comfortColor(cell.base)}
         transparent
-        opacity={opacity}
+        opacity={0.14 + (1 - cell.base) * 0.4}
         depthWrite={false}
         toneMapped={false}
         side={THREE.DoubleSide}
@@ -105,10 +112,10 @@ function PersonaBeacon({
           toneMapped={false}
         />
       </mesh>
-      <Html distanceFactor={40} position={[0, 3.2, 0]} center style={{ pointerEvents: "none" }}>
+      <HtmlLabel distanceFactor={40} maxDist={100} position={[0, 3.2, 0]}>
         <div
           style={{
-            fontFamily: "IBM Plex Mono, ui-monospace, monospace",
+            fontFamily: "var(--font-mono)",
             fontSize: 10,
             color: "#eef2f0",
             background: "rgba(8,12,14,0.84)",
@@ -121,14 +128,14 @@ function PersonaBeacon({
           {name.split(" ")[0]}
           <span style={{ color, marginLeft: 6 }}>{Math.round(score * 100)}</span>
         </div>
-      </Html>
+      </HtmlLabel>
     </group>
   );
 }
 
 /**
  * Comfort heat = people avg in area × congestion penalty.
- * Crowded plazas (Sofia lunch) read as low robot-sendability.
+ * Tile materials update imperatively — no React remount per tick.
  */
 export function ComfortFlowLayer() {
   const on = useAscStore((s) => s.activeLayers.includes("comfort"));
@@ -144,7 +151,7 @@ export function ComfortFlowLayer() {
     [scenario],
   );
 
-  const [scores, setScores] = useState(() => grid.map((c) => c.base));
+  const mats = useRef<(THREE.MeshBasicMaterial | null)[]>([]);
   const prevDistrict = useRef(0.7);
   const uiAccum = useRef(0);
 
@@ -164,7 +171,13 @@ export function ComfortFlowLayer() {
       liveComfortBreakdown(c, deposits, pedCounts[i], scenarioBoosts),
     );
     const next = breakdowns.map((b) => b.score);
-    setScores(next);
+
+    next.forEach((score, i) => {
+      const mat = mats.current[i];
+      if (!mat) return;
+      mat.color.set(comfortColor(score));
+      mat.opacity = 0.14 + (1 - score) * 0.4;
+    });
 
     const district = next.reduce((a, b) => a + b, 0) / next.length;
     const calmPct = Math.round((next.filter((s) => s >= 0.7).length / next.length) * 100);
@@ -217,7 +230,13 @@ export function ComfortFlowLayer() {
   return (
     <group>
       {grid.map((c, i) => (
-        <HeatTile key={c.id} cell={c} score={scores[i]} />
+        <HeatTile
+          key={c.id}
+          cell={c}
+          matRef={(m) => {
+            mats.current[i] = m;
+          }}
+        />
       ))}
       {deposits.map((d) => (
         <PersonaBeacon key={d.name} x={d.x} z={d.z} name={d.name} score={d.score} />

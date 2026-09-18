@@ -7,18 +7,15 @@ import {
   telemetry,
   useAscStore,
 } from "../../state/ascStore";
+import { useSumoActors } from "../../scene/useSumoActors";
 import { LayerOverlay } from "../ops/LayerOverlay";
 import { LiveFeeds } from "../ops/LiveFeeds";
-import { TrafficMetricsPanel } from "../ops/TrafficMetricsPanel";
-import { PedestrianMetricsPanel } from "../ops/PedestrianMetricsPanel";
-import { FleetMetricsPanel } from "../ops/FleetMetricsPanel";
-import { TransitMetricsPanel } from "../ops/TransitMetricsPanel";
-import { AqPulseMetricsPanel } from "../ops/AqPulseMetricsPanel";
-import { ComfortMetricsPanel } from "../ops/ComfortMetricsPanel";
+import { MetricsDock } from "../ops/MetricsDock";
 import { TelemetryDrawer } from "../ops/TelemetryDrawer";
 import { CitizenPanel } from "../citizens/CitizenPanel";
 import { ComfortMap } from "../comfort/ComfortMap";
 import "./OpsShell.css";
+import "../ops/MetricsDock.css";
 
 /** DMF-style module rail — maps to our data layers */
 const MODULES: { id: DataLayer; label: string; hint: string }[] = [
@@ -64,6 +61,50 @@ function useLiveClock() {
   return { clock, date };
 }
 
+function useLinkProbe() {
+  const setLinkHealth = useAscStore((s) => s.setLinkHealth);
+  const sumo = useSumoActors(1000);
+  const [kitHint, setKitHint] = useState("");
+
+  useEffect(() => {
+    setLinkHealth(sumo.live ? "live" : useAscStore.getState().linkHealth, sumo.live);
+  }, [sumo.live, setLinkHealth]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const probe = async () => {
+      try {
+        const res = await fetch("/api/stream-status", {
+          cache: "no-store",
+          signal: AbortSignal.timeout(1200),
+        });
+        if (!res.ok) throw new Error("status");
+        const data = (await res.json()) as { appReady?: boolean; signal?: boolean };
+        if (cancelled) return;
+        const kitUp = Boolean(data.appReady && data.signal);
+        setKitHint(kitUp ? "LIVE" : data.appReady ? "…" : "offline");
+        const sumoLive = useAscStore.getState().sumoLive;
+        if (sumoLive || kitUp) setLinkHealth("live", sumoLive);
+        else if (data.appReady) setLinkHealth("degraded", false);
+        else setLinkHealth("offline", false);
+      } catch {
+        if (!cancelled) {
+          setKitHint("offline");
+          if (!useAscStore.getState().sumoLive) setLinkHealth("offline", false);
+        }
+      }
+    };
+    void probe();
+    const id = window.setInterval(() => void probe(), 3000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, [setLinkHealth]);
+
+  return { kitHint };
+}
+
 export function OpsShell() {
   const mode = useAscStore((s) => s.mode);
   const activeLayers = useAscStore((s) => s.activeLayers);
@@ -80,39 +121,41 @@ export function OpsShell() {
   const switchViewport = useAscStore((s) => s.switchViewport);
   const transitioning = useAscStore((s) => s.viewportTransitioning);
   const openCv = useAscStore((s) => s.openCv);
+  const linkHealth = useAscStore((s) => s.linkHealth);
+  const sumoLive = useAscStore((s) => s.sumoLive);
+  const storyPulse = useAscStore((s) => s.storyPulse);
+  const clearStoryPulse = useAscStore((s) => s.clearStoryPulse);
   const { clock, date } = useLiveClock();
-  const [kitHint, setKitHint] = useState("");
+  const { kitHint } = useLinkProbe();
 
   useEffect(() => {
-    if (viewportMode !== "kit") {
-      setKitHint("");
-      return;
-    }
-    let cancelled = false;
-    const probe = async () => {
-      try {
-        const res = await fetch("/api/stream-status", { cache: "no-store" });
-        if (!res.ok || cancelled) return;
-        const data = (await res.json()) as { appReady?: boolean; signal?: boolean };
-        if (cancelled) return;
-        setKitHint(data.appReady && data.signal ? "LIVE" : "…");
-      } catch {
-        if (!cancelled) setKitHint("offline");
-      }
-    };
-    void probe();
-    const id = window.setInterval(() => void probe(), 3000);
-    return () => {
-      cancelled = true;
-      window.clearInterval(id);
-    };
-  }, [viewportMode]);
+    if (!storyPulse) return;
+    const id = window.setTimeout(() => clearStoryPulse(), 14000);
+    return () => window.clearTimeout(id);
+  }, [storyPulse, clearStoryPulse]);
 
   const scenario = getScenario(activeScenarioId);
 
+  const liveLabel =
+    linkHealth === "live"
+      ? sumoLive
+        ? "LIVE · SUMO"
+        : "LIVE"
+      : linkHealth === "degraded"
+        ? "DEGRADED"
+        : linkHealth === "checking"
+          ? "…"
+          : "OFFLINE";
+
+  const liveClass =
+    linkHealth === "live"
+      ? "ops-live"
+      : linkHealth === "offline"
+        ? "ops-live ops-live--offline"
+        : "ops-live ops-live--degraded";
+
   return (
     <div className={`ops-shell dmf${viewportMode === "kit" ? " ops-shell--kit" : ""}`}>
-      {/* DMF-style top chrome */}
       <header className="ops-top">
         <div className="ops-top__left">
           <button type="button" className="ops-brand" onClick={backHero}>
@@ -134,7 +177,7 @@ export function OpsShell() {
             {date} · {clock}
           </span>
           <span className="ops-sep" />
-          <span className="ops-live">LIVE</span>
+          <span className={liveClass}>{liveLabel}</span>
         </div>
 
         <div className="ops-top__actions">
@@ -158,7 +201,6 @@ export function OpsShell() {
 
       <LayerOverlay />
 
-      {/* Left: DMF Layers / Functions rail */}
       <aside className="ops-modules" aria-label="City modules">
         <div className="ops-modules__tabs mono">
           <span className="on">Layers</span>
@@ -213,14 +255,8 @@ export function OpsShell() {
       </aside>
 
       <LiveFeeds />
-      <TrafficMetricsPanel />
-      <PedestrianMetricsPanel />
-      <FleetMetricsPanel />
-      <TransitMetricsPanel />
-      <AqPulseMetricsPanel />
-      <ComfortMetricsPanel />
+      <MetricsDock />
 
-      {/* Right: personas — DMF style profile cards */}
       <aside className="ops-personas" aria-label="Citizen personas">
         <header className="ops-personas__head">
           <span className="mono">Personas</span>
@@ -256,7 +292,21 @@ export function OpsShell() {
         </div>
       )}
 
-      {/* Bottom tool dock — twin vs Isaac */}
+      {storyPulse && mode === "ops" && (
+        <div className="ops-story-pulse" role="status">
+          <div className="ops-story-pulse__top">
+            <strong>
+              Day run · {storyPulse.agentName}
+              {storyPulse.policy ? ` · ${storyPulse.policy}` : ""}
+            </strong>
+            <button type="button" className="ops-story-pulse__dismiss" onClick={clearStoryPulse}>
+              Dismiss
+            </button>
+          </div>
+          <p>{storyPulse.blurb}</p>
+        </div>
+      )}
+
       <div className="ops-dock" aria-label="View tools">
         <button
           type="button"

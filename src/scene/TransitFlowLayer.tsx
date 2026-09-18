@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Html, Line } from "@react-three/drei";
+import { Line } from "@react-three/drei";
+import { HtmlLabel } from "./HtmlLabel";
 import * as THREE from "three";
 import { useAscStore } from "../state/ascStore";
 import {
@@ -54,7 +55,9 @@ export const transitBus = {
   subscribe(l: Listener) {
     this.listeners.add(l);
     l(this.snap);
-    return () => this.listeners.delete(l);
+    return () => {
+      this.listeners.delete(l);
+    };
   },
 };
 
@@ -153,10 +156,10 @@ function StationPortal({ station, load }: { station: TransitStation; load: numbe
         <boxGeometry args={[platformW - 2, 0.15, platformD - 2.5]} />
         <GhostMat color={color} opacity={0.5} emissive={color} emissiveIntensity={0.4} />
       </mesh>
-      <Html distanceFactor={42} position={[0, isHub ? 3.8 : 3.2, 0]} center style={{ pointerEvents: "none" }}>
+      <HtmlLabel distanceFactor={42} maxDist={110} position={[0, isHub ? 3.8 : 3.2, 0]}>
         <div
           style={{
-            fontFamily: "IBM Plex Mono, ui-monospace, monospace",
+            fontFamily: "var(--font-mono)",
             fontSize: 10,
             letterSpacing: "0.06em",
             color: "#e8f4f8",
@@ -195,7 +198,7 @@ function StationPortal({ station, load }: { station: TransitStation; load: numbe
             </span>
           )}
         </div>
-      </Html>
+      </HtmlLabel>
     </group>
   );
 }
